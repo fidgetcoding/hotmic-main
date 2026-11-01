@@ -299,7 +299,8 @@ public enum LyricArranger {
         slots = RetakeAligner.joinFragments(slots)
         // The last word on every line: no trailing comma or period, and the line starts lowercase.
         return slots.map { $0.map { v in
-            LabSession.Version(id: v.id, takeID: v.takeID, text: lowercaseStart(trimLineEnd(v.text)), start: v.start, end: v.end,
+            // A line you typed stays exactly as you typed it.
+            LabSession.Version(id: v.id, takeID: v.takeID, text: v.takeID == "typed" ? v.text : lowercaseStart(trimLineEnd(v.text)), start: v.start, end: v.end,
                                at: v.at, words: v.words, chords: v.chords, keeper: v.keeper)
         } }
     }

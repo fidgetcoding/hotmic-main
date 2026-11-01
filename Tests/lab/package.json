@@ -1,0 +1,8 @@
+{
+  "name": "hotmic-window-tests",
+  "private": true,
+  "type": "module",
+  "description": "Tests for the window's page code. Never shipped: the app has no dependency on any of this.",
+  "scripts": { "test": "node --test *.test.mjs" },
+  "devDependencies": { "jsdom": "26.1.0" }
+}

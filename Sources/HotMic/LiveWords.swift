@@ -20,8 +20,6 @@ final class LiveWords: @unchecked Sendable {
     private var historyStart: Int64 = 0        // session frame of history[0]
 
     static let lineGap = LyricArranger.lineGap, maxWords = LyricArranger.maxWords, settle = 1.2, maxRequest = 10.0
-    /// How far before a line's first word its Whisper clip starts (see `commit`).
-    static let clipLead = 1.4
     /// Where the last committed line ended (session seconds, main queue): the next clip never starts before it.
     private var lastLineEnd = -Double.infinity
 
@@ -115,8 +113,9 @@ final class LiveWords: @unchecked Sendable {
         // A request that hears you singing but sends nothing back is stuck (Nate's 2026-10-14 tests: four sessions,
         // 5–45 s, not one word until Stop, then "No speech detected"). After 3.5 s of that, start a fresh request
         // and hand it the last 3 s again so the words that went unheard still land.
-        let deaf = !(pass?.heard ?? true) && Date().timeIntervalSince(started) > 3.5 && sinceDeafCheck(samples.count)
-            && voicedLocked(lastSeconds: min(6, Date().timeIntervalSince(started)))
+        let deaf = sinceDeafCheck(samples.count) && LiveVoice.isStuck(
+            heardAnything: pass?.heard ?? true, secondsSinceStart: Date().timeIntervalSince(started),
+            recent: history[max(0, history.count - Int(rate * min(6, Date().timeIntervalSince(started))))...], rate: rate)
         framesFed += Int64(samples.count)
         history.append(contentsOf: samples)
         let keep = Int(rate * 60)
@@ -139,20 +138,6 @@ final class LiveWords: @unchecked Sendable {
         if deafCheckFrames < Int(rate) { return false }
         deafCheckFrames = 0; return true
     }
-    /// The last `lastSeconds` of history had sound in it (same rule as `voiced`; caller holds the lock).
-    private func voicedLocked(lastSeconds: Double) -> Bool {
-        let hop = Int(rate * 0.05), from = max(0, history.count - Int(rate * lastSeconds))
-        guard hop > 0, history.count - from >= hop else { return false }
-        var loud = 0, frames = 0, i = from
-        while i + hop <= history.count {
-            var sum: Float = 0
-            for j in i..<(i + hop) { sum += history[j] * history[j] }
-            if sum / Float(hop) > 0.008 * 0.008 { loud += 1 }
-            frames += 1; i += hop
-        }
-        _ = frames; return loud >= 50          // 2.5 s of sound with no words back: stuck, not just slow
-    }
-
     private func restart(replay: Double = 0) {
         lock.lock()
         let oldReq = request, oldTask = task
@@ -235,21 +220,11 @@ final class LiveWords: @unchecked Sendable {
         if final, current { restart() }     // an old request finishing late must not cut off the new one
     }
 
-    /// Sound between `a` and `b` (session seconds): more than a third of 50 ms frames above −42 dBFS.
-    /// Mumbling sits around −30; the quiet room around −60.
+    /// Sound between `a` and `b` (session seconds).
     private func voiced(from a: Double, to b: Double) -> Bool {
         lock.withLock {
             let from = max(0, Int((a - timeOffset) * rate) - Int(historyStart)), to = min(history.count, Int((b - timeOffset) * rate) - Int(historyStart))
-            let hop = Int(rate * 0.05)
-            guard hop > 0, to - from >= hop else { return false }
-            var loud = 0, frames = 0, i = from
-            while i + hop <= to {
-                var sum: Float = 0
-                for j in i..<(i + hop) { sum += history[j] * history[j] }
-                if sum / Float(hop) > 0.008 * 0.008 { loud += 1 }
-                frames += 1; i += hop
-            }
-            return loud * 3 > frames
+            return from < to && LiveVoice.isVoiced(history[from..<to], rate: rate)
         }
     }
 
@@ -269,7 +244,7 @@ final class LiveWords: @unchecked Sendable {
         // Words are placed by when they ARRIVED, up to ~1 s after they were sung (Nate's 2026-10-13 test:
         // 0.35–0.95 s late), so a 0.4 s lead cut the first word off: Whisper heard "I don't, what it?" for
         // "because I don't want", and nothing at all for three short lines. Reach back further, never into the line before.
-        let start = max(a - Self.clipLead, lastLineEnd)
+        let start = LiveVoice.clipStart(lineStart: a, previousLineEnd: lastLineEnd)
         lastLineEnd = b
         let audio: [Float] = lock.withLock {
             let from = max(0, Int((start - timeOffset) * rate) - Int(historyStart)), to = min(history.count, Int((b - timeOffset + 0.6) * rate) - Int(historyStart))

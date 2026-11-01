@@ -23,3 +23,6 @@ bench/__pycache__/
 *.mobileprovision
 .DS_Store
 __pycache__/
+
+# window test tooling
+Tests/lab/node_modules/
