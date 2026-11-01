@@ -71,7 +71,7 @@ case "import":
     // Same settings the app gives a dropped recording (PipelineSettings.configure, jam, every feature on).
     let takes = try await RecordingImport.run(url: audio, folder: folder, mix: mix, configure: { pipeline in
         pipeline.beatboxEnabled = false
-        pipeline.options = ExportOptions()
+        pipeline.options = args.contains("--capture-only") ? .captureOnly : ExportOptions()
         if lyrics { pipeline.transcriber = transcriber }
         pipeline.onLyrics = { id, l in print("lyrics \(id): \(l.text.prefix(80))") }
     }, progress: { p in

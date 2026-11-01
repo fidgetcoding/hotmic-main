@@ -40,6 +40,9 @@ public final class SingingDetector {
         public var beatboxMaxVoiced: Float = 0.35     // beatbox = mostly unvoiced…
         public var beatboxMinOnsetsPerSecond = 2.0    // …and made of hits
         public var onsetJump: Float = 12              // dB over the last 30 ms minimum
+        /// Nobody pauses for this long only if something is off, or it's nonstop rap: the phrase is cut here so a
+        /// stretch never outgrows the audio held for it.
+        public var maxPhraseSeconds = 120.0
         public init() {}
     }
 
@@ -177,6 +180,7 @@ public final class SingingDetector {
             if onset { phraseOnsets += 1 }
             phrase.append(frame)
             quietRun = 0
+            if Double(phrase.count) / 100 >= tuning.maxPhraseSeconds { closePhrase() }
         } else if !phrase.isEmpty {
             phrase.append(frame)
             quietRun += 1

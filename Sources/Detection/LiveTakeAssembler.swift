@@ -11,7 +11,8 @@ public final class LiveTakeAssembler {
     /// Takes that can no longer grow, given the session has reached `position`. A phrase the
     /// detector still has open that started within the merge gap keeps the take open too.
     public func advance(to position: Int64, openPhraseStart: Int64? = nil) -> [TakeRange] {
-        guard let last = open.max(by: { $0.end < $1.end }) else { return [] }
+        guard let last = open.max(by: { $0.end < $1.end }), let first = open.min(by: { $0.start < $1.start }) else { return [] }
+        if last.end - first.start >= Int64(slicer.maxTakeSeconds * slicer.sampleRate) { return flush() }
         let gap = Int64(slicer.mergeGap * slicer.sampleRate)
         if let openStart = openPhraseStart, openStart - last.end <= gap { return [] }
         let settle = Int64((slicer.mergeGap + slicer.padding) * slicer.sampleRate)

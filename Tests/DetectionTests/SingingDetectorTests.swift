@@ -202,6 +202,41 @@ final class AuditDetectionTests: XCTestCase {
     }
 
     /// Audit #7: 10 s of unbroken legato singing stays one phrase (floor can't climb onto the singer).
+    func testAPhraseWithNoPausesIsCutBeforeItOutgrowsTheAudioHeldForIt() {
+        var tuning = SingingDetector.Tuning()
+        tuning.maxPhraseSeconds = 5
+        tuning.detectBeatbox = false
+        let d = SingingDetector(sampleRate: 16_000, tuning: tuning)
+        d.emitCandidates = true
+        var got: [SingingSegment] = []
+        d.onSegment = { got.append($0) }
+        let quiet = (0..<(16_000 * 2)).map { _ in Float.random(in: -0.0003...0.0003) }
+        let sound = (0..<(16_000 * 7)).map { Float(0.2 * sin(2 * .pi * 220 * Double($0) / 16_000)) }
+        (quiet + sound).withUnsafeBufferPointer { d.feed($0) }
+        d.flush()
+        XCTAssertEqual(got.count, 2, "7 s of sound with no pause, cut at 5 s")
+        for s in got { XCTAssertLessThanOrEqual(Double(s.end - s.start) / 16_000, 5.1) }
+    }
+
+    func testAnOpenTakeClosesAtItsLimitEvenWhileSomeoneKeepsGoing() {
+        var slicer = TakeSlicer(sampleRate: 100)
+        slicer.mergeGap = 6
+        slicer.maxTakeSeconds = 300
+        let a = LiveTakeAssembler(slicer: slicer)
+        func seg(_ s: Double, _ e: Double) -> SingingSegment { SingingSegment(start: Int64(s * 100), end: Int64(e * 100), confidence: 1, medianHz: 200) }
+        a.add(seg(0, 120))
+        XCTAssertEqual(a.advance(to: Int64(121 * 100), openPhraseStart: Int64(121 * 100)), [], "still growing")
+        a.add(seg(121, 241))
+        XCTAssertEqual(a.advance(to: Int64(242 * 100), openPhraseStart: Int64(242 * 100)), [])
+        a.add(seg(242, 362))
+        let out = a.advance(to: Int64(363 * 100), openPhraseStart: Int64(363 * 100))
+        XCTAssertEqual(out.count, 1, "past 5 minutes it goes, with someone still singing")
+        XCTAssertEqual(out.first?.start, 0)
+        XCTAssertEqual(Double(out.first?.end ?? 0) / 100, 363.5, accuracy: 0.1)
+        a.add(seg(363, 400))
+        XCTAssertEqual(a.flush().first.map { Double($0.start) / 100 } ?? 0, 361.5, accuracy: 0.1, "the next one overlaps by the padding")
+    }
+
     func testLongHeldLineIsOnePhrase() {
         var line: [Float] = []
         for m in [57.0, 59, 60, 62, 64, 62, 60, 59, 57, 55] {

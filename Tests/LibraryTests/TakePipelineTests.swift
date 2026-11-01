@@ -42,6 +42,44 @@ final class TakePipelineTests: XCTestCase {
         }
     }
 
+    /// The session that lost everything: someone singing nonstop for longer than the scratch audio goes back.
+    /// All of it has to end up in takes, not just the last 12 minutes.
+    func testSingingForLongerThanTheScratchWindowLosesNothing() throws {
+        let rate = 16_000.0
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("hm-long-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let pipeline = try TakePipeline(folder: folder, sampleRate: rate, sessionStart: Date(), daw: "Jam", jam: true)
+        pipeline.judge = PitchOnlyKeepAll()
+        pipeline.options = .captureOnly
+        let minutes = 14, block = 4_000
+        var position: Int64 = 0
+        // 20 s of singing and a 1 s breath, over and over: the breaths never let the take close.
+        let breath = (0..<Int(rate)).map { _ in Float.random(in: -0.0003...0.0003) }
+        let tune = breath + breath + sung(20, rate: rate)
+        var voice = [Float](repeating: 0, count: block), mix = [Float](repeating: 0, count: block * 2)
+        while position < Int64(minutes * 60) * Int64(rate) {
+            for i in 0..<block { voice[i] = tune[Int((position + Int64(i)) % Int64(tune.count))]; mix[2 * i] = voice[i]; mix[2 * i + 1] = voice[i] }
+            voice.withUnsafeBufferPointer { v in mix.withUnsafeBufferPointer { pipeline.consume(voice: v, mix: $0, frames: block, position: position) } }
+            position += Int64(block)
+        }
+        try pipeline.finish()
+        pipeline.waitForExports()
+        let takes = pipeline.takes.sorted { $0.sessionStartSeconds < $1.sessionStartSeconds }
+        XCTAssertLessThan(takes.first?.sessionStartSeconds ?? 999, 5, "the start of the session is there")
+        var covered = 0.0, end = 0.0
+        for t in takes {
+            XCTAssertLessThan(t.durationSeconds, 12 * 60, "no take outgrows the scratch audio")
+            XCTAssertLessThanOrEqual(t.sessionStartSeconds, end + 10, "no hole in the session")
+            covered += max(0, t.sessionStartSeconds + t.durationSeconds - max(end, t.sessionStartSeconds))
+            end = max(end, t.sessionStartSeconds + t.durationSeconds)
+        }
+        XCTAssertGreaterThan(covered, Double(minutes * 60) * 0.98, "\(takes.count) takes")
+    }
+
+    private struct PitchOnlyKeepAll: PhraseJudging {
+        func judge(_ samples: [Float], sampleRate: Double, detected: SingingSegment.Kind) -> SingingSegment.Kind? { .rap }
+    }
+
     func testSungIdeaBecomesOneTakeWithBothFilesAndSidecar() throws {
         let scratchBefore = Set((try? FileManager.default.contentsOfDirectory(atPath: TakePipeline.scratchRoot.path)) ?? [])
         let rate = 48_000.0

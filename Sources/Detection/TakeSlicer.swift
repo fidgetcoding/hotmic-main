@@ -14,6 +14,9 @@ public struct TakeSlicer: Sendable {
     public var sampleRate: Double
     public var padding: Double = 1.5     // s, spec: 0 clipped first syllables
     public var mergeGap: Double = 2.0    // s
+    /// A take closes once it reaches this long. Scratch audio only goes back 12 minutes, and a take that grew past
+    /// that lost everything before its last 12 minutes (livestream test corpus: up to 25 minutes, with all the writing in it).
+    public var maxTakeSeconds: Double = 300
 
     public init(sampleRate: Double) { self.sampleRate = sampleRate }
 
