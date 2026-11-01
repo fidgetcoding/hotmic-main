@@ -1,0 +1,379 @@
+/* Hot Mic design lab: vintage looks (Soundtoys family). Wood cheeks, enamel / brushed / tolex faceplates,
+   screen-printed caps, a tube-lit screen for the strip, chunky hardware keys, jewel lamps, screws.
+   Every rule is scoped to the vintage looks so Neon and Glass stay untouched. */
+
+/* ---------- materials (procedural, no images) ---------- */
+:root {
+  --wood-walnut: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='700'><filter id='w'><feTurbulence type='fractalNoise' baseFrequency='0.55 0.006' numOctaves='4' seed='7'/><feColorMatrix values='0 0 0 0 0.12  0 0 0 0 0.06  0 0 0 0 0.02  3.2 0 0 0 -1.25'/></filter><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='0.08 0.004' numOctaves='3' seed='2'/><feColorMatrix values='0 0 0 0 0.85  0 0 0 0 0.6  0 0 0 0 0.38  2.4 0 0 0 -1.3'/></filter><rect width='100%' height='100%' fill='%23573420'/><rect width='100%' height='100%' filter='url(%23f)'/><rect width='100%' height='100%' filter='url(%23w)'/></svg>");
+  --wood-oak: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='700'><filter id='w'><feTurbulence type='fractalNoise' baseFrequency='0.5 0.008' numOctaves='4' seed='3'/><feColorMatrix values='0 0 0 0 0.36  0 0 0 0 0.22  0 0 0 0 0.09  3 0 0 0 -1.2'/></filter><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='0.08 0.004' numOctaves='3' seed='6'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 0.82  0 0 0 0 0.55  2.2 0 0 0 -1.2'/></filter><rect width='100%' height='100%' fill='%23a8743f'/><rect width='100%' height='100%' filter='url(%23f)'/><rect width='100%' height='100%' filter='url(%23w)'/></svg>");
+  --wood-rose: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='700'><filter id='w'><feTurbulence type='fractalNoise' baseFrequency='0.6 0.007' numOctaves='4' seed='11'/><feColorMatrix values='0 0 0 0 0.12  0 0 0 0 0.03  0 0 0 0 0.02  3.2 0 0 0 -1.25'/></filter><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='0.08 0.004' numOctaves='3' seed='4'/><feColorMatrix values='0 0 0 0 0.75  0 0 0 0 0.35  0 0 0 0 0.22  2.4 0 0 0 -1.3'/></filter><rect width='100%' height='100%' fill='%235c2318'/><rect width='100%' height='100%' filter='url(%23f)'/><rect width='100%' height='100%' filter='url(%23w)'/></svg>");
+  --brushed: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='120'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='0.002 0.9' numOctaves='2' seed='5'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.5 -0.12'/></filter><rect width='100%' height='100%' filter='url(%23b)'/></svg>");
+  --tolex: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='t'><feTurbulence type='turbulence' baseFrequency='0.75' numOctaves='2' seed='9'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.6 -0.2'/></filter><rect width='100%' height='100%' filter='url(%23t)'/></svg>");
+  --speck: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.2  0 0 0 0 0.12  0 0 0 0 0.05  0 0 0 0.9 -0.35'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  --screw: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><defs><radialGradient id='g' cx='42%' cy='36%' r='60%'><stop offset='0' stop-color='%23faf6ec'/><stop offset='.35' stop-color='%23c9c2b2'/><stop offset='.75' stop-color='%238d8576'/><stop offset='1' stop-color='%234a443b'/></radialGradient></defs><circle cx='6' cy='6' r='5.4' fill='rgba(0,0,0,.35)'/><circle cx='6' cy='6' r='4.8' fill='url(%23g)'/><path d='M3.2 8.8 8.8 3.2' stroke='rgba(40,34,26,.8)' stroke-width='1.1'/></svg>");
+  --lcd: "Share Tech Mono", "Geist Mono", ui-monospace, monospace;
+  --stamp: "Archivo Narrow", "Archivo", "Helvetica Neue", sans-serif;
+}
+
+/* ---------- 01 Walnut: ivory faceplate, walnut cheeks, amber tube screen ---------- */
+[data-look="walnut"] {
+  --wood: var(--wood-walnut);
+  --desk: #15100c; --desk-2: #2c2119; --bg: #e6dbc3; --side: #ddd0b4; --surface: #f3ead6; --np-bg: #efe5cf;
+  --raise: #f7f0df; --raise-2: #d8caab; --display: #1a120a; --hl: rgba(255, 252, 240, 0.9);
+  --ink: #2b2017; --muted: #6c5c47; --faint: #9b8a6f; --line: rgba(70, 48, 22, 0.16); --line-2: rgba(70, 48, 22, 0.3); --grid: #c9b994;
+  --accent: #c4561b; --accent-2: #e9893a; --accent-soft: rgba(196, 86, 27, 0.13); --glow: rgba(255, 150, 60, 0.45);
+  --accent-grad: linear-gradient(180deg, #e0762e 0%, #b8501a 100%); --on-accent: #fff6e8;
+  --fire: #c4401b; --fire-soft: rgba(196, 64, 27, 0.13); --chg: rgba(233, 137, 58, 0.25);
+  --plate: linear-gradient(180deg, rgba(255, 250, 235, 0.55), rgba(190, 168, 120, 0.18)), var(--speck), #e6dbc3;
+  --plate-edge: rgba(70, 48, 22, 0.35); --keycap: linear-gradient(180deg, #fbf5e6 0%, #e8dcc0 60%, #d2c29f 100%); --key-ink: #2b2017; --key-base: #8a7552;
+  --s-bg: radial-gradient(120% 140% at 50% 0%, #2a1a0b 0%, #120a04 70%); --s-wave: #5c3c18; --s-played: #ffb547; --s-ink: #ffd89c; --s-faint: #a27a43; --s-grid: #3b2911;
+  --s-a: #ffcf6b; --s-b: #ff7a3a; --s-c: #9fdcc6; --s-head: #fff2cc; --s-loop: #ffb547; --s-glow: rgba(255, 170, 70, 0.35);
+  --wave: var(--s-wave); --wave-played: var(--s-played); --tone-a: #d98a2b; --tone-b: #c4401b; --tone-c: #3f7d86;
+  --playhead: #c4401b; --loop: #c4561b; --rec: #e1361b; --kw: #f7f0df; --kb: #2b2017; --grain-o: 0;
+  --radius: 6px; --radius-sm: 4px; color-scheme: light;
+}
+/* ---------- 02 EchoBoy: chocolate enamel, cream silkscreen, orange ---------- */
+[data-look="echo"] {
+  --wood: var(--wood-oak);
+  --desk: #120c08; --desk-2: #2a1d14; --bg: #3a2a20; --side: #2f221a; --surface: #4a372a; --np-bg: #2a1e17;
+  --raise: #6a5140; --raise-2: #44322687; --display: #120a05; --hl: rgba(255, 230, 200, 0.18);
+  --ink: #f3e5c8; --muted: #cdb48d; --faint: #94795a; --line: rgba(243, 229, 200, 0.12); --line-2: rgba(243, 229, 200, 0.24); --grid: #5a4535;
+  --accent: #ff8c2e; --accent-2: #ffc06a; --accent-soft: rgba(255, 140, 46, 0.15); --glow: rgba(255, 140, 46, 0.5);
+  --accent-grad: linear-gradient(180deg, #ffa24a 0%, #e66d17 100%); --on-accent: #2a1203;
+  --fire: #ff6a2b; --fire-soft: rgba(255, 106, 43, 0.16); --chg: rgba(255, 192, 106, 0.2);
+  --plate: linear-gradient(180deg, rgba(255, 220, 180, 0.08), rgba(0, 0, 0, 0.18)), var(--speck), #3a2a20;
+  --plate-edge: rgba(0, 0, 0, 0.5); --keycap: linear-gradient(180deg, #f4e7cc 0%, #ddc9a4 60%, #c4ad84 100%); --key-ink: #2a1d14; --key-base: #6d5636;
+  --s-bg: radial-gradient(120% 140% at 50% 0%, #2a1709 0%, #0f0703 70%); --s-wave: #5a3714; --s-played: #ffa64a; --s-ink: #ffd49a; --s-faint: #a57a45; --s-grid: #3a2610;
+  --s-a: #ffcf6b; --s-b: #ff6a2b; --s-c: #9fdcc6; --s-head: #fff2cc; --s-loop: #ffa64a; --s-glow: rgba(255, 160, 60, 0.38);
+  --wave: var(--s-wave); --wave-played: var(--s-played); --tone-a: #ffbf55; --tone-b: #ff6a2b; --tone-c: #9fdcc6;
+  --playhead: #ffd27c; --loop: #ff8c2e; --rec: #ff3b1f; --kw: #f4e7cc; --kb: #1e140e; --grain-o: 0;
+  --radius: 6px; --radius-sm: 4px; color-scheme: dark;
+}
+/* ---------- 03 Decapitator: oxblood enamel, cream lettering, rosewood ---------- */
+[data-look="decap"] {
+  --wood: var(--wood-rose);
+  --desk: #120707; --desk-2: #2c1110; --bg: #6b1915; --side: #5a1411; --surface: #7d221c; --np-bg: #241010;
+  --raise: #93302a; --raise-2: #5c1612; --display: #140605; --hl: rgba(255, 220, 200, 0.2);
+  --ink: #f7e8cf; --muted: #e6bca0; --faint: #b98670; --line: rgba(247, 232, 207, 0.13); --line-2: rgba(247, 232, 207, 0.26); --grid: #6a2c25;
+  --accent: #ffb347; --accent-2: #ffe08a; --accent-soft: rgba(255, 179, 71, 0.15); --glow: rgba(255, 150, 60, 0.5);
+  --accent-grad: linear-gradient(180deg, #ffc86a 0%, #f0952a 100%); --on-accent: #3a0d06;
+  --fire: #ff5a3a; --fire-soft: rgba(255, 90, 58, 0.18); --chg: rgba(255, 224, 138, 0.2);
+  --plate: linear-gradient(180deg, rgba(255, 200, 180, 0.1), rgba(0, 0, 0, 0.25)), var(--speck), #6b1915;
+  --plate-edge: rgba(0, 0, 0, 0.55); --keycap: linear-gradient(180deg, #f7ead2 0%, #e2cfab 60%, #c9b184 100%); --key-ink: #3a0d06; --key-base: #4a120e;
+  --s-bg: radial-gradient(120% 140% at 50% 0%, #2c0c07 0%, #0e0403 70%); --s-wave: #5c1f12; --s-played: #ff7a3a; --s-ink: #ffc9a6; --s-faint: #b06a50; --s-grid: #3e150d;
+  --s-a: #ffd06b; --s-b: #ff5a3a; --s-c: #ffe8b0; --s-head: #fff0d6; --s-loop: #ffb347; --s-glow: rgba(255, 110, 60, 0.4);
+  --wave: var(--s-wave); --wave-played: var(--s-played); --tone-a: #ffd06b; --tone-b: #ff5a3a; --tone-c: #f7e8cf;
+  --playhead: #ffe08a; --loop: #ffb347; --rec: #ff2a1a; --kw: #f7ead2; --kb: #1a0606; --grain-o: 0;
+  --radius: 6px; --radius-sm: 4px; color-scheme: dark;
+}
+/* ---------- 03b Decap Coral: oxblood + electric coral, cyan screen ---------- */
+[data-look="decap-coral"] {
+  --wood: var(--wood-rose);
+  --desk: #120707; --desk-2: #2c1110; --bg: #6b1915; --side: #5a1411; --surface: #7d221c; --np-bg: #200d0d;
+  --raise: #93302a; --raise-2: #5c1612; --display: #0a0606; --hl: rgba(255, 220, 200, 0.2);
+  --ink: #f7e8cf; --muted: #e6bca0; --faint: #b98670; --line: rgba(247, 232, 207, 0.13); --line-2: rgba(247, 232, 207, 0.26); --grid: #6a2c25;
+  --accent: #ff5f6d; --accent-2: #ff9aa3; --accent-soft: color-mix(in srgb, #ff5f6d 16%, transparent); --glow: rgba(255, 95, 109, 0.55);
+  --accent-grad: linear-gradient(180deg, #ff7a85 0%, #e8414f 100%); --on-accent: #2a0408;
+  --fire: #ff5f6d; --fire-soft: color-mix(in srgb, #ff5f6d 18%, transparent); --chg: rgba(255, 95, 109, 0.22);
+  --plate: linear-gradient(180deg, rgba(255, 200, 180, 0.1), rgba(0, 0, 0, 0.25)), var(--speck), #6b1915;
+  --plate-edge: rgba(0, 0, 0, 0.55); --keycap: linear-gradient(180deg, #f7ead2 0%, #e2cfab 60%, #c9b184 100%); --key-ink: #3a0d06; --key-base: #4a120e;
+  --s-bg: radial-gradient(120% 140% at 50% 0%, #05232a 0%, #050506 72%); --s-wave: #0f4a55; --s-played: #4de1ff; --s-ink: #bff4ff; --s-faint: #3a8a99; --s-grid: #0d3138;
+  --s-a: #4de1ff; --s-b: #ff5f6d; --s-c: #ffd3d7; --s-head: #eaffff; --s-loop: #4de1ff; --s-glow: rgba(77, 225, 255, 0.3);
+  --wave: var(--s-wave); --wave-played: var(--s-played); --tone-a: #4de1ff; --tone-b: #ff5f6d; --tone-c: #f7e8cf;
+  --playhead: #eaffff; --loop: #ff5f6d; --rec: #ff2a3a; --kw: #f7ead2; --kb: #1a0606; --grain-o: 0;
+  --radius: 6px; --radius-sm: 4px; color-scheme: dark;
+}
+/* ---------- 03c Decap Lime: oxblood + acid lime ---------- */
+[data-look="decap-lime"] {
+  --wood: var(--wood-rose);
+  --desk: #120707; --desk-2: #2c1110; --bg: #6b1915; --side: #5a1411; --surface: #7d221c; --np-bg: #200d0d;
+  --raise: #93302a; --raise-2: #5c1612; --display: #0a0606; --hl: rgba(255, 220, 200, 0.2);
+  --ink: #f7e8cf; --muted: #e6bca0; --faint: #b98670; --line: rgba(247, 232, 207, 0.13); --line-2: rgba(247, 232, 207, 0.26); --grid: #6a2c25;
+  --accent: #c6ff3d; --accent-2: #e4ff9a; --accent-soft: color-mix(in srgb, #c6ff3d 16%, transparent); --glow: rgba(198, 255, 61, 0.5);
+  --accent-grad: linear-gradient(180deg, #d8ff6a 0%, #9fdc1c 100%); --on-accent: #152000;
+  --fire: #c6ff3d; --fire-soft: color-mix(in srgb, #c6ff3d 18%, transparent); --chg: rgba(198, 255, 61, 0.2);
+  --plate: linear-gradient(180deg, rgba(255, 200, 180, 0.1), rgba(0, 0, 0, 0.25)), var(--speck), #6b1915;
+  --plate-edge: rgba(0, 0, 0, 0.55); --keycap: linear-gradient(180deg, #f7ead2 0%, #e2cfab 60%, #c9b184 100%); --key-ink: #3a0d06; --key-base: #4a120e;
+  --s-bg: radial-gradient(120% 140% at 50% 0%, #16240a 0%, #050506 72%); --s-wave: #334f12; --s-played: #c6ff3d; --s-ink: #eaffc0; --s-faint: #7d9a4a; --s-grid: #1f2e0e;
+  --s-a: #c6ff3d; --s-b: #ff6b4a; --s-c: #f7e8cf; --s-head: #f6ffe0; --s-loop: #c6ff3d; --s-glow: rgba(198, 255, 61, 0.26);
+  --wave: var(--s-wave); --wave-played: var(--s-played); --tone-a: #c6ff3d; --tone-b: #c6ff3d; --tone-c: #f7e8cf;
+  --playhead: #f6ffe0; --loop: #c6ff3d; --rec: #ff2a3a; --kw: #f7ead2; --kb: #1a0606; --grain-o: 0;
+  --radius: 6px; --radius-sm: 4px; color-scheme: dark;
+}
+/* ---------- 03d Decap Neon: oxblood + magenta, cyan chords (Neon's colors) ---------- */
+[data-look="decap-neon"] {
+  --wood: var(--wood-rose);
+  --desk: #120707; --desk-2: #2c1110; --bg: #6b1915; --side: #5a1411; --surface: #7d221c; --np-bg: #200d0d;
+  --raise: #93302a; --raise-2: #5c1612; --display: #0a0606; --hl: rgba(255, 220, 200, 0.2);
+  --ink: #f7e8cf; --muted: #e6bca0; --faint: #b98670; --line: rgba(247, 232, 207, 0.13); --line-2: rgba(247, 232, 207, 0.26); --grid: #6a2c25;
+  --accent: #ff4fd8; --accent-2: #ff9cec; --accent-soft: color-mix(in srgb, #ff4fd8 16%, transparent); --glow: rgba(255, 79, 216, 0.55);
+  --accent-grad: linear-gradient(180deg, #ff74e2 0%, #d92bb6 100%); --on-accent: #2a0021;
+  --fire: #ff4fd8; --fire-soft: color-mix(in srgb, #ff4fd8 18%, transparent); --chg: rgba(255, 79, 216, 0.2);
+  --plate: linear-gradient(180deg, rgba(255, 200, 180, 0.1), rgba(0, 0, 0, 0.25)), var(--speck), #6b1915;
+  --plate-edge: rgba(0, 0, 0, 0.55); --keycap: linear-gradient(180deg, #f7ead2 0%, #e2cfab 60%, #c9b184 100%); --key-ink: #3a0d06; --key-base: #4a120e;
+  --s-bg: radial-gradient(120% 140% at 50% 0%, #200a2e 0%, #050506 72%); --s-wave: #4a1c5c; --s-played: #ff4fd8; --s-ink: #ffd0f5; --s-faint: #9a5aa8; --s-grid: #2d1236;
+  --s-a: #4de1ff; --s-b: #ff4fd8; --s-c: #c9a7ff; --s-head: #fff0fc; --s-loop: #ff4fd8; --s-glow: rgba(255, 79, 216, 0.3);
+  --wave: var(--s-wave); --wave-played: var(--s-played); --tone-a: #4de1ff; --tone-b: #ff4fd8; --tone-c: #f7e8cf;
+  --playhead: #fff0fc; --loop: #ff4fd8; --rec: #ff2a3a; --kw: #f7ead2; --kb: #1a0606; --grain-o: 0;
+  --radius: 6px; --radius-sm: 4px; color-scheme: dark;
+}
+/* ---------- 04 Tape Deck: brushed aluminum, oak, green VU ---------- */
+[data-look="tape"] {
+  --wood: var(--wood-oak);
+  --desk: #101211; --desk-2: #262a27; --bg: #cfccc4; --side: #c3bfb6; --surface: #e2dfd8; --np-bg: #ebe8e1;
+  --raise: #f2f1ec; --raise-2: #b9b5ac; --display: #0b0d0a; --hl: rgba(255, 255, 255, 0.95);
+  --ink: #1e1e1c; --muted: #54524c; --faint: #85827a; --line: rgba(30, 30, 28, 0.14); --line-2: rgba(30, 30, 28, 0.28); --grid: #b3afa6;
+  --accent: #c2412b; --accent-2: #e2735a; --accent-soft: rgba(194, 65, 43, 0.12); --glow: rgba(140, 230, 110, 0.45);
+  --accent-grad: linear-gradient(180deg, #d9573f 0%, #a8321f 100%); --on-accent: #fff4ee;
+  --fire: #c2412b; --fire-soft: rgba(194, 65, 43, 0.12); --chg: rgba(255, 214, 90, 0.35);
+  --plate: linear-gradient(180deg, rgba(255, 255, 255, 0.45), rgba(0, 0, 0, 0.08)), var(--brushed), #cfccc4;
+  --plate-edge: rgba(0, 0, 0, 0.3); --keycap: linear-gradient(180deg, #2c2c2a 0%, #1a1a19 100%); --key-ink: #ecebe5; --key-base: #050505;
+  --s-bg: radial-gradient(120% 140% at 50% 0%, #10200f 0%, #050904 70%); --s-wave: #234021; --s-played: #8fe36b; --s-ink: #c9f5b8; --s-faint: #6a9a5c; --s-grid: #1c2e1a;
+  --s-a: #8fe36b; --s-b: #ffb347; --s-c: #6fd3e0; --s-head: #eaffd9; --s-loop: #8fe36b; --s-glow: rgba(140, 230, 110, 0.32);
+  --wave: var(--s-wave); --wave-played: var(--s-played); --tone-a: #3f8a3a; --tone-b: #c2412b; --tone-c: #2f7d86;
+  --playhead: #c2412b; --loop: #3f8a3a; --rec: #e0301a; --kw: #f2f1ec; --kb: #1e1e1c; --grain-o: 0;
+  --radius: 5px; --radius-sm: 3px; color-scheme: light;
+}
+/* ---------- 04b Tape Deck Dark: graphite anodized aluminum, oak, same green VU ---------- */
+[data-look="tape-dark"] {
+  --wood: var(--wood-oak);
+  --desk: #0b0c0c; --desk-2: #1c1f1e; --bg: #2a2d2f; --side: #24272a; --surface: #33373a; --np-bg: #1b1e20;
+  --raise: #3c4044; --raise-2: #1e2124; --display: #050705; --hl: rgba(255, 255, 255, 0.1);
+  --ink: #e9ebe6; --muted: #aab0ab; --faint: #757c77; --line: rgba(233, 235, 230, 0.1); --line-2: rgba(233, 235, 230, 0.22); --grid: #3d4245;
+  --accent: #8fe36b; --accent-2: #c9f5b8; --accent-soft: rgba(143, 227, 107, 0.13); --glow: rgba(140, 230, 110, 0.45);
+  --accent-grad: linear-gradient(180deg, #a6ee86 0%, #62b844 100%); --on-accent: #0b1a06;
+  --fire: #ff4a32; --fire-soft: rgba(255, 74, 50, 0.15); --chg: rgba(143, 227, 107, 0.18);
+  --plate: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(0, 0, 0, 0.25)), var(--brushed), #2a2d2f;
+  --plate-edge: rgba(0, 0, 0, 0.6); --keycap: linear-gradient(180deg, #3a3d40 0%, #222427 100%); --key-ink: #e9ebe6; --key-base: #000;
+  --s-bg: radial-gradient(120% 140% at 50% 0%, #10200f 0%, #040703 70%); --s-wave: #234021; --s-played: #8fe36b; --s-ink: #c9f5b8; --s-faint: #6a9a5c; --s-grid: #1c2e1a;
+  --s-a: #8fe36b; --s-b: #ffb347; --s-c: #6fd3e0; --s-head: #eaffd9; --s-loop: #8fe36b; --s-glow: rgba(140, 230, 110, 0.32);
+  --wave: var(--s-wave); --wave-played: var(--s-played); --tone-a: #8fe36b; --tone-b: #ff6a4a; --tone-c: #6fd3e0;
+  --playhead: #eaffd9; --loop: #8fe36b; --rec: #ff3a22; --kw: #e9ebe6; --kb: #0b0c0c; --grain-o: 0;
+  --radius: 5px; --radius-sm: 3px; color-scheme: dark;
+}
+/* ---------- 05 Tube Amp: black tolex, gold piping, orange dial glow ---------- */
+[data-look="tube"] {
+  --wood: var(--wood-walnut);
+  --desk: #0b0908; --desk-2: #221a12; --bg: #171513; --side: #12100e; --surface: #221e1a; --np-bg: #110f0d;
+  --raise: #2f2a24; --raise-2: #161310; --display: #0c0805; --hl: rgba(255, 225, 160, 0.12);
+  --ink: #f0e2c0; --muted: #c9ae76; --faint: #7f6f52; --line: rgba(214, 168, 74, 0.16); --line-2: rgba(214, 168, 74, 0.32); --grid: #3a3024;
+  --accent: #e3b04f; --accent-2: #ffd98a; --accent-soft: rgba(227, 176, 79, 0.13); --glow: rgba(255, 150, 50, 0.5);
+  --accent-grad: linear-gradient(180deg, #f1cd7c 0%, #b9862c 100%); --on-accent: #1d1305;
+  --fire: #ff8a3c; --fire-soft: rgba(255, 138, 60, 0.15); --chg: rgba(227, 176, 79, 0.2);
+  --plate: linear-gradient(180deg, rgba(255, 240, 210, 0.05), rgba(0, 0, 0, 0.3)), var(--tolex), #171513;
+  --plate-edge: #b9862c; --keycap: linear-gradient(180deg, #3a342d 0%, #1d1915 100%); --key-ink: #f0e2c0; --key-base: #000;
+  --s-bg: radial-gradient(120% 140% at 50% 0%, #2e1806 0%, #0d0603 70%); --s-wave: #563313; --s-played: #ff9a3c; --s-ink: #ffcf8a; --s-faint: #a1733c; --s-grid: #382210;
+  --s-a: #ffd06b; --s-b: #ff7a3a; --s-c: #e3b04f; --s-head: #fff0cc; --s-loop: #ff9a3c; --s-glow: rgba(255, 140, 50, 0.42);
+  --wave: var(--s-wave); --wave-played: var(--s-played); --tone-a: #ffd06b; --tone-b: #ff7a3a; --tone-c: #e3b04f;
+  --playhead: #ffe7a8; --loop: #ff9a3c; --rec: #ff3b1f; --kw: #f0e2c0; --kb: #0c0a08; --grain-o: 0;
+  --radius: 6px; --radius-sm: 4px; color-scheme: dark;
+}
+
+/* ---------- 05b Tube Amp · light: cream tolex, gold piping, the same walnut cabinet ---------- */
+[data-look="tube-light"] {
+  --desk: #cfc3ab; --desk-2: #ece2cd; --bg: #efe5cf; --side: #e8dcc2; --surface: #fbf6ea; --np-bg: #fcf8ee;
+  --raise: #fffaf0; --raise-2: #e2d6bd; --display: #fff3d6; --hl: rgba(255, 255, 255, 0.7);
+  --ink: #2a2016; --muted: #6b5434; --faint: #9c8562; --line: rgba(122, 88, 30, 0.2); --line-2: rgba(122, 88, 30, 0.34); --grid: #dccdae;
+  --accent: #b5741c; --accent-2: #e6a548; --accent-soft: rgba(181, 116, 28, 0.13); --glow: rgba(255, 150, 50, 0.32);
+  --accent-grad: linear-gradient(180deg, #f5c770 0%, #c8892b 100%); --on-accent: #2a1805;
+  --fire: #df5e1c; --fire-soft: rgba(223, 94, 28, 0.13); --chg: rgba(181, 116, 28, 0.17);
+  --plate: linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(110, 80, 30, 0.08)), url("textures/cream-tolex.jpg") 0 0 / 300px auto, #ece0c6;
+  --plate-edge: #b9862c; --keycap: linear-gradient(180deg, #fffcf4 0%, #e7dabf 100%); --key-ink: #2a2016; --key-base: #b3a07a;
+  --s-bg: radial-gradient(120% 140% at 50% 0%, #fff6e0 0%, #f2e1bd 75%); --s-wave: #d9bf8f; --s-played: #c0540f; --s-ink: #4a2c0c; --s-faint: #95703f; --s-grid: #e3d0a8;
+  --s-a: #b07d10; --s-b: #d0541a; --s-c: #8a6a2a; --s-head: #3a2410; --s-loop: #d0541a; --s-glow: rgba(255, 196, 120, 0.4);
+  --wave: var(--s-wave); --wave-played: var(--s-played); --tone-a: #b07d10; --tone-b: #d0541a; --tone-c: #8a6a2a;
+  --playhead: #3a2410; --loop: #d0541a; --rec: #e0301a; --kw: #fffaf0; --kb: #2a2016; --grain-o: 0;
+  --radius: 6px; --radius-sm: 4px; color-scheme: light;
+}
+:root[data-look="tube-light"] {
+  .strip { --surface: #fff8ea; }
+  .strip-canvas { box-shadow: 0 0 0 6px #e7d6b2, 0 0 0 7px rgba(255, 255, 255, 0.8), 0 0 0 9px var(--plate-edge), inset 0 0 30px var(--s-glow), inset 0 2px 8px rgba(90, 60, 20, 0.28); }
+  .strip-canvas::after { background: linear-gradient(160deg, rgba(255, 255, 255, 0.5), transparent 40%); }
+  .clock, .tune-key, .mic, .loop-chip { box-shadow: 0 0 0 2px #e7d6b2, 0 1px 0 3px var(--plate-edge), inset 0 0 12px var(--s-glow), inset 0 2px 5px rgba(90, 60, 20, 0.3); }
+  .clock, .tune-key b { text-shadow: none; }
+  .tbtn.play { box-shadow: 0 0 0 3px #e7d6b2, 0 0 0 5px color-mix(in srgb, var(--accent) 45%, transparent), 0 3px 0 5px rgba(90, 60, 20, 0.25), 0 0 18px -4px var(--glow), inset 0 2px 2px rgba(255, 255, 255, 0.55); }
+  .mode-seg, .shape-toggle { background: rgba(90, 60, 20, 0.12); box-shadow: inset 0 2px 4px rgba(90, 60, 20, 0.25), 0 1px 0 var(--hl); }
+  .mode-seg button::before { background: #cdb48a; }
+  .rec-pill { background: rgba(42, 32, 22, 0.86); color: #ffd9cc; }
+  .rec-pill.off { background: rgba(90, 60, 20, 0.12); color: var(--muted); box-shadow: inset 0 2px 4px rgba(90, 60, 20, 0.25); }
+  .search, .seg, .notes .stepper { background: rgba(90, 60, 20, 0.08); box-shadow: inset 0 1px 3px rgba(90, 60, 20, 0.22), 0 1px 0 var(--hl); }
+  .s-row.on { background: rgba(90, 60, 20, 0.1); box-shadow: inset 0 1px 3px rgba(90, 60, 20, 0.2); }
+  .lyric .w.now { color: var(--ink); background: var(--accent-soft); text-shadow: none; }
+  .menu, .pop, .hud, .strip-tip { background: var(--surface); color: var(--ink); }
+}
+
+/* ---------- the shared vintage build ---------- */
+:root:is([data-look="walnut"], [data-look="echo"], [data-look="decap"], [data-look="decap-coral"], [data-look="decap-lime"], [data-look="decap-neon"], [data-look="tape"], [data-look="tape-dark"], [data-look="tube"], [data-look="tube-light"]) {
+  --ui: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono: "IBM Plex Mono", "Geist Mono", ui-monospace, monospace;
+  --plate-ink: var(--ink); --plate-muted: var(--muted); --plate-faint: var(--faint); --plate-line: var(--line);
+
+  body { background: radial-gradient(90% 70% at 50% 0%, var(--desk-2), var(--desk) 70%) fixed, var(--desk); }
+
+  /* the case: wood cheeks left and right, the faceplate in between */
+  .win {
+    padding: 0 26px; border-radius: 10px;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.5), rgba(255, 255, 255, 0.1) 28%, transparent 60%, rgba(0, 0, 0, 0.55)) left / 26px 100% no-repeat,
+      linear-gradient(90deg, rgba(0, 0, 0, 0.55), transparent 40%, rgba(255, 255, 255, 0.1) 72%, rgba(0, 0, 0, 0.5)) right / 26px 100% no-repeat,
+      var(--wood) left / 26px 700px repeat-y, var(--wood) right / 26px 700px repeat-y, var(--bg);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 40px 90px -24px rgba(0, 0, 0, 0.8), 0 10px 26px rgba(0, 0, 0, 0.35);
+  }
+  .win::after { display: none; }
+  .win-body, .titlebar { box-shadow: inset 1px 0 0 var(--plate-edge), inset -1px 0 0 var(--plate-edge); }
+
+  /* faceplate surfaces */
+  .titlebar { height: 56px; background: var(--screw) 8px 7px / 12px 12px no-repeat, var(--screw) right 8px top 7px / 12px 12px no-repeat, var(--plate); border-bottom: 1px solid var(--plate-edge); }
+  .lights { margin-left: 14px; }
+  .app-name::after { content: "Hot Mic"; font: 400 21px/1 "Righteous", var(--ui); letter-spacing: 0.01em; color: var(--ink); text-shadow: 0 1px 0 var(--hl), 0 -1px 0 rgba(0, 0, 0, 0.25); }
+  .app-name::before { content: "blue gum"; order: 3; font: 600 9px var(--stamp); letter-spacing: 0.28em; text-transform: uppercase; color: var(--faint); margin-left: 2px; }
+  .side { background: var(--plate); }
+  .side-open .side { border-right: 1px solid var(--plate-edge); }
+  .tune { background: var(--plate); border-bottom: 1px solid var(--plate-edge); }
+  .notes { background: linear-gradient(180deg, rgba(0, 0, 0, 0.06), transparent 40px), var(--np-bg); box-shadow: inset 0 1px 0 var(--plate-edge); }
+  .sec-head, .np-bar { background: var(--np-bg); backdrop-filter: none; }
+
+  /* silkscreened caps */
+  .caps, .side-head b, .menu-h, .sec-title h3, .shape-toggle span, .lab-group h4, .lane-col, .s-day { font-family: var(--stamp); font-weight: 700; letter-spacing: 0.2em; }
+  .sec-title h3 { font-size: 12px; color: var(--ink); }
+  .mode-seg button, .shape-toggle button, .mini-btn, .rec-pill, .badge { font-family: var(--stamp); }
+
+  /* the meter bridge: faceplate panel holding a tube-lit screen */
+  .strip {
+    margin: 0; padding: 12px 22px 18px; border-bottom: 1px solid var(--plate-edge);
+    background: var(--screw) 4px 4px / 12px 12px no-repeat, var(--screw) right 4px top 4px / 12px 12px no-repeat, var(--screw) left 4px bottom 4px / 12px 12px no-repeat, var(--screw) right 4px bottom 4px / 12px 12px no-repeat, var(--plate);
+    /* what the canvas paints with */
+    --wave: var(--s-wave); --wave-played: var(--s-played); --grid: var(--s-grid); --faint: var(--s-faint); --ink: var(--s-head); --surface: #0b0705;
+    --tone-a: var(--s-a); --tone-b: var(--s-b); --tone-c: var(--s-c); --loop: var(--s-loop); --playhead: var(--s-head);
+  }
+  .strip-head { --ink: var(--plate-ink); --muted: var(--plate-muted); --faint: var(--plate-faint); --line: var(--plate-line); padding: 0 6px; }
+  .strip-canvas {
+    background: var(--s-bg); border-radius: 8px;
+    box-shadow: 0 0 0 6px #0a0705, 0 0 0 7px rgba(255, 255, 255, 0.08), 0 0 0 9px var(--plate-edge), inset 0 0 40px var(--s-glow), inset 0 3px 12px rgba(0, 0, 0, 0.8);
+  }
+  .strip-canvas::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px), linear-gradient(160deg, rgba(255, 255, 255, 0.08), transparent 35%); }
+  .strip-title .i { color: var(--accent); filter: none; }
+
+  /* amber windows: clock, key, mic, loop */
+  .clock, .tune-key, .mic, .loop-chip {
+    background: var(--s-bg); border: 0; border-radius: 4px; color: var(--s-played);
+    box-shadow: 0 0 0 2px #0a0705, 0 1px 0 3px var(--plate-edge), inset 0 0 14px var(--s-glow), inset 0 2px 6px rgba(0, 0, 0, 0.8);
+  }
+  .clock { font: 400 15px var(--lcd); letter-spacing: 0.06em; text-shadow: 0 0 8px var(--s-played); }
+  .tune-key b { font: 400 14px var(--lcd); color: var(--s-played); text-shadow: 0 0 8px var(--s-played); }
+  .tune-key span, .tune-key .i { color: var(--s-faint); }
+  .mic { color: var(--s-played); } .mic select { font: 400 13px var(--lcd); color: var(--s-ink); }
+  .mic select option { background: #1a120a; }
+  .loop-chip { font: 400 12px var(--lcd); color: var(--s-played); }
+  .meter i { background: rgba(255, 255, 255, 0.1); }
+  .is-live .meter i { background: var(--s-played); box-shadow: 0 0 5px var(--s-played); }
+
+  /* chunky hardware keys */
+  .tbtn:not(.play), .mini-btn, .np-btn:not(.primary), .chip, .kchip, .pill, .lane-h, .car-btn, .side-head .icon-btn, .stepper, .fav {
+    background: var(--keycap); color: var(--key-ink); border: 0; border-radius: 4px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -2px 0 rgba(0, 0, 0, 0.18), 0 2px 0 var(--key-base), 0 3px 6px rgba(0, 0, 0, 0.35);
+    transition: transform 0.06s, box-shadow 0.06s;
+  }
+  .tbtn:not(.play):active, .mini-btn:active, .np-btn:active, .kchip:active, .pill:active, .chip:active { transform: translateY(2px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 0 var(--key-base), 0 1px 2px rgba(0, 0, 0, 0.35); }
+  .tbtn:not(.play):hover, .mini-btn:hover, .kchip:hover, .pill:hover { color: var(--key-ink); filter: brightness(1.05); }
+  .tbtn { width: 34px; height: 32px; }
+  .tbtn.snap { width: auto; padding: 0 9px; font: 700 10px var(--stamp); letter-spacing: 0.16em; }
+  .tbtn.on, .pill.on, .kchip.on, .lane-h.on, .np-btn.primary {
+    background: var(--accent-grad); color: var(--on-accent); border: 0;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), inset 0 -2px 0 rgba(0, 0, 0, 0.2), 0 2px 0 color-mix(in srgb, var(--accent) 45%, #000), 0 0 14px -3px var(--glow);
+  }
+  .seg, .notes .stepper { background: rgba(0, 0, 0, 0.18); box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35); border: 0; }
+  .seg .pill:not(.on) { background: transparent; box-shadow: none; color: var(--muted); }
+
+  /* the big transport button: a bakelite knob cap with a lit ring */
+  .tbtn.play {
+    width: 44px; height: 44px; border: 0; color: var(--on-accent);
+    background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--accent-2) 70%, #fff) 0%, var(--accent) 45%, color-mix(in srgb, var(--accent) 60%, #000) 100%);
+    box-shadow: 0 0 0 3px #0b0705, 0 0 0 5px color-mix(in srgb, var(--accent) 40%, transparent), 0 3px 0 5px rgba(0, 0, 0, 0.35), 0 0 22px -2px var(--glow), inset 0 2px 2px rgba(255, 255, 255, 0.45);
+  }
+
+  /* Freestyle / Beat as a hardware selector with jewel lamps */
+  .mode-seg { padding: 4px; gap: 4px; border: 0; border-radius: 6px; background: rgba(0, 0, 0, 0.32); box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.55), 0 1px 0 var(--hl); }
+  .mode-seg button { position: relative; padding: 7px 16px 7px 24px; border-radius: 4px; color: var(--key-ink); font-size: 11px; letter-spacing: 0.18em; background: var(--keycap); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 2px 0 var(--key-base); }
+  .mode-seg button::before { content: ""; position: absolute; left: 9px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%; background: #3a2a1a; box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.6); }
+  .mode-seg button.on { color: var(--key-ink); transform: translateY(2px); background: var(--keycap); box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 0 var(--key-base); }
+  .mode-seg button.on::before { background: radial-gradient(circle at 40% 35%, #fff3c4, var(--s-played) 60%); box-shadow: 0 0 8px var(--s-played), 0 0 2px var(--s-played); }
+  .mode-seg button.on .i { filter: none; }
+  .mode-seg button .i { display: none; }
+
+  .shape-toggle { border: 0; border-radius: 6px; background: rgba(0, 0, 0, 0.25); box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.45), 0 1px 0 var(--hl); }
+  .shape-toggle span { color: var(--plate-muted); }
+  .shape-toggle button { color: var(--plate-muted); }
+  .shape-toggle button.on { background: var(--keycap); color: var(--key-ink); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 2px 0 var(--key-base); }
+
+  /* the recording jewel lamp */
+  .rec-pill { height: 28px; border-radius: 4px; border: 0; background: rgba(0, 0, 0, 0.3); color: #ffd2c4; box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.55), 0 1px 0 var(--hl); letter-spacing: 0.2em; }
+  .rec-dot { width: 10px; height: 10px; background: radial-gradient(circle at 35% 30%, #fff 0 8%, #ff8a70 25%, var(--rec) 60%, #6a0d04 100%); box-shadow: 0 0 10px var(--rec), 0 0 2px var(--rec); }
+  .rec-pill.off { background: rgba(0, 0, 0, 0.18); color: var(--plate-faint); box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.35); }
+  .rec-pill.off::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #c79a90 0 8%, #6a2a22 50%, #2a0c08 100%); }
+
+  /* sessions list */
+  .search { background: rgba(0, 0, 0, 0.12); border: 0; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 1px 0 var(--hl); }
+  .s-row.on { background: rgba(0, 0, 0, 0.14); box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25); color: var(--accent); }
+  .s-row.on::before { background: var(--accent); box-shadow: 0 0 8px var(--glow); }
+
+  /* lyrics */
+  .lyric .ch { font-family: var(--mono); font-weight: 600; color: var(--accent); text-shadow: none; }
+  .lyric .w.now { color: var(--accent); text-shadow: 0 0 12px var(--glow); }
+  .badge.sug { background: var(--accent-soft); color: var(--accent); }
+  .dot { box-shadow: none !important; }
+  .tag { border-radius: 3px; font-family: var(--stamp); letter-spacing: 0.1em; }
+  .menu, .pop, .hud, .strip-tip { backdrop-filter: none; background: var(--surface); }
+  .edit-line { background: color-mix(in srgb, var(--surface) 70%, transparent); }
+}
+
+/* light faceplates (Walnut, Tape Deck): softer shadows, no glow on ink */
+:root:is([data-look="walnut"], [data-look="tape"], [data-look="tube-light"]) {
+  .lyric .w.now { text-shadow: none; background: var(--accent-soft); }
+  .tune-key, .clock, .mic, .loop-chip { box-shadow: 0 0 0 2px #1a1a18, 0 1px 0 3px rgba(255, 255, 255, 0.6), inset 0 0 14px var(--s-glow), inset 0 2px 6px rgba(0, 0, 0, 0.8); }
+  .rec-pill { background: rgba(0, 0, 0, 0.72); }
+}
+/* Tube Amp: gold piping around the faceplate */
+:root:is([data-look="tube"], [data-look="tube-light"]) {
+  .titlebar { border-bottom: 2px solid #b9862c; }
+  .strip { border-bottom: 2px solid #b9862c; }
+  .win-body, .titlebar { box-shadow: inset 2px 0 0 #b9862c, inset -2px 0 0 #b9862c; }
+  .app-name::after { color: var(--accent); }
+}
+
+/* ---------- the Tube Amp cabinet: oiled rosewood cheeks (locked 2026-10-12) with real grain, rounded edges, routed ends ---------- */
+:root:is([data-look="tube"], [data-look="tube-light"]) {
+  --cab: url("textures/cab-rosewood.jpg");
+  .win { padding: 0 36px; border-radius: 12px; background: var(--bg); box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.7), 0 44px 90px -26px rgba(0, 0, 0, 0.75), 0 12px 28px rgba(0, 0, 0, 0.35); }
+  .win::before, .win::after {
+    content: ""; display: block; position: absolute; top: 0; bottom: 0; width: 36px; z-index: 3; pointer-events: none;
+    opacity: 1; mix-blend-mode: normal; background-image: none;
+  }
+  .win::before {
+    left: 0; border-radius: 12px 0 0 12px;
+    background:
+      linear-gradient(180deg, rgba(255, 222, 176, 0.45) 0, rgba(120, 62, 26, 0.35) 2px, rgba(20, 8, 2, 0.55) 6px, rgba(0, 0, 0, 0) 13px) top / 100% 14px no-repeat,
+      linear-gradient(0deg, rgba(10, 4, 0, 0.78) 0, rgba(255, 210, 160, 0.16) 4px, rgba(0, 0, 0, 0) 13px) bottom / 100% 14px no-repeat,
+      linear-gradient(90deg, transparent 8px, rgba(255, 242, 220, 0.18) 10.5px, transparent 13px),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.7) 0, rgba(0, 0, 0, 0.3) 3px, rgba(255, 228, 186, 0.28) 9px, rgba(255, 238, 205, 0.1) 15px, rgba(0, 0, 0, 0) 22px, rgba(0, 0, 0, 0.32) 32px, rgba(0, 0, 0, 0.6) 36px),
+      linear-gradient(180deg, rgba(255, 236, 205, 0.16), rgba(0, 0, 0, 0) 32%, rgba(0, 0, 0, 0) 66%, rgba(0, 0, 0, 0.32)),
+      var(--cab) -60px 0 / 300px auto repeat-y;
+    box-shadow: inset 1px 0 0 rgba(255, 220, 170, 0.18), inset 0 1px 0 rgba(255, 225, 180, 0.35);
+  }
+  .win::after {
+    right: 0; inset-inline-start: auto; border-radius: 0 12px 12px 0;
+    background:
+      linear-gradient(180deg, rgba(255, 222, 176, 0.45) 0, rgba(120, 62, 26, 0.35) 2px, rgba(20, 8, 2, 0.55) 6px, rgba(0, 0, 0, 0) 13px) top / 100% 14px no-repeat,
+      linear-gradient(0deg, rgba(10, 4, 0, 0.78) 0, rgba(255, 210, 160, 0.16) 4px, rgba(0, 0, 0, 0) 13px) bottom / 100% 14px no-repeat,
+      linear-gradient(270deg, transparent 8px, rgba(255, 242, 220, 0.16) 10.5px, transparent 13px),
+      linear-gradient(270deg, rgba(0, 0, 0, 0.66) 0, rgba(0, 0, 0, 0.22) 3px, rgba(255, 228, 186, 0.3) 9px, rgba(255, 238, 205, 0.1) 15px, rgba(0, 0, 0, 0) 22px, rgba(0, 0, 0, 0.26) 32px, rgba(0, 0, 0, 0.55) 36px),
+      linear-gradient(180deg, rgba(255, 236, 205, 0.14), rgba(0, 0, 0, 0) 32%, rgba(0, 0, 0, 0) 66%, rgba(0, 0, 0, 0.34)),
+      var(--cab) -110px -260px / 300px auto repeat-y;
+    box-shadow: inset 0 1px 0 rgba(255, 225, 180, 0.3);
+  }
+  /* the faceplate sits in front of the wood and throws a small shadow onto it */
+  .titlebar, .win-body { position: relative; z-index: 4; box-shadow: inset 2px 0 0 #b9862c, inset -2px 0 0 #b9862c, -5px 0 8px -3px rgba(0, 0, 0, 0.7), 5px 0 8px -3px rgba(0, 0, 0, 0.7); }
+}
+/* the cheeks stay this walnut even if a wood texture is picked */
+:root:is([data-look="tube"], [data-look="tube-light"]):is([data-texture="walnut"], [data-texture="oak"], [data-texture="rosewood"]) .win { padding: 0 36px; background: var(--bg); }
+/* Tube Amp · light: readable lamp label (after the shared build so it wins) */
+:root[data-look="tube-light"] .rec-pill.off { background: rgba(90, 60, 20, 0.12); color: var(--muted); }

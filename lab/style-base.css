@@ -1,0 +1,32 @@
+/* Hot Mic: the three styles (2026-10-12). Vintage = the Tube Amp (vintage.css, untouched).
+   Modern and Notebook switch data-look to modern / modern-light / notebook / notebook-light,
+   so none of the Tube Amp materials apply; they share the Lilac ice accent from accents.css. */
+
+/* ---------- the style switch in the title bar ---------- */
+.style-seg { display: flex; align-items: center; gap: 2px; height: 28px; padding: 2px; border-radius: 8px; background: rgba(0, 0, 0, 0.22); box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4); }
+.style-seg button { height: 24px; padding: 0 9px; border-radius: 6px; font: 600 10px/1 var(--ui); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.style-seg button:hover { color: var(--ink); }
+.style-seg button.on { background: var(--raise, var(--surface)); color: var(--ink); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), inset 0 1px 0 var(--hl, rgba(255, 255, 255, 0.08)); }
+:root[data-look="tube-light"] .style-seg { background: rgba(90, 60, 20, 0.12); box-shadow: inset 0 2px 4px rgba(90, 60, 20, 0.25); }
+:root[data-look="tube-light"] .style-seg button.on { background: var(--keycap); color: var(--key-ink); }
+@media (max-width: 1500px) { .style-seg button { padding: 0 7px; letter-spacing: 0.04em; } }
+
+/* ---------- Lilac ice (or any accent) across Modern + Notebook ---------- */
+:root:is([data-look="modern"], [data-look="modern-light"], [data-look="notebook"], [data-look="notebook-light"]) {
+  --accent: var(--acc, #b4c4ff); --accent-2: var(--acc-2, #eef0ff);
+  --accent-soft: color-mix(in srgb, var(--acc, #b4c4ff) 14%, transparent);
+  --accent-grad: linear-gradient(180deg, var(--acc-2, #eef0ff) 0%, var(--acc, #b4c4ff) 100%);
+  --on-accent: #141127; --glow: color-mix(in srgb, var(--acc, #b4c4ff) 45%, transparent);
+  --chg: color-mix(in srgb, var(--acc, #b4c4ff) 20%, transparent);
+  --tone-a: var(--acc-2, #eef0ff); --tone-b: var(--acc-b, #8fe2ff); --tone-c: var(--acc-c, #a77bff);
+  --wave-played: var(--acc, #b4c4ff); --loop: var(--acc, #b4c4ff);
+  --grain-o: 0;
+}
+:root:is([data-look="modern-light"], [data-look="notebook-light"]) {
+  --accent: var(--acc-d, #3b4fb0); --accent-soft: color-mix(in srgb, var(--acc-d, #3b4fb0) 11%, transparent);
+  --glow: color-mix(in srgb, var(--acc, #b4c4ff) 35%, transparent); --on-accent: #141127;
+  --tone-a: color-mix(in srgb, var(--acc-d, #3b4fb0) 70%, #fff); --tone-b: #3aa7c9; --tone-c: #7c55e0;
+  --wave-played: color-mix(in srgb, var(--acc-d, #3b4fb0) 80%, var(--acc, #b4c4ff)); --loop: var(--acc-d, #3b4fb0);
+}
+/* the chrome wordmark reads on light paper */
+:root:is([data-look="modern-light"], [data-look="notebook-light"]) .hm-word { background: linear-gradient(180deg, #5a4fb8, #2d2a52); -webkit-background-clip: text; background-clip: text; filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.7)); }

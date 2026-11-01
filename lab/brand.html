@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hot Mic chrome</title>
+<link href="https://fonts.googleapis.com/css2?family=Yellowtail&family=Great+Vibes&family=Alex+Brush&family=Pinyon+Script&family=Allura&display=swap" rel="stylesheet">
+<script src="brand/icon-h.js"></script>
+<style>
+  :root { --bg: #0c0b10; --ink: #ece8f4; --dim: #8d86a0; --card: #17151d; --line: #2a2634; --pick: #c9b8ff; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 13px/1.4 -apple-system, system-ui, sans-serif; display: grid; grid-template-columns: 1fr 300px; height: 100vh; }
+  iframe { width: 100%; height: 100vh; border: 0; background: #111; }
+  aside { border-left: 1px solid var(--line); overflow: auto; padding: 14px; }
+  h1 { font-size: 15px; margin: 0 0 2px; } .sub { color: var(--dim); margin: 0 0 12px; }
+  .grp { margin: 0 0 14px; } .grp b { display: block; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin: 0 0 6px; }
+  .opts { display: flex; flex-wrap: wrap; gap: 5px; }
+  .opts button { background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: 7px; padding: 5px 8px; font: inherit; cursor: pointer; }
+  input[type=range] { accent-color: var(--pick); }
+  .opts button.on { border-color: var(--pick); box-shadow: inset 0 0 0 1px var(--pick); }
+  .deciding { margin: 0 0 14px; padding: 10px; border-radius: 10px; border: 1px solid var(--pick); background: rgba(201,184,255,.08); }
+  .deciding b { display: block; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--pick); margin: 0 0 6px; }
+  details.locked { margin: 0 0 14px; } details.locked summary { cursor: pointer; color: var(--dim); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; margin: 0 0 10px; }
+  details.locked summary::after { content: " · tap to show"; text-transform: none; letter-spacing: 0; }
+  .copy { width: 100%; padding: 9px; border-radius: 8px; border: 0; background: var(--pick); color: #17131f; font-weight: 700; cursor: pointer; }
+  @media (max-width: 760px) { body { grid-template-columns: 1fr; } iframe { height: 60vh; } }
+</style></head><body>
+<iframe id="app" src="index.html#style=modern"></iframe>
+<aside>
+  <h1>Chrome, only at brand moments</h1>
+  <p class="sub">The real Hot Mic UI. Work surfaces stay flat. Lilac ice is the chrome; warm orange only means recording. Picks live in the URL.</p>
+  <div id="groups"></div>
+  <div class="grp"><b>Restore from link</b><div style="display:flex;gap:5px"><input id="restore" placeholder="Paste a brand.html link with #..." style="flex:1;min-width:0;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:6px 8px;font:inherit"><button id="restoreGo" style="background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:5px 8px;font:inherit;cursor:pointer">Apply</button></div></div>
+  <button class="copy" id="copy">Copy picks</button>
+</aside>
+<script>
+const GROUPS = {
+  state: { label: 'Screen', opts: { lyrics: 'Session with lyrics', empty: 'Empty session', rec: 'Recording', beat: 'Beat mode' } },
+  word: { label: 'Wordmark', opts: { line: 'Picked: FLORA line, flame i', greatvibes: 'Great Vibes', pinyon: 'Pinyon Script', alex: 'Alex Brush', allura: 'Allura', yellowtail: 'Yellowtail', current: 'Today (Yellowtail, no icon H)' } },
+  edge: { label: 'Wordmark edge', opts: { dark: 'Dark edge', none: 'No edge' } },
+  curl: { label: 'Flame curl off the c', opts: { off: 'Off', on: 'On' } },
+  topbar: { label: 'Top bar', opts: { trim: 'Chrome trim along its edge', capsule: 'Chrome capsule (old pick)', flat: 'Flat (today)' } },
+  amount: { label: 'Chrome amount', opts: { off: 'Off', lean: 'Lean', leanframes: 'Lean + frames', dividers: 'Dividers only', frames: 'Dividers + frames', all: 'Everything' } },
+  tile: { label: 'Title-bar H tile', opts: { on: 'On', off: 'Off' } },
+  rec: { label: 'Record button', opts: { chrome: 'Chrome ring, heats orange', off: 'Flat (today)' } },
+  knob: { label: 'Play knob', opts: { brushed: 'Brushed chrome face', off: 'Flat (today)' } },
+  flourish: { label: 'Section header', opts: { none: 'None', curl: 'Tiny flame curl' } },
+  hero: { label: 'About / onboarding hero', opts: { off: 'Off', sheen: 'Icon + wordmark, slow sheen' } },
+};
+const DEF = { state: 'lyrics', word: 'line', edge: 'dark', curl: 'off', topbar: 'trim', amount: 'all', ti: '70', tile: 'on', rec: 'chrome', knob: 'brushed', flourish: 'none', hero: 'off' };
+// Chrome trim: a lilac-ice stroke that sits on each element's REAL edge (straight lines stay straight, panels keep
+// their own radius). Bright near-white on the lit (top/left) row, lilac midtone under it, soft glow. Drawn with
+// box-shadows so it follows border-radius for free.
+const LINE_B = 'inset 0 -1px 0 var(--tr-mid), inset 0 -2px 0 var(--tr-hi), 0 2px var(--tr-gw) -2px var(--tr-glow)';
+const RING = '0 0 0 1px var(--tr-mid), inset 0 1px 0 var(--tr-hi), 0 -1px 0 0 var(--tr-hi2), 0 0 var(--tr-gw) 0 var(--tr-glow)';
+const TRIM = {
+  t_top: { label: 'Top bar edge', kind: 'dividers', css: `.titlebar{border-bottom-color:transparent!important;box-shadow:${LINE_B}!important}` },
+  t_side: { label: 'Sidebar / main divider', kind: 'dividers', css: `.side{border-right-color:transparent!important;box-shadow:inset -1px 0 0 var(--tr-mid),inset -2px 0 0 var(--tr-hi),2px 0 var(--tr-gw) -2px var(--tr-glow)!important;position:relative;z-index:2}` },
+  t_key: { label: 'Divider above key/chords row', kind: 'dividers', css: `.strip{border-bottom-color:transparent!important;box-shadow:${LINE_B}!important;z-index:1}` },
+  t_lyr: { label: 'Divider above lyrics', kind: 'dividers', css: `.tune{border-bottom-color:transparent!important;box-shadow:${LINE_B}!important;position:relative;z-index:1}` },
+  t_sec: { label: 'Section header rules', kind: 'dividers', css: `.notes .sec-head{box-shadow:none!important;background-image:linear-gradient(var(--tr-mid2),var(--tr-mid2))!important;background-size:100% 1px!important;background-position:0 100%!important;background-repeat:no-repeat!important;outline:0!important}` },
+  t_tl: { label: 'Timeline panel frame', kind: 'frames', css: `.strip{border-bottom-color:transparent!important}.strip-canvas{box-shadow:${RING}!important}` },
+  t_tune: { label: 'Key / chords / shapes row', kind: 'frames', css: `.tune .tune-key,.tune .shape-toggle{box-shadow:${RING}!important}` },
+  t_trans: { label: 'Transport button group', kind: 'all', css: `.transport{border-radius:12px;padding:3px 6px;margin:-3px -6px -3px 0;box-shadow:${RING}!important}` },
+  t_sel: { label: 'Selected session', kind: 'all', css: `.side .s-row.on{box-shadow:${RING}!important}` },
+};
+const LEAN = ['t_top', 't_side', 't_key', 't_lyr', 't_sec'];
+const AMOUNT_ON = { off: [], lean: LEAN, leanframes: [...LEAN, 't_tl', 't_trans'], dividers: ['dividers'], frames: ['dividers', 'frames'], all: ['dividers', 'frames', 'all'] };
+const presetHas = (a, k) => AMOUNT_ON[a].includes(k) || AMOUNT_ON[a].includes(TRIM[k].kind);
+Object.keys(TRIM).forEach((k) => { DEF[k] = 'on'; });
+// Nate's locked defaults (2026-10-14); only the two frames below are still open.
+Object.assign(DEF, { amount: 'custom', tile: 'off', t_tune: 'off' });
+const OPEN = ['t_tl', 't_trans'];
+function trimVars(ti) {
+  const t = Math.max(0, Math.min(100, +ti || 0)) / 100;
+  return `:root{--tr-hi:rgba(255,255,255,${(.25 + .75 * t).toFixed(2)});--tr-hi2:rgba(255,255,255,${(.08 + .3 * t).toFixed(2)});--tr-mid:rgba(185,178,242,${(.35 + .6 * t).toFixed(2)});--tr-mid2:rgba(185,178,242,${(.2 + .45 * t).toFixed(2)});--tr-glow:rgba(185,178,242,${(.1 + .55 * t).toFixed(2)});--tr-gw:${(2 + 14 * t).toFixed(1)}px}`;
+}
+const picks = { ...DEF, ...Object.fromEntries(location.hash.slice(1).split('&').filter(Boolean).map((kv) => kv.split('='))) };
+
+// Lilac-ice chrome = exactly the title-bar wordmark's gradient (Nate 2026-10-14: everything matches its brightness).
+const CHROME = 'linear-gradient(180deg, #ffffff 0%, #dfe5ff 40%, #8f9cff 56%, #eef0ff 76%, #b4c4ff 100%)';   // the wordmark's own chrome
+const CSS = {
+  // Nate's FLORA pick: the title bar is a polished lilac-ice chrome capsule spanning the whole window
+  // (small inset), every control inside it with room to spare; wordmark only, no H tile.
+  topbar: {
+    capsule: `.titlebar{height:58px!important;padding:0 26px!important;background:transparent!important;border-bottom:0!important;box-shadow:none!important;gap:12px!important}
+      .titlebar::after{content:none!important}
+      .titlebar::before{content:"";position:absolute;inset:6px 6px;border-radius:999px;pointer-events:none;padding:2px;
+        background:linear-gradient(180deg,#ffffff 0%,#eef0ff 18%,#b9b2f2 45%,#6f68a8 55%,#cfc9ff 78%,#f4f3ff 100%);
+        -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+        box-shadow:0 0 14px -4px rgba(185,178,242,.55)}
+      .titlebar>*{position:relative;z-index:1}
+      .titlebar .app-name .hm-tile-img{display:none!important}
+      .titlebar .mode-seg{position:absolute!important;left:50%!important;transform:translateX(-50%)!important;z-index:1}
+      .titlebar .tb-right{min-width:0;flex:0 1 auto;margin-left:auto!important}
+      .titlebar .mic{min-width:0;max-width:220px;overflow:hidden}
+      .titlebar .mic select{min-width:0;flex:1 1 auto;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .titlebar .mic .meter{flex:none}
+      @media (max-width:1250px){.titlebar .mic{max-width:170px}.titlebar .mic select{max-width:100px}}`,
+    trim: `.titlebar .app-name .hm-tile-img{display:none!important}`,
+    flat: ``,
+  },
+  tile: { on: ``, off: `.app-name .hm-tile-img{display:none!important}` },
+  rec: {
+    chrome: `.transport .rec-btn{border-radius:50%!important;background:radial-gradient(circle at 50% 50%,#1a1820 52%,transparent 53%),conic-gradient(from 200deg,#f4f2ff,#8f84c8,#ffffff,#6b6199,#e9e6ff,#8f84c8,#f4f2ff)!important;box-shadow:0 1px 2px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.25)!important}
+      .transport .rec-btn span{background:#c94a52!important}
+      .transport .rec-btn.on{background:radial-gradient(circle at 50% 50%,#2a1410 52%,transparent 53%),conic-gradient(from 200deg,#ffd9a8,#ff8a2a,#fff1d6,#d9621c,#ffc27a,#ff8a2a,#ffd9a8)!important;box-shadow:0 0 18px -2px rgba(255,138,42,.75),0 0 0 1px rgba(255,138,42,.5)!important;animation:hmheat 1.6s ease-in-out infinite}
+      .transport .rec-btn.on span{background:#ff7a1a!important;box-shadow:0 0 10px #ff7a1a!important}
+      @keyframes hmheat{50%{box-shadow:0 0 26px 0 rgba(255,138,42,.9),0 0 0 1px rgba(255,138,42,.7)}}`,
+    off: ``,
+  },
+  knob: {
+    brushed: `.transport .tbtn.play{color:#2a2540!important;background:repeating-radial-gradient(circle at 50% 50%,rgba(255,255,255,.18) 0 1px,rgba(0,0,0,.05) 1px 2px),conic-gradient(from 210deg,#f6f4ff,#a79ddc,#ffffff,#8a80bf,#eeebff,#a79ddc,#f6f4ff)!important;box-shadow:0 0 0 1px #2b2640,0 4px 12px -4px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.8)!important}`,
+    off: ``,
+  },
+  flourish: {
+    none: ``,
+    curl: `.notes .sec-head .sec-title h3::before{content:"";display:inline-block;width:11px;height:12px;margin-right:6px;vertical-align:-1px;background:${CHROME};-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 22'%3E%3Cpath d='M3 21c6-2 9-6 8-11-1 3-3 4-4 4 3-4 4-8 1-13 0 4-2 7-5 9 1-3 0-5-2-6 1 5-2 8-1 12 1 3 2 4 3 5z'/%3E%3C/svg%3E") center/contain no-repeat}`,
+  },
+  hero: {
+    off: ``,
+    sheen: `#hm-hero{position:fixed;inset:0;z-index:99;display:grid;place-items:center;background:rgba(8,7,12,.72);backdrop-filter:blur(6px)}
+      #hm-hero .card{display:grid;justify-items:center;gap:14px;padding:44px 64px;border-radius:22px;background:#15131b;box-shadow:0 30px 80px rgba(0,0,0,.6),inset 0 0 0 1px #2a2634}
+      #hm-hero img{width:148px;height:148px}
+      #hm-hero .w{font:400 64px/1 Yellowtail,cursive;background:linear-gradient(100deg,transparent 40%,rgba(255,255,255,.95) 50%,transparent 60%) 0 0/250% 100% no-repeat,${CHROME};-webkit-background-clip:text;background-clip:text;color:transparent;animation:hmsheen 5s ease-in-out infinite;filter:drop-shadow(0 2px 0 #241f3a)}
+      #hm-hero .sheen{position:relative;overflow:hidden;-webkit-mask:linear-gradient(#000,#000)}
+      #hm-hero .sheen::after{content:"";position:absolute;inset:-10px;background:linear-gradient(100deg,transparent 40%,rgba(255,255,255,.75) 50%,transparent 60%) 0 0/250% 100% no-repeat;mix-blend-mode:screen;animation:hmsheen 5s ease-in-out infinite}
+      #hm-hero p{margin:0;color:#8d86a0;font:500 14px -apple-system,system-ui}
+      @keyframes hmsheen{0%,40%{background-position:150% 0,0 0}80%,100%{background-position:-60% 0,0 0}}`,
+  },
+};
+
+// The whole word "Hot Mic" as ONE mark: the icon's own H, then "ot Mic" in a script picked to match its
+// strokes, all in the wordmark's bright chrome. Per font: where "ot Mic" sits against the H (x, baseline, size).
+const FONTS = {
+  greatvibes: { family: 'Great Vibes', x: 100, y: 88, size: 92 },
+  pinyon: { family: 'Pinyon Script', x: 102, y: 86, size: 76 },
+  alex: { family: 'Alex Brush', x: 98, y: 88, size: 86 },
+  allura: { family: 'Allura', x: 100, y: 88, size: 94 },
+  yellowtail: { family: 'Yellowtail', x: 102, y: 86, size: 76 },
+};
+const CURL = 'M3 21c6-2 9-6 8-11-1 3-3 4-4 4 3-4 4-8 1-13 0 4-2 7-5 9 1-3 0-5-2-6 1 5-2 8-1 12 1 3 2 4 3 5z';
+function wordmarkSVG(key, h) {
+  const f = FONTS[key], k = 100 / 1032, edge = picks.edge === 'dark' ? 'stroke="#241f3a" stroke-width="2.4" paint-order="stroke" stroke-linejoin="round"' : '';
+  const W = f.x + f.size * 2.75 + (picks.curl === 'on' ? 18 : 0);
+  return `<svg class="hm-wordmark" viewBox="0 -8 ${W} 116" height="${h}" style="overflow:visible;display:block">
+    <defs><linearGradient id="hmChrome" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".4" stop-color="#dfe5ff"/><stop offset=".56" stop-color="#8f9cff"/><stop offset=".76" stop-color="#eef0ff"/><stop offset="1" stop-color="#b4c4ff"/></linearGradient></defs>
+    <g fill="url(#hmChrome)" ${edge}>
+      <g transform="scale(${k})"><g transform="${ICON_H.transform}"><path d="${ICON_H.d}" ${edge ? 'stroke-width="240"' : ''}/></g></g>
+      <text x="${f.x}" y="${f.y}" font-family="${f.family}" font-size="${f.size}">ot Mic</text>
+      ${picks.curl === 'on' ? `<path transform="translate(${W - 20} 4) scale(1.1)" d="${CURL}"/>` : ''}
+    </g></svg>`;
+}
+// Nate's picked wordmarks (FLORA, cut by scripts/wordmark-build.py): the line one in the title bar, the stacked one on square screens.
+const IMG = (n, h) => `<img src="brand/wordmark-${n}.png" srcset="brand/wordmark-${n}@2x.png 2x, brand/wordmark-${n}@3x.png 3x" alt="Hot Mic" style="height:${h}px;width:auto;display:block">`;
+const app = document.getElementById('app');
+function apply() {
+  const w = app.contentWindow, d = app.contentDocument; if (!w || !w.HM || !d) return;
+  if (!d.getElementById('brandfonts')) { const l = d.createElement('link'); l.id = 'brandfonts'; l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=Yellowtail&family=Great+Vibes&family=Alex+Brush&family=Pinyon+Script&family=Allura&display=swap'; d.head.appendChild(l); l.onload = () => apply(); }
+  let st = d.getElementById('brand'); if (!st) { st = d.createElement('style'); st.id = 'brand'; d.head.appendChild(st); }
+  d.documentElement.classList.add('in-app');   // the app's own frame: no lab panel
+  st.textContent = Object.keys(CSS).map((k) => CSS[k][picks[k]] || '').join('\n')
+    + '\n' + trimVars(picks.ti) + '\n' + Object.entries(TRIM).filter(([k]) => picks[k] === 'on').map(([, t]) => t.css).join('\n');
+  const word = d.querySelector('.hm-word');
+  if (word) {
+    if (!word.dataset.orig) word.dataset.orig = word.innerHTML;
+    if (picks.word === 'current') { word.innerHTML = word.dataset.orig; word.classList.remove('svgmark'); }
+    else { word.innerHTML = picks.word === 'line' ? IMG('line', 30) : wordmarkSVG(picks.word, 30); word.classList.add('svgmark'); }
+  }
+  // Session rows sit inside the sidebar with even side margins, clear of the divider; the selected row's accent bar is drawn inside it.
+  st.textContent += `.side .side-list{width:auto!important;margin:0!important;padding:0 12px!important;box-sizing:border-box}
+    .side .search{width:auto!important;margin-left:20px!important;margin-right:21px!important;box-sizing:border-box}
+    .side .s-main span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .side .s-row{width:100%!important;margin-left:0!important;margin-right:0!important;box-sizing:border-box}
+    .side .s-row.on::before{left:5px!important;top:12px!important;bottom:12px!important;width:2px!important;border-radius:2px!important;transform:none!important}`;
+  st.textContent += '.hm-word.svgmark{background:none!important;filter:drop-shadow(0 1px 0 rgba(0,0,0,.5))!important;padding:0!important;font-size:0!important}';
+  let hero = d.getElementById('hm-hero');
+  if (picks.hero === 'sheen' && !hero) { hero = d.createElement('div'); hero.id = 'hm-hero'; hero.innerHTML = `<div class="card"><img src="hm-icon.png" alt="">${picks.word === 'current' ? '<div class="w">Hot Mic</div>' : `<div class="sheen">${picks.word === 'line' ? IMG('stacked', 190) : wordmarkSVG(picks.word, 78)}</div>`}<p>Sing. It keeps every line.</p></div>`; d.body.appendChild(hero); }
+  if (hero) hero.remove(), hero = null;
+  if (picks.hero === 'sheen') { hero = d.createElement('div'); hero.id = 'hm-hero'; hero.innerHTML = `<div class="card"><img src="hm-icon.png" alt="">${picks.word === 'current' ? '<div class="w">Hot Mic</div>' : `<div class="sheen">${picks.word === 'line' ? IMG('stacked', 190) : wordmarkSVG(picks.word, 78)}</div>`}<p>Sing. It keeps every line.</p></div>`; d.body.appendChild(hero); }
+  const HM = w.HM, S = HM.S;
+  if (S.growing && picks.state !== 'rec') { S.growing = false; S.playing = false; }
+  if (picks.state === 'empty') { HM.newSession(); HM.set({ mode: 'solo' }); }
+  else if (picks.state === 'lyrics') { if (!HM.sections.length || S.fresh) HM.set({ fresh: false }); HM.set({ mode: 'solo', elapsed: HM.sessionLen }); }
+  else if (picks.state === 'rec') { HM.set({ mode: 'solo', elapsed: Math.min(HM.sessionLen, 600) }); S.growing = true; HM.render(); }
+  else if (picks.state === 'beat') HM.set({ mode: 'beat', t: 0 });
+  if (picks.state === 'lyrics' && w.HM.sheet) { S.breaks = { solo: { 'v1:0': 'Verse', 'hook:0': 'Hook' }, beat: null }; HM.renderNotes(); }
+}
+let lockedOpen = false;
+function draw() {
+  const root = document.getElementById('groups'); root.innerHTML = '';
+  const open = document.createElement('div'); open.className = 'deciding';
+  open.innerHTML = '<b>Still deciding</b><div class="opts"></div>';
+  OPEN.forEach((k) => {
+    const b = document.createElement('button'); b.textContent = TRIM[k].label + (picks[k] === 'on' ? ': on' : ': off'); b.className = picks[k] === 'on' ? 'on' : '';
+    b.onclick = () => { picks[k] = picks[k] === 'on' ? 'off' : 'on'; picks.amount = 'custom'; save(); };
+    open.querySelector('.opts').appendChild(b);
+  });
+  root.appendChild(open);
+  const locked = document.createElement('details'); locked.className = 'locked'; locked.open = lockedOpen;
+  locked.ontoggle = () => { lockedOpen = locked.open; };
+  locked.innerHTML = '<summary>Locked</summary>';
+  root.appendChild(locked);
+  const box = locked;
+  Object.entries(GROUPS).forEach(([k, g]) => {
+    const el = document.createElement('div'); el.className = 'grp';
+    const host = k === 'state' ? root : box; el.innerHTML = `<b>${g.label}</b><div class="opts"></div>`;
+    Object.entries(g.opts).forEach(([v, label]) => {
+      const b = document.createElement('button'); b.textContent = label; b.className = picks[k] === v ? 'on' : '';
+      b.onclick = () => {
+        picks[k] = v;
+        if (k === 'amount') Object.entries(TRIM).forEach(([tk, t]) => { picks[tk] = presetHas(v, tk) ? 'on' : 'off'; });
+        save();
+      };
+      el.querySelector('.opts').appendChild(b);
+    });
+    if (k === 'state') root.insertBefore(el, open); else box.appendChild(el);
+    if (k === 'amount') box.appendChild(trimPanel());
+  });
+}
+function save() { location.hash = Object.entries(picks).map(([a, c]) => `${a}=${c}`).join('&'); draw(); apply(); }
+function amountLabel() {
+  const on = Object.keys(TRIM).filter((k) => picks[k] === 'on');
+  const hit = Object.keys(AMOUNT_ON).find((a) => Object.entries(TRIM).every(([k, t]) => (picks[k] === 'on') === presetHas(a, k)));
+  return hit ? GROUPS.amount.opts[hit] : `Custom (${on.length} of ${Object.keys(TRIM).length})`;
+}
+function trimPanel() {
+  const el = document.createElement('div'); el.className = 'grp';
+  el.innerHTML = `<b>Trim spots</b><div class="opts"></div><b style="margin-top:10px">Trim intensity <span id="tiv">${picks.ti}</span></b><input type="range" min="0" max="100" value="${picks.ti}" style="width:100%">`;
+  Object.entries(TRIM).forEach(([k, t]) => {
+    const b = document.createElement('button'); b.textContent = t.label; b.className = picks[k] === 'on' ? 'on' : '';
+    b.onclick = () => { picks[k] = picks[k] === 'on' ? 'off' : 'on'; const hit = Object.keys(AMOUNT_ON).find((a) => Object.entries(TRIM).every(([tk, tt]) => (picks[tk] === 'on') === presetHas(a, tk))); picks.amount = hit || 'custom'; save(); };
+    el.querySelector('.opts').appendChild(b);
+  });
+  const r = el.querySelector('input');
+  r.oninput = () => { picks.ti = r.value; el.querySelector('#tiv').textContent = r.value; history.replaceState(null, '', '#' + Object.entries(picks).map(([a, c]) => `${a}=${c}`).join('&')); apply(); };
+  return el;
+}
+document.getElementById('copy').onclick = () => {
+  const text = 'Hot Mic chrome picks:\n' + Object.entries(GROUPS).filter(([k]) => k !== 'state').map(([k, g]) => `- ${g.label}: ${k === 'amount' ? amountLabel() : g.opts[picks[k]]}`).join('\n')
+    + '\n- Trim spots on: ' + (Object.entries(TRIM).filter(([k]) => picks[k] === 'on').map(([, t]) => t.label).join(', ') || 'none')
+    + `\n- Trim intensity: ${picks.ti}/100\n- Link: ${location.href}`;
+  navigator.clipboard.writeText(text).then(() => { const c = document.getElementById('copy'); c.textContent = 'Copied'; setTimeout(() => { c.textContent = 'Copy picks'; }, 1200); });
+};
+// Restore: the pasted link's hash replaces every pick exactly (anything it leaves out falls back to the defaults).
+document.getElementById('restoreGo').onclick = () => {
+  const v = document.getElementById('restore').value.trim(), i = v.indexOf('#'); if (i < 0) return;
+  const got = Object.fromEntries(v.slice(i + 1).split('&').filter(Boolean).map((kv) => kv.split('=')));
+  Object.keys(picks).forEach((k) => delete picks[k]); Object.assign(picks, DEF, got); save();
+  document.getElementById('restore').value = '';
+};
+app.addEventListener('load', () => setTimeout(apply, 300));
+draw();
+</script>
+</body></html>

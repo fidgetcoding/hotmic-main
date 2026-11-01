@@ -1,0 +1,129 @@
+/* Hot Mic design lab: transport strip, dialed in (2026-10-12).
+   One key height, one radius, one bevel; play is the only bigger control; three groups:
+   [stop rec play] · [loop return snap] · [sound] · [clock]. */
+:root:is([data-look="tube"], [data-look="tube-light"]) .transport {
+  --k: 32px; --r: 8px;
+  --key-bg: linear-gradient(180deg, #3a332b 0%, #26211b 100%);
+  --key-edge: 0 0 0 1px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 2px 0 rgba(0, 0, 0, 0.45);
+  --key-ink: #d9cfbf;
+  display: flex; align-items: center; gap: 6px;
+}
+:root[data-look="tube-light"] .transport {
+  --key-bg: linear-gradient(180deg, #fbf4e4 0%, #e9dcc0 100%);
+  --key-edge: 0 0 0 1px rgba(90, 60, 20, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 2px 0 rgba(90, 60, 20, 0.28);
+  --key-ink: #3a2c1c;
+}
+/* every key */
+:root:is([data-look="tube"], [data-look="tube-light"]) .transport :is(.tbtn, .rec-btn) {
+  height: var(--k) !important; min-width: var(--k) !important; width: auto !important; padding: 0 !important;
+  border-radius: var(--r) !important; border: 0 !important; margin: 0 !important;
+  background: var(--key-bg) !important; box-shadow: var(--key-edge) !important; color: var(--key-ink) !important;
+  display: inline-grid; place-items: center; transition: transform 0.06s, box-shadow 0.12s, background 0.12s;
+  animation: none !important;
+}
+:root:is([data-look="tube"], [data-look="tube-light"]) .transport :is(.tbtn, .rec-btn):active { transform: translateY(1px); box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55), inset 0 1px 3px rgba(0, 0, 0, 0.45) !important; }
+:root:is([data-look="tube"], [data-look="tube-light"]) .transport .tbtn .i { width: 15px; height: 15px; }
+/* text keys */
+:root:is([data-look="tube"], [data-look="tube-light"]) .transport .tbtn.snap { padding: 0 11px !important; font: 700 10px/1 var(--ui) !important; letter-spacing: 0.12em; }
+/* lit state: a lamp, not a fill */
+:root:is([data-look="tube"], [data-look="tube-light"]) .transport :is(.tbtn.on, .tbtn.snap.on) {
+  background: var(--key-bg) !important; color: var(--accent) !important;
+  box-shadow: var(--key-edge), inset 0 -2px 0 var(--accent), 0 0 12px -3px var(--glow) !important;
+  text-shadow: 0 0 6px var(--glow);
+}
+/* stop: a plain square on a key */
+:root:is([data-look="tube"], [data-look="tube-light"]) .transport .tbtn.stop .sq { width: 10px; height: 10px; border-radius: 2px; background: currentColor; }
+/* record: same key, red dot; lit when recording */
+:root:is([data-look="tube"], [data-look="tube-light"]) .transport .rec-btn span { width: 12px; height: 12px; border-radius: 50%; background: #e2412f; box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.25); }
+:root:is([data-look="tube"], [data-look="tube-light"]) .transport .rec-btn.on { box-shadow: var(--key-edge), inset 0 -2px 0 #ff4a3a, 0 0 14px -2px rgba(255, 74, 58, 0.7) !important; }
+:root:is([data-look="tube"], [data-look="tube-light"]) .transport .rec-btn.on span { width: 10px; height: 10px; border-radius: 2px; background: #ff4a3a; box-shadow: 0 0 8px #ff4a3a; animation: recblink 1.2s steps(2, start) infinite; }
+@keyframes recblink { 50% { opacity: 0.45; } }
+/* play: the one bigger, round control */
+:root:is([data-look="tube"], [data-look="tube-light"]) .transport .tbtn.play {
+  --p: 40px; height: var(--p) !important; min-width: var(--p) !important; width: var(--p) !important; border-radius: 50% !important;
+  background: var(--accent-grad) !important; color: #120d1e !important;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 2px 0 rgba(0, 0, 0, 0.45), 0 0 16px -4px var(--glow) !important;
+}
+:root:is([data-look="tube"], [data-look="tube-light"]) .transport .tbtn.play .i { width: 16px; height: 16px; }
+/* group spacing */
+:root:is([data-look="tube"], [data-look="tube-light"]) .transport .tbtn.play { margin: 0 6px 0 2px !important; }
+:root:is([data-look="tube"], [data-look="tube-light"]) .transport [data-act="sound"] { margin-left: 6px !important; }
+/* clock: a recessed window the same height as the keys */
+:root:is([data-look="tube"], [data-look="tube-light"]) .transport .clock {
+  height: var(--k); display: inline-flex; align-items: center; margin-left: 6px; padding: 0 12px; min-width: 0;
+  border-radius: var(--r); border: 0 !important; outline: 0 !important;
+  background: #0b0906 !important; color: var(--acc, var(--accent)) !important; font-size: 14px; letter-spacing: 0.06em;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  text-shadow: 0 0 8px var(--glow);
+}
+
+/* ---------- fluid window: fills the browser at any size, full screen included ---------- */
+.desk { padding: clamp(10px, 1.4vw, 22px); gap: clamp(10px, 1.4vw, 22px); }
+.win { width: calc(100vw - var(--labw) - 2 * clamp(10px, 1.4vw, 22px) - clamp(10px, 1.4vw, 22px)) !important; max-width: none !important; height: calc(100vh - 2 * clamp(10px, 1.4vw, 22px)) !important; }
+body.lab-closed .win { width: calc(100vw - 2 * clamp(10px, 1.4vw, 22px)) !important; }
+.lab { max-height: calc(100vh - 2 * clamp(10px, 1.4vw, 22px)); top: clamp(10px, 1.4vw, 22px); }
+/* the lyric sheet grows with the window, but lines stay readable */
+.sec, .np-bar { max-width: min(1180px, 100%) !important; }
+.notes { padding-left: clamp(18px, 3vw, 56px) !important; padding-right: clamp(18px, 3vw, 56px) !important; }
+@media (min-width: 1900px) { .notes { --np-size: 25px; } }
+/* sidebar scales a little on big screens */
+@media (min-width: 1700px) { .side-open .side, .side > * { width: 280px; } }
+
+/* ---------- narrower windows: keep the top bars on one clean line ---------- */
+.transport .clock { white-space: nowrap; flex: none; }
+.strip-head { flex-wrap: nowrap; }
+.strip-left { min-width: 0; flex: 1 1 auto; overflow: hidden; }
+.strip-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.transport { flex: none; }
+.titlebar .mode-seg { flex: none; }
+@media (max-width: 1500px) {
+  .mic select { max-width: 92px !important; }
+  .mic { padding: 4px 8px !important; }
+  .strip-title .dim { display: none; }
+}
+@media (max-width: 1300px) {
+  .titlebar .mode-seg { position: static !important; transform: none !important; margin-left: auto; }
+  .tb-right { margin-left: 10px !important; }
+  .app-name::before { display: none !important; }
+  .mic .meter { display: none; }
+  .transport .tbtn.snap { padding: 0 8px !important; letter-spacing: 0.06em; }
+  .transport .clock { padding: 0 8px; font-size: 12px; }
+}
+
+/* ---------- no see-through sticky bars over the lyrics (they overlapped lines, shapes and chevrons) ---------- */
+.np-bar, .sec-head { position: static !important; top: auto !important; background: transparent !important; box-shadow: none !important; }
+.np-bar { margin: 0 auto 10px !important; padding: 0 0 10px !important; }
+.row { position: relative; }
+.row > .stepper { position: relative; z-index: 1; flex: none; }
+.row-main:has(> .music-shapes), .row-main:has(> .music-keys) { row-gap: 8px; padding: 4px 0; }
+
+/* breathing room around the transport row (it sat tight on the screen and the corner screw) */
+:root:is([data-look="tube"], [data-look="tube-light"]) .strip { padding-top: 16px !important; padding-right: 26px !important; padding-left: 26px !important; }
+:root:is([data-look="tube"], [data-look="tube-light"]) .strip-head { margin-bottom: 16px !important; min-height: 44px; }
+
+/* ---------- logo: chrome script wordmark + the H tile (fire note retired 2026-10-12) ---------- */
+:root:is([data-look="tube"], [data-look="tube-light"]) .app-name::after { content: none !important; }
+:root:is([data-look="tube"], [data-look="tube-light"]) .app-name::before { content: none !important; }
+.app-name { gap: 9px !important; }
+.hm-tile { position: relative; width: 28px; height: 28px; flex: none; border-radius: 7px; overflow: hidden;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.05) 0 2px, transparent 2px 4px), radial-gradient(120% 100% at 50% 0%, #2a2533, #120f17);
+  box-shadow: inset 0 0 0 1px #c9b98a, inset 0 0 0 2px rgba(0,0,0,.55), 0 2px 4px rgba(0,0,0,.45); }
+.hm-tile svg { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 1px 0 rgba(0,0,0,.6)); }
+.hm-tile i { position: absolute; right: 4.5px; bottom: 4.5px; width: 3px; height: 3px; border-radius: 50%; background: #8fe2ff; box-shadow: 0 0 4px #8fe2ff; }
+.hm-word { font: 400 23px/1 Yellowtail, cursive; padding: 0 2px 2px; background: linear-gradient(180deg, #ffffff 0%, #dfe5ff 40%, #8f9cff 56%, #eef0ff 76%, #b4c4ff 100%); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 1px 0 rgba(0,0,0,.55)); }
+:root[data-look="tube-light"] .hm-word { background: linear-gradient(180deg, #5a4fb8, #2d2a52); -webkit-background-clip: text; background-clip: text; filter: drop-shadow(0 1px 0 rgba(255,255,255,.7)); }
+/* title bar: wordmark only (Nate 2026-10-12); the H tile is for the app icon + menu bar */
+.app-name .hm-tile { display: none !important; }
+
+/* ---------- inside the app: full-bleed window, no lab panel, the real traffic lights ---------- */
+html.in-app, html.in-app body { --labw: 0px !important; }
+html.in-app body, html.in-app .desk { padding: 0 !important; margin: 0; gap: 0 !important; min-height: 100vh; }
+html.in-app .win { width: 100vw !important; height: 100vh !important; min-height: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+html.in-app #lab, html.in-app .lab-fab { display: none !important; }
+html.in-app .lights { visibility: hidden; }           /* the window's own traffic lights sit here */
+html.in-app .titlebar { -webkit-user-select: none; user-select: none; }
+/* in the app the real traffic lights sit where the titlebar's left screw is: drop that screw (Vintage) */
+html.in-app[data-style="vintage"] .titlebar { background-position: -60px -60px, right 8px top 7px, 0 0 !important; }
+
+/* title bar: the app icon (flame-frame H, locked by Nate 2026-10-14) before the wordmark */
+.app-name .hm-tile-img { width: 26px; height: 26px; flex: none; filter: drop-shadow(0 1px 1px rgba(0,0,0,.45)); }

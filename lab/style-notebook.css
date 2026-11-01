@@ -1,0 +1,150 @@
+/* Hot Mic · Notebook: a songwriter's notebook in Lilac ice. Paper, ruled lines under every lyric,
+   a margin rule, a soft gutter shadow at the spine, the waveform taped in like a clipping, pencil-and-ink
+   details. Light = cream cold-press paper, dark = deep aubergine ink paper (real CC0 paper scans, baked:
+   textures/paper-cream.jpg, paper-ink.jpg). Lyrics stay Space Grotesk. */
+[data-look="notebook"] {
+  /* dark = a night notebook: deep aubergine-black paper, lilac ink, soft rules (no grey, no glare) */
+  --desk: #0c0b10; --desk-2: #17141f; --bg: #16141c; --side: #121017; --surface: #1e1b26; --np-bg: #16141c;
+  --raise: #221f2b; --raise-2: #1b1923; --display: #110f16; --hl: rgba(220, 210, 255, 0.04);
+  --ink: #e9e5f2; --muted: #a6a0b6; --faint: #6c6680; --line: rgba(200, 190, 240, 0.07); --line-2: rgba(200, 190, 240, 0.13); --grid: #262232;
+  --wave: #3a3550; --playhead: #eef0ff; --rec: #ff6b7a; --fire: #ff7a86; --fire-soft: rgba(255, 107, 122, 0.12);
+  --kw: #e9e5f2; --kb: #121017; --radius: 6px; --radius-sm: 4px; color-scheme: dark;
+  --paper-rule: color-mix(in srgb, var(--acc, #b4c4ff) 9%, transparent);
+  --paper-margin: rgba(255, 120, 150, 0.18); --tape: color-mix(in srgb, var(--acc, #b4c4ff) 26%, transparent); --ring: #3d3948;
+  --paper: url(textures/paper-ink.jpg) 0 0 / 512px 512px;
+}
+[data-look="notebook-light"] {
+  --desk: #d9d2c3; --desk-2: #ece6d8; --bg: #fbf8f1; --side: #f3eee2; --surface: #fffdf8; --np-bg: #fbf8f1;
+  --raise: #fffdf8; --raise-2: #f4efe3; --display: #f5f0e4; --hl: rgba(255, 255, 255, 0.8);
+  --ink: #23212b; --muted: #5f5a52; --faint: #9a9488; --line: rgba(60, 50, 30, 0.1); --line-2: rgba(60, 50, 30, 0.18); --grid: #e6dfcf;
+  --wave: #cfc8b8; --playhead: #3b4fb0; --rec: #e04848; --fire: #d9473c; --fire-soft: rgba(224, 72, 72, 0.1);
+  --kw: #fffdf8; --kb: #23212b; --radius: 6px; --radius-sm: 4px; color-scheme: light;
+  --paper-rule: color-mix(in srgb, var(--acc-d, #3b4fb0) 18%, transparent);
+  --paper-margin: rgba(214, 70, 80, 0.28); --tape: color-mix(in srgb, var(--acc, #b4c4ff) 55%, transparent); --ring: #9c968a;
+  --paper: url(textures/paper-cream.jpg) 0 0 / 512px 512px;
+}
+:root:is([data-look="notebook"], [data-look="notebook-light"]) {
+  --hand: "Caveat", "Bradley Hand", cursive;
+  --serif: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --paper-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .45 0 0 0 0 .35 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  body { background: radial-gradient(110% 80% at 50% -10%, var(--desk-2), var(--desk) 70%) fixed, var(--desk); }
+  .win { background: var(--paper), var(--bg); border-radius: 10px; box-shadow: 0 0 0 1px var(--line-2), 0 2px 0 var(--line), 0 4px 0 -1px var(--bg), 0 5px 0 -1px var(--line-2), 0 40px 90px -30px rgba(0, 0, 0, 0.55); }
+
+  /* title bar: a notebook cover band, serif small caps for the controls */
+  .titlebar { height: 54px; background: linear-gradient(color-mix(in srgb, var(--side) 55%, transparent), color-mix(in srgb, var(--side) 55%, transparent)), var(--paper); border-bottom: 1px solid var(--line-2); box-shadow: none; }
+  .titlebar::after { content: ""; position: absolute; left: 0; right: 0; bottom: -4px; height: 3px; background: repeating-linear-gradient(90deg, var(--line-2) 0 6px, transparent 6px 10px); opacity: 0.6; }
+  .hm-word { font-size: 22px; }
+  .mode-seg { background: var(--side); }
+  .theme-toggle, .style-seg, .mic { background: transparent; }
+  .mode-seg, .theme-toggle, .style-seg, .mic { border: 1px solid var(--line-2); box-shadow: none; border-radius: 999px; }
+  .mode-seg button { font: 600 12.5px var(--serif); font-variant: small-caps; letter-spacing: 0.03em; text-transform: lowercase; border-radius: 999px; padding: 5px 14px; }
+  .mode-seg button.on { color: var(--ink); background: var(--tape); box-shadow: none; }
+  .mode-seg button.on .i { color: var(--ink); }
+  .style-seg button { font-family: var(--serif); }
+  .rec-pill { border-radius: 999px; font: 600 10.5px var(--ui); letter-spacing: 0.1em; }
+  .rec-pill.off { background: transparent; color: var(--faint); border: 1px dashed var(--line-2); }
+  .theme-toggle .tt-track { background: var(--grid); box-shadow: none; }
+  .theme-toggle .tt-knob { background: var(--raise); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); }
+  .theme-toggle .moon { color: var(--accent); filter: none; }
+
+  /* sidebar = the left page */
+  .side { background: linear-gradient(color-mix(in srgb, var(--side) 45%, transparent), color-mix(in srgb, var(--side) 45%, transparent)), var(--paper); }
+  .side-open .side { border-right: 1px solid var(--line-2); }
+  /* the spine: a soft gutter where the two pages meet (no rings) */
+  .side-open .main::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 26px; z-index: 6; pointer-events: none;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0.05) 40%, transparent); }
+  .side-open .side { box-shadow: inset -14px 0 18px -14px rgba(0, 0, 0, 0.22); }
+  .side-head b { font: 600 20px/1 var(--hand); letter-spacing: 0; text-transform: none; color: var(--ink); }
+  .side-head .icon-btn { background: transparent; box-shadow: 0 0 0 1px var(--line-2); border-radius: 999px; }
+  .search { background: transparent; border: 0; border-bottom: 1px solid var(--line-2); border-radius: 0; box-shadow: none; }
+  .s-row { border-radius: 0; border-bottom: 1px solid var(--paper-rule); }
+  .s-row b { font-family: var(--serif); font-weight: 600; }
+  .s-row.on { background: color-mix(in srgb, var(--acc, #b4c4ff) 16%, transparent); box-shadow: none; color: var(--ink); }
+  .s-row.on::before { left: -8px; width: 4px; background: var(--acc, #b4c4ff); box-shadow: none; border-radius: 0; }
+
+  /* the strip: the waveform taped onto the page */
+  .strip { background: transparent; padding: 18px 26px 22px; border-bottom: 1px solid var(--line-2); }
+  .strip-title { font-family: var(--serif); }
+  .strip-canvas { border-radius: 3px; background: var(--paper), var(--display); box-shadow: 0 0 0 1px var(--line-2), 0 10px 18px -12px rgba(0, 0, 0, 0.45); transform: rotate(-0.25deg); }
+  .strip-canvas::before, .strip-canvas::after { content: ""; position: absolute; top: -9px; width: 84px; height: 20px; z-index: 2; pointer-events: none;
+    background: repeating-linear-gradient(90deg, transparent 0 6px, rgba(255, 255, 255, 0.12) 6px 7px), var(--tape); mix-blend-mode: normal; opacity: 0.9;
+    clip-path: polygon(2% 0, 98% 6%, 100% 50%, 97% 100%, 3% 94%, 0 50%); }
+  .strip-canvas::before { left: 26px; transform: rotate(-4deg); }
+  .strip-canvas::after { right: 26px; transform: rotate(3deg); }
+  .strip { --surface: var(--display); }
+
+  /* transport: ink-drawn round keys */
+  .transport { gap: 6px; }
+  .transport :is(.tbtn, .rec-btn) { width: 34px; height: 34px; border-radius: 999px; border: 1.5px solid color-mix(in srgb, var(--ink) 55%, transparent); color: var(--ink); background: transparent; box-shadow: none; display: inline-grid; place-items: center; animation: none; margin: 0; transition: background 0.15s, transform 0.08s; }
+  .transport :is(.tbtn, .rec-btn):hover { background: color-mix(in srgb, var(--acc, #b4c4ff) 14%, transparent); }
+  .transport :is(.tbtn, .rec-btn):active { transform: scale(0.95); }
+  .transport .tbtn.snap { width: auto; padding: 0 12px; font: 600 13px var(--serif); font-variant: small-caps; letter-spacing: 0.04em; text-transform: lowercase; }
+  .transport :is(.tbtn.on, .tbtn.snap.on) { background: var(--tape); border-color: color-mix(in srgb, var(--ink) 70%, transparent); color: var(--ink); box-shadow: none; }
+  .transport .tbtn.stop .sq { width: 10px; height: 10px; border-radius: 1.5px; background: currentColor; }
+  .transport .rec-btn span { width: 12px; height: 12px; border-radius: 50%; background: var(--rec); box-shadow: none; }
+  .transport .rec-btn.on { border-color: var(--rec); background: var(--fire-soft); }
+  .transport .rec-btn.on span { animation: recblink 1.2s steps(2, start) infinite; }
+  .transport .tbtn.play { width: 42px; height: 42px; margin: 0 4px; border: 0; color: var(--bg); background: var(--ink); }
+  .transport .tbtn.play .i { fill: currentColor; }
+  .transport .clock { height: 34px; display: inline-flex; align-items: center; padding: 0 12px; margin-left: 4px; border-radius: 999px; border: 1px solid var(--line-2); background: transparent; box-shadow: none; color: var(--ink); font: 500 13px var(--mono); text-shadow: none; }
+
+  /* key + shapes = sticky notes */
+  .tune { background: transparent; border-bottom: 1px solid var(--line-2); padding: 12px 26px; }
+  .tune-key, .shape-toggle { border: 0; border-radius: 2px; color: #2a2620; background: linear-gradient(180deg, color-mix(in srgb, var(--acc, #b4c4ff) 30%, #fff6c8), color-mix(in srgb, var(--acc, #b4c4ff) 20%, #fff2b8)); box-shadow: 0 1px 1px rgba(0, 0, 0, 0.12), 0 8px 12px -8px rgba(0, 0, 0, 0.4); }
+  .tune-key { transform: rotate(-0.8deg); }
+  .shape-toggle { transform: rotate(0.6deg); }
+  .tune-key b { font: 700 22px/1 var(--hand); color: #2a2620; text-shadow: none; }
+  .tune-key span { color: rgba(42, 38, 32, 0.6); font: 500 10px var(--ui); letter-spacing: 0.08em; }
+  .shape-toggle span { font: 700 17px/1 var(--hand); letter-spacing: 0; text-transform: none; color: rgba(42, 38, 32, 0.75); }
+  .shape-toggle button { font: 600 13px var(--serif); font-variant: small-caps; text-transform: lowercase; letter-spacing: 0.04em; color: rgba(42, 38, 32, 0.6); border-radius: 2px; }
+  .shape-toggle button.on { color: #2a2620; background: transparent; box-shadow: none; text-decoration: underline 2px; text-decoration-color: color-mix(in srgb, var(--acc-d, #3b4fb0) 80%, transparent); text-underline-offset: 4px; }
+
+  /* the lyric page: margin rule + a ruled line under every lyric */
+  .notes { background: var(--paper), var(--np-bg); }
+  .sec, .np-bar { position: relative; }
+  .sec::before { content: ""; position: absolute; left: -30px; top: 0; bottom: -30px; width: 1.5px; background: var(--paper-margin); pointer-events: none; }
+  .np-bar, .sec-head { background: color-mix(in srgb, var(--np-bg) 92%, transparent); }
+  .np-bar b, .np-bar strong { font-family: var(--serif); }
+  .sec-head { border-bottom: 0; }
+  .sec-title h3 { font: 700 26px/1 var(--hand); letter-spacing: 0; text-transform: none; color: var(--ink); }
+  .row { border-radius: 0; border-bottom: 1px solid var(--paper-rule); padding-bottom: 7px; }
+  .row:hover { background: color-mix(in srgb, var(--acc, #b4c4ff) 7%, transparent); }
+  .lyric .ch { font: 700 17px/1 var(--hand); color: var(--accent); text-shadow: none; letter-spacing: 0.01em; }
+  .lyric .w.now { color: var(--ink); text-shadow: none; background: linear-gradient(transparent 55%, color-mix(in srgb, var(--acc, #b4c4ff) 45%, transparent) 55% 90%, transparent 90%); }
+  .chord-cell { background: transparent; border: 1px solid var(--line-2); border-radius: 3px; box-shadow: none; }
+  .chord-cell > span { font: 700 15px/1 var(--hand); }
+  .sv-dot { fill: var(--ink); }
+  .notes .stepper, .seg { background: transparent; box-shadow: 0 0 0 1px var(--line-2); border: 0; border-radius: 999px; }
+  .np-btn { border-radius: 999px; background: transparent; border: 1px solid var(--line-2); box-shadow: none; color: var(--ink); }
+  .np-btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .tag, .badge { border-radius: 2px; font: 700 14px/1 var(--hand); letter-spacing: 0.01em; text-transform: none; }
+  .menu, .pop { border-radius: 6px; background: var(--paper), var(--surface); border: 1px solid var(--line-2); }
+  .live-line { font-family: var(--hand); font-size: 26px; color: color-mix(in srgb, var(--ink) 60%, transparent); }
+}
+:root[data-look="notebook"] {
+  /* sticky notes become dark lilac paper with lilac ink, not glaring cream */
+  .tune-key, .shape-toggle { filter: none; color: var(--ink); background: linear-gradient(180deg, color-mix(in srgb, var(--acc, #b4c4ff) 16%, #1f1c29), color-mix(in srgb, var(--acc, #b4c4ff) 10%, #1a1723)); box-shadow: 0 0 0 1px var(--line-2), 0 8px 14px -8px rgba(0, 0, 0, 0.7); }
+  .tune-key b { color: var(--acc-2, #eef0ff); }
+  .tune-key span, .shape-toggle span { color: var(--muted); }
+  .shape-toggle button { color: var(--muted); }
+  .shape-toggle button.on { color: var(--ink); text-decoration-color: var(--acc, #b4c4ff); }
+  /* the taped strip card sits a shade darker than the page, still paper */
+  .strip-canvas { background: linear-gradient(rgba(6, 4, 12, 0.35), rgba(6, 4, 12, 0.35)), var(--paper); }
+  .side-open .main::before { background: linear-gradient(90deg, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.12) 40%, transparent); }
+}
+/* title bar: keep the mic name from running into the mode switch */
+:root:is([data-look="notebook"], [data-look="notebook-light"]) .mic select { max-width: 104px; overflow: hidden; text-overflow: ellipsis; }
+
+/* waveform card, round 2 (Nate: "i dont like how this looks"): no tape, no tilt, no beige smudge.
+   A clean ink screen in both light and dark, like the other styles keep their screen the same. */
+:root:is([data-look="notebook"], [data-look="notebook-light"]) .strip-canvas {
+  transform: none !important; border-radius: 10px !important; background: #15131b !important;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 24px -16px rgba(0, 0, 0, 0.6) !important;
+  --wave: #3e3950; --faint: #8b84a3; --grid: #2a2636; --ink: #ece8f6; --surface: #15131b;
+}
+:root:is([data-look="notebook"], [data-look="notebook-light"]) .strip-canvas::before,
+:root:is([data-look="notebook"], [data-look="notebook-light"]) .strip-canvas::after { content: none !important; display: none !important; }
+/* breathing room inside the ink screen so nothing touches or clips at the edges */
+:root:is([data-look="notebook"], [data-look="notebook-light"]) .strip-canvas { padding: 10px 16px; box-sizing: border-box; }
+:root:is([data-look="notebook"], [data-look="notebook-light"]) .strip-canvas canvas { width: 100%; }

@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hot Mic Logo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Sora:wght@600;700&family=Space+Mono:wght@700&family=Mr+Dafoe&family=Bebas+Neue&family=Michroma&family=Yellowtail&family=Saira+Condensed:wght@700;800&family=Caprasimo&family=Fraunces:ital,opsz,wght@1,9..144,700&family=Rubik+Mono+One&family=Caveat+Brush&family=Geist:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --ink-ui: #ece6dc; --muted: #9b958a; --bg: #12100d; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink-ui); font: 14px/1.4 Geist, -apple-system, sans-serif; }
+  header { position: sticky; top: 0; z-index: 3; display: flex; align-items: center; gap: 16px; padding: 16px 24px; background: rgba(18, 16, 13, 0.94); backdrop-filter: blur(8px); border-bottom: 1px solid #2a251e; }
+  header b { font-size: 18px; } header span { color: var(--muted); }
+  header .grow { flex: 1; }
+  button { font: inherit; cursor: pointer; }
+  .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid #3a3329; background: #1d1a15; color: var(--ink-ui); text-decoration: none; }
+  .btn.primary { background: linear-gradient(180deg, #eef0ff, #b4c4ff); color: #141026; border: 0; font-weight: 600; }
+  h2 { margin: 30px 24px 4px; font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: #b4c4ff; }
+  h2 + p { margin: 0 24px 14px; color: var(--muted); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 600px), 1fr)); gap: 18px; padding: 0 24px 10px; }
+  .card { border: 1px solid #2a251e; border-radius: 14px; overflow: hidden; background: #17140f; }
+  .card.starred { border-color: #b4c4ff; box-shadow: 0 0 0 1px #b4c4ff, 0 0 24px -8px #b4c4ff; }
+  .plates { display: grid; grid-template-columns: 1fr 1fr; }
+  .plate { height: 170px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+  .plate.dark { background: radial-gradient(110% 130% at 50% 0%, #211c2e 0%, #0c0a09 72%); }
+  .plate.dark::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 10px; background: linear-gradient(90deg, #3b160f, #6b2a1c 40%, #3b160f); opacity: .9; }
+  .plate.dark::after { content: ""; position: absolute; inset: 0 0 0 auto; width: 10px; background: linear-gradient(90deg, #3b160f, #6b2a1c 60%, #3b160f); opacity: .9; }
+  .plate.light { background: linear-gradient(180deg, #f6eedb, #e6d7b6); }
+  .icons { display: flex; align-items: center; gap: 18px; padding: 12px 16px; border-top: 1px solid #2a251e; }
+  .app { width: 58px; height: 58px; border-radius: 14px; display: grid; place-items: center; overflow: hidden; background: radial-gradient(120% 120% at 50% 0%, #2b2442, #0f0c18); box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 6px 14px rgba(0,0,0,.5); }
+  .menubar { display: flex; align-items: center; gap: 10px; height: 26px; padding: 0 12px; border-radius: 6px; background: #e9e9e9; color: #111; font-size: 12px; }
+  .menubar.dk { background: #2a2a2c; color: #eee; }
+  .menubar .glyph { height: 16px; display: flex; align-items: center; }
+  .meta { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-top: 1px solid #2a251e; }
+  .meta .n { font: 600 11px ui-monospace, monospace; color: var(--muted); }
+  .meta b { font-size: 15px; }
+  .meta p { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; text-wrap: pretty; }
+  .meta .txt { flex: 1; min-width: 0; }
+  .star { width: 38px; height: 38px; border-radius: 10px; border: 1px solid #3a3329; background: #1d1a15; color: #9b958a; font-size: 18px; }
+  .starred .star { color: #141026; background: #b4c4ff; border-color: #b4c4ff; }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); padding: 9px 16px; border-radius: 999px; background: #eef0ff; color: #141026; font-weight: 600; }
+  @media (max-width: 660px) { .plates { grid-template-columns: 1fr; } }
+
+  /* ---------- colorway: Lilac ice, per plate ---------- */
+  .dark  { --fg: #b4c4ff; --hi: #eef0ff; --acc: #8fe2ff; --vio: #a77bff; --deep: #141127; --grad: linear-gradient(180deg, #f4f5ff 0%, #c9d3ff 55%, #9fb0ff 100%); --glow: 0 0 14px rgba(180, 196, 255, .35); --shade: rgba(0,0,0,.65); --lite: rgba(255,255,255,.18); }
+  .light { --fg: #2d2a52; --hi: #4a43a0; --acc: #1f86a8; --vio: #5b33c4; --deep: #f3ead6; --grad: linear-gradient(180deg, #4d46a6 0%, #2d2a52 100%); --glow: none; --shade: rgba(255,255,255,.75); --lite: rgba(45,42,82,.25); }
+  .app   { --fg: #c9d3ff; --hi: #eef0ff; --acc: #8fe2ff; --vio: #a77bff; --deep: #141127; --grad: linear-gradient(180deg, #f4f5ff, #9fb0ff); --glow: 0 0 10px rgba(180,196,255,.4); --shade: rgba(0,0,0,.6); --lite: rgba(255,255,255,.18); }
+  .menubar { --fg: currentColor; --hi: currentColor; --acc: currentColor; --vio: currentColor; --deep: transparent; --grad: linear-gradient(currentColor, currentColor); --glow: none; --shade: transparent; --lite: transparent; }
+  .gt { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .menubar .gt { background: none; color: currentColor; }
+
+  /* A1 faceplate */
+  .a1 { display: flex; align-items: center; gap: 10px; white-space: nowrap; font: 600 25px/1 Oswald, sans-serif; letter-spacing: .42em; text-transform: uppercase; }
+  .a1 .rule { width: 18px; height: 1px; background: var(--lite); }
+  .a1 .t { color: var(--fg); text-shadow: 0 1px 0 var(--shade), 0 -1px 0 var(--lite), var(--glow); padding-left: .42em; }
+  .a1 .led { width: 7px; height: 7px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 8px var(--acc); }
+  .i-a1 { font: 600 22px/1 Oswald; letter-spacing: .12em; color: var(--fg); text-shadow: 0 1px 0 var(--shade); display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .i-a1 i { width: 5px; height: 5px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 6px var(--acc); }
+  /* A2 lowercase ligature */
+  .a2 { display: flex; align-items: baseline; font: 700 46px/1 Sora, sans-serif; letter-spacing: -.035em; }
+  .a2 .o { display: inline-block; width: .56em; height: .56em; margin: 0 .02em; border-radius: 50%; border: .12em solid var(--fg); position: relative; transform: translateY(-.01em); }
+  .a2 .o::after { content: ""; position: absolute; inset: 22%; border-radius: 50%; background: var(--acc); box-shadow: 0 0 10px var(--acc); }
+  .a2 .i { position: relative; }
+  .a2 .i::before { content: ""; position: absolute; left: 50%; top: -.08em; width: .2em; height: .2em; margin-left: -.1em; border-radius: 50%; background: var(--acc); box-shadow: 0 0 10px var(--acc); }
+  .i-a2 { width: 28px; height: 28px; border-radius: 50%; border: 5px solid var(--fg); display: grid; place-items: center; }
+  .i-a2 i { width: 9px; height: 9px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 6px var(--acc); }
+  /* A3 mono label */
+  .a3 { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-radius: 6px; background: var(--deep); box-shadow: inset 0 2px 5px var(--shade), 0 1px 0 var(--lite); font: 700 28px/1 "Space Mono", monospace; letter-spacing: .08em; color: var(--fg); }
+  .light .a3 { background: #2d2a52; color: #eef0ff; box-shadow: inset 0 2px 5px rgba(0,0,0,.5), 0 1px 0 #fff; }
+  .a3 .dot { width: 10px; height: 10px; border-radius: 50%; background: #8fe2ff; box-shadow: 0 0 10px #8fe2ff, 0 0 2px #fff inset; }
+  .i-a3 { font: 700 15px/1 "Space Mono"; color: var(--fg); display: flex; align-items: center; gap: 4px; }
+  .i-a3 i { width: 6px; height: 6px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 6px var(--acc); }
+  /* A4 signature */
+  .a4 { position: relative; font: 400 70px/1 "Mr Dafoe", cursive; padding: 0 10px 14px; }
+  .a4 .t { filter: drop-shadow(0 2px 0 var(--shade)); }
+  .a4 svg { position: absolute; left: 6px; right: 0; bottom: 4px; width: calc(100% - 6px); height: 20px; overflow: visible; }
+  .i-a4 { font: 400 40px/1 "Mr Dafoe"; padding-top: 6px; }
+  /* B1 enamel badge */
+  .b1 { position: relative; padding: 12px 30px 11px; border-radius: 999px; background: var(--grad); box-shadow: inset 0 2px 0 rgba(255,255,255,.6), inset 0 -3px 0 rgba(0,0,0,.25), 0 0 0 3px #1a1636, 0 0 0 5px #c9b98a, 0 6px 14px rgba(0,0,0,.45); font: 400 40px/1 "Bebas Neue", sans-serif; letter-spacing: .14em; color: #1a1636; }
+  .light .b1 { background: linear-gradient(180deg, #d9dfff, #b4c4ff); }
+  .b1 span { padding-left: .14em; text-shadow: 0 1px 0 rgba(255,255,255,.55); }
+  .b1::after { content: ""; position: absolute; inset: 4px; border-radius: 999px; border: 1px solid rgba(26,22,54,.35); }
+  .i-b1 { width: 46px; height: 30px; border-radius: 999px; background: linear-gradient(180deg, #eef0ff, #9fb0ff); box-shadow: 0 0 0 2px #1a1636, 0 0 0 3px #c9b98a; display: grid; place-items: center; font: 400 17px/1 "Bebas Neue"; letter-spacing: .08em; color: #1a1636; }
+  .menubar .i-b1 { width: 28px; height: 16px; background: none; box-shadow: inset 0 0 0 1.5px currentColor; font-size: 10px; color: currentColor; }
+  /* B2 embossed plate */
+  .b2 { position: relative; padding: 18px 34px; border-radius: 6px; background: repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 1px, transparent 1px 3px), linear-gradient(180deg, #5a5f6e, #2c2f39); box-shadow: inset 0 1px 0 rgba(255,255,255,.35), inset 0 -1px 0 rgba(0,0,0,.6), 0 6px 14px rgba(0,0,0,.5); font: 400 24px/1 Michroma, sans-serif; letter-spacing: .1em; }
+  .light .b2 { background: repeating-linear-gradient(90deg, rgba(255,255,255,.25) 0 1px, transparent 1px 3px), linear-gradient(180deg, #e8eaf2, #b9bdcb); box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0,0,0,.25), 0 4px 10px rgba(60,50,30,.3); }
+  .b2 .t { color: #c9d3ff; text-shadow: 0 -1px 0 rgba(0,0,0,.7), 0 1px 0 rgba(255,255,255,.25); }
+  .light .b2 .t { color: #2d2a52; text-shadow: 0 1px 0 rgba(255,255,255,.9), 0 -1px 0 rgba(0,0,0,.25); }
+  .b2 small { display: block; margin-top: 8px; font: 600 8px/1 Geist; letter-spacing: .4em; text-transform: uppercase; color: #8fe2ff; opacity: .8; text-align: center; }
+  .light .b2 small { color: #1f86a8; }
+  .b2 .sc { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #8a8e9a 45%, #3a3d46); box-shadow: 0 1px 1px rgba(0,0,0,.5); }
+  .b2 .sc::after { content: ""; position: absolute; left: 1px; right: 1px; top: 3px; height: 1px; background: rgba(0,0,0,.55); transform: rotate(35deg); }
+  .i-b2 { width: 46px; height: 30px; border-radius: 4px; background: linear-gradient(180deg, #5a5f6e, #2c2f39); box-shadow: inset 0 1px 0 rgba(255,255,255,.35); display: grid; place-items: center; font: 400 12px/1 Michroma; color: #c9d3ff; text-shadow: 0 -1px 0 rgba(0,0,0,.7); }
+  .menubar .i-b2 { width: 28px; height: 16px; background: none; box-shadow: inset 0 0 0 1.5px currentColor; font-size: 8px; color: currentColor; text-shadow: none; }
+  /* B3 amp script strip */
+  .b3 { position: relative; padding: 6px 30px 14px; border-radius: 4px; background: repeating-linear-gradient(45deg, rgba(255,255,255,.035) 0 2px, transparent 2px 4px), #17141c; box-shadow: inset 0 0 0 2px #c9b98a, inset 0 0 0 4px #17141c, inset 0 0 0 5px rgba(201,185,138,.5), 0 6px 14px rgba(0,0,0,.5); }
+  .light .b3 { background: repeating-linear-gradient(45deg, rgba(0,0,0,.05) 0 2px, transparent 2px 4px), #2d2a52; }
+  .b3 .t { font: 400 58px/1 Yellowtail, cursive; background: linear-gradient(180deg, #ffffff 0%, #dfe5ff 40%, #8f9cff 55%, #eef0ff 75%, #b4c4ff 100%); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 2px 0 rgba(0,0,0,.6)); }
+  .b3 svg { position: absolute; left: 22px; right: 22px; bottom: 8px; width: calc(100% - 44px); height: 10px; }
+  .i-b3 { font: 400 36px/1 Yellowtail; background: linear-gradient(180deg, #fff, #8f9cff 60%, #eef0ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  /* B4 rack label */
+  .b4 { display: flex; align-items: center; gap: 14px; padding: 10px 16px; border-radius: 3px; background: linear-gradient(180deg, #2a2733, #18161e); box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 0 0 1px #000, 0 6px 14px rgba(0,0,0,.5); }
+  .light .b4 { background: linear-gradient(180deg, #ece6d6, #d2c7ab); box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(60,50,30,.35), 0 4px 10px rgba(60,50,30,.25); }
+  .b4 .hole { width: 9px; height: 14px; border-radius: 5px; background: #07060a; box-shadow: inset 0 1px 2px #000, 0 1px 0 rgba(255,255,255,.1); }
+  .light .b4 .hole { background: #6b6250; }
+  .b4 .t { font: 800 34px/1 "Saira Condensed", sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--fg); }
+  .b4 .vu { display: flex; gap: 3px; align-items: center; }
+  .b4 .vu i { width: 6px; height: 16px; border-radius: 1.5px; background: #3a3a48; }
+  .b4 .vu i.on { background: #8fe2ff; box-shadow: 0 0 6px #8fe2ff; }
+  .b4 .vu i.on.v { background: #b4c4ff; box-shadow: 0 0 6px #b4c4ff; }
+  .b4 .vu i.on.r { background: #a77bff; box-shadow: 0 0 6px #a77bff; }
+  .light .b4 .vu i { background: #b9ae92; }
+  .i-b4 { display: flex; gap: 3px; align-items: flex-end; height: 26px; }
+  .i-b4 i { width: 5px; border-radius: 1.5px; background: var(--acc); box-shadow: 0 0 5px var(--acc); }
+  .i-b4 i:nth-child(1) { height: 10px; } .i-b4 i:nth-child(2) { height: 16px; } .i-b4 i:nth-child(3) { height: 22px; background: var(--fg); } .i-b4 i:nth-child(4) { height: 26px; background: var(--vio); box-shadow: 0 0 5px var(--vio); }
+  .menubar .i-b4 { height: 14px; gap: 2px; } .menubar .i-b4 i { width: 3px; box-shadow: none; }
+  .menubar .i-b4 i:nth-child(1) { height: 5px; } .menubar .i-b4 i:nth-child(2) { height: 8px; } .menubar .i-b4 i:nth-child(3) { height: 11px; } .menubar .i-b4 i:nth-child(4) { height: 14px; }
+  /* C1 mic buddy */
+  .c1 { display: flex; align-items: center; gap: 12px; }
+  .c1 .t { font: 400 46px/1 Caprasimo, serif; letter-spacing: .01em; }
+  .c1 svg { width: 58px; height: 74px; }
+  /* C2 monogram */
+  .c2 { display: flex; align-items: center; gap: 14px; }
+  .c2 svg { width: 62px; height: 62px; }
+  .c2 .t { font: italic 700 44px/1 Fraunces, serif; letter-spacing: -.02em; }
+  /* C3 stamp */
+  .c3 { display: flex; align-items: center; gap: 14px; }
+  .c3 svg { width: 92px; height: 92px; }
+  .c3 .t { font: 400 26px/1.05 "Rubik Mono One", sans-serif; color: var(--fg); }
+  /* C4 screenprint */
+  .c4 { position: relative; white-space: nowrap; font: 400 62px/1 "Caveat Brush", cursive; transform: rotate(-4deg); }
+  .c4 .back { position: absolute; left: 4px; top: 4px; color: var(--acc); opacity: .9; }
+  .c4 .front { position: relative; color: var(--fg); }
+  .dark .c4 .front { color: #c9d3ff; }
+  .i-c4 { position: relative; font: 400 34px/1 "Caveat Brush"; transform: rotate(-6deg); }
+  .i-c4 b { font-weight: 400; position: absolute; left: 2px; top: 2px; color: var(--acc); }
+  .i-c4 span { position: relative; color: var(--fg); }
+</style>
+</head>
+<body>
+<header><b>Hot Mic · logo directions</b><span>Three directions, four distinct ideas each, all in Lilac ice. ☆ anything that's close, even if it isn't right yet.</span><div class="grow"></div><button class="btn primary" id="copy">Copy picks</button><a class="btn" href="index.html">← Back to the lab</a></header>
+<div id="root"></div>
+<script>
+let uid = 0;
+const swash = (w = 300) => `<svg viewBox="0 0 ${w} 20" preserveAspectRatio="none"><path d="M4 14 C ${w * .3} 4, ${w * .6} 20, ${w - 22} 8" fill="none" stroke="var(--acc)" stroke-width="2.5" stroke-linecap="round"/><circle cx="${w - 12}" cy="7" r="4" fill="var(--acc)"/></svg>`;
+const buddy = (big = true) => `<svg viewBox="0 0 58 74">
+  <rect x="9" y="3" width="40" height="46" rx="20" fill="var(--deep)" stroke="var(--fg)" stroke-width="3.5"/>
+  <path d="M15 14h28M13 21h32" stroke="var(--fg)" stroke-width="2" stroke-linecap="round" opacity=".45"/>
+  <circle cx="22" cy="30" r="3.2" fill="var(--fg)"/><circle cx="36" cy="30" r="3.2" fill="var(--fg)"/>
+  <path d="M23 37c3 3 9 3 12 0" fill="none" stroke="var(--fg)" stroke-width="2.6" stroke-linecap="round"/>
+  <circle cx="16" cy="36" r="2.6" fill="var(--vio)" opacity=".7"/><circle cx="42" cy="36" r="2.6" fill="var(--vio)" opacity=".7"/>
+  <path d="M29 49v10M19 66h20" stroke="var(--fg)" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="47" cy="7" r="4.5" fill="var(--acc)"/></svg>`;
+const mono = () => `<svg viewBox="0 0 62 62">
+  <path d="M10 50V12M10 31h18M28 12v38" fill="none" stroke="var(--fg)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M28 50V14l12 18 12-18v36" fill="none" stroke="var(--vio)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" opacity=".95"/>
+  <circle cx="40" cy="32" r="4" fill="var(--acc)"/></svg>`;
+const stamp = () => { const id = `arc${++uid}`; return `<svg viewBox="0 0 92 92">
+  <defs><path id="${id}" d="M46 46 m-31 0 a31 31 0 1 1 62 0 a31 31 0 1 1 -62 0"/></defs>
+  <circle cx="46" cy="46" r="43" fill="none" stroke="var(--fg)" stroke-width="3" stroke-dasharray="2 2.6"/>
+  <circle cx="46" cy="46" r="38" fill="none" stroke="var(--fg)" stroke-width="2"/>
+  <text font-family="Rubik Mono One" font-size="7.2" letter-spacing="0.9" fill="var(--fg)"><textPath href="#${id}">HOT MIC · BLUE GUM · ALWAYS ON · </textPath></text>
+  <rect x="38" y="30" width="16" height="24" rx="8" fill="var(--acc)"/><path d="M33 47a13 13 0 0 0 26 0M46 60v6" fill="none" stroke="var(--fg)" stroke-width="3" stroke-linecap="round"/></svg>`; };
+
+const D = [
+  { sec: 'A · Type only', blurb: 'No symbol to lean on. The lettering does all the work, like a hardware faceplate or a signature.', items: [
+    { id: 'faceplate', name: 'Faceplate caps', why: 'Condensed engraved capitals with wide spacing and one lit LED, like the name screened onto a preamp.',
+      mark: () => `<div class="a1"><span class="led"></span><span class="rule"></span><span class="t">Hot Mic</span><span class="rule"></span></div>`,
+      icon: () => `<div class="i-a1">HM<i></i></div>` },
+    { id: 'ring', name: 'hotmic, one word', why: 'Lowercase geometric, one word. The o is a record ring and the dot on the i is lit.',
+      mark: () => `<div class="a2"><span class="gt">h</span><span class="o"></span><span class="gt">tm</span><span class="gt i">ı</span><span class="gt">c</span></div>`,
+      icon: () => `<div class="i-a2"><i></i></div>` },
+    { id: 'label', name: 'HOT·MIC label', why: 'A printed label tape in a recessed slot, the middle dot is an LED that glows when the mic is on.',
+      mark: () => `<div class="a3"><span>HOT</span><span class="dot"></span><span>MIC</span></div>`,
+      icon: () => `<div class="i-a3">H<i></i>M</div>` },
+    { id: 'signature', name: 'Signature', why: 'A fast brush signature with an underline that ends on a dot, like signing a take.',
+      mark: () => `<div class="a4"><span class="t gt">Hot Mic</span>${swash()}</div>`,
+      icon: () => `<div class="i-a4 gt">H</div>` },
+  ] },
+  { sec: 'B · Hardware badge', blurb: 'The name as a physical object bolted to the gear: enamel, metal, chrome script, rack panel.', items: [
+    { id: 'enamel', name: 'Enamel nameplate', why: 'A lilac enamel pill with a gold rim and stamped capitals, the badge on the front of a vintage console.',
+      mark: () => `<div class="b1"><span>HOT MIC</span></div>`, icon: () => `<div class="i-b1">HM</div>` },
+    { id: 'plate', name: 'Embossed plate', why: 'Brushed metal plate with four screws, the name pressed in, blue gum stamped underneath.',
+      mark: () => `<div class="b2"><span class="sc" style="left:6px;top:6px"></span><span class="sc" style="right:6px;top:6px"></span><span class="sc" style="left:6px;bottom:6px"></span><span class="sc" style="right:6px;bottom:6px"></span><span class="t">HOT MIC</span><small>blue gum</small></div>`,
+      icon: () => `<div class="i-b2">HM</div>` },
+    { id: 'script', name: 'Chrome script', why: 'Chrome script on a tolex strip with gold piping, the way amp makers sign the front panel.',
+      mark: () => `<div class="b3"><span class="t">Hot Mic</span><svg viewBox="0 0 200 10" preserveAspectRatio="none"><path d="M2 5 H198" stroke="#c9b98a" stroke-width="1.5"/></svg></div>`,
+      icon: () => `<div class="i-b3">H</div>` },
+    { id: 'rack', name: 'Rack panel', why: 'A 1U rack ear: mounting holes, condensed caps and a VU ladder that is lit to the top.',
+      mark: () => `<div class="b4"><span class="hole"></span><span class="t">Hot Mic</span><span class="vu"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on v"></i><i class="on v"></i><i class="on r"></i><i></i></span><span class="hole"></span></div>`,
+      icon: () => `<div class="i-b4"><i></i><i></i><i></i><i></i></div>` },
+  ] },
+  { sec: 'C · Character', blurb: 'Personality first, the Soundtoys way: something you would put on a sticker or a t-shirt.', items: [
+    { id: 'buddy', name: 'Mic buddy', why: 'A little mic with a face and a lit tally light, chunky soft lettering beside it.',
+      mark: () => `<div class="c1">${buddy()}<span class="t gt">Hot Mic</span></div>`, icon: () => `<div style="width:40px;height:50px">${buddy()}</div>` },
+    { id: 'monogram', name: 'HM monogram', why: 'The H and the M share a stroke and lock together, with a lit dot where the M dips.',
+      mark: () => `<div class="c2">${mono()}<span class="t gt">Hot Mic</span></div>`, icon: () => `<div style="width:42px;height:42px">${mono()}</div>` },
+    { id: 'stamp', name: 'Always-on stamp', why: 'A round stamp, "HOT MIC · BLUE GUM · ALWAYS ON" around a lit mic, next to heavy mono caps.',
+      mark: () => `<div class="c3">${stamp()}<span class="t">HOT<br>MIC</span></div>`, icon: () => `<div style="width:50px;height:50px">${stamp()}</div>` },
+    { id: 'print', name: 'Screen print', why: 'Hand brushed and slightly tilted, printed twice a little off register, like a gig poster.',
+      mark: () => `<div class="c4"><span class="back">Hot Mic</span><span class="front">Hot Mic</span></div>`,
+      icon: () => `<div class="i-c4"><b>H</b><span>H</span></div>` },
+  ] },
+];
+
+const KEY = 'hotmicLogo';
+let stars = []; try { stars = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { stars = []; }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(stars)); } catch (e) { /* ignore */ } };
+const all = D.flatMap((s) => s.items);
+function render() {
+  let n = 0;
+  document.getElementById('root').innerHTML = D.map((s) => `<h2>${s.sec}</h2><p>${s.blurb}</p><div class="grid">${s.items.map((it) => { n++; return `
+    <section class="card${stars.includes(it.id) ? ' starred' : ''}" data-k="${it.id}">
+      <div class="plates"><div class="plate dark">${it.mark()}</div><div class="plate light">${it.mark()}</div></div>
+      <div class="icons"><div class="app">${it.icon()}</div>
+        <div class="menubar"><span class="glyph">${it.icon()}</span><span>menu bar</span></div>
+        <div class="menubar dk"><span class="glyph">${it.icon()}</span><span>menu bar</span></div></div>
+      <div class="meta"><span class="n">${String(n).padStart(2, '0')}</span><div class="txt"><b>${it.name}</b><p>${it.why}</p></div><button class="star" title="Star it">${stars.includes(it.id) ? '★' : '☆'}</button></div>
+    </section>`; }).join('')}</div>`).join('');
+  document.querySelectorAll('.star').forEach((b) => b.addEventListener('click', () => {
+    const k = b.closest('.card').dataset.k; stars = stars.includes(k) ? stars.filter((x) => x !== k) : [...stars, k]; save(); render();
+  }));
+  // menu-bar glyphs: scale whatever the icon is down to ~16px tall
+  document.querySelectorAll('.menubar .glyph > *').forEach((el) => { const h = el.getBoundingClientRect().height || 16; el.style.transform = `scale(${Math.min(1, 16 / h)})`; el.style.transformOrigin = 'left center'; });
+}
+render();
+document.getElementById('copy').addEventListener('click', async () => {
+  const picks = stars.map((k) => all.find((x) => x.id === k)).filter(Boolean).map((x) => x.name);
+  const txt = `Hot Mic logo picks: ${picks.length ? picks.join(', ') : 'none yet'}`;
+  try { await navigator.clipboard.writeText(txt); } catch (e) { console.log(txt); }
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = 'Copied. Paste it to Claude.'; document.body.appendChild(t); setTimeout(() => t.remove(), 2200);
+});
+</script>
+</body>
+</html>

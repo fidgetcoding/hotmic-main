@@ -1,0 +1,7 @@
+// Signing for Hot Mic (iPhone).
+// DEVELOPMENT_TEAM stays empty in git. To sign, either:
+//   - run `DEVELOPMENT_TEAM=ABCDE12345 ./install.sh` (it passes the team to xcodebuild), or
+//   - create Config/Signing.local.xcconfig (git-ignored) with `DEVELOPMENT_TEAM = ABCDE12345`
+//     so Xcode picks it up too. Your Team ID is in Xcode › Settings › Accounts.
+DEVELOPMENT_TEAM =
+#include? "Signing.local.xcconfig"

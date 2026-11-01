@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hot Mic Record Icon</title>
+<style>
+  :root { --bg:#f6f4ef; --ink:#1d1d1f; --muted:#6e6e73; --line:#e4e0d8; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.45 -apple-system, BlinkMacSystemFont, sans-serif; }
+  main { max-width:1100px; margin:0 auto; padding:28px 16px 48px; }
+  h1 { font-size:24px; margin:0 0 4px; } p.sub { color:var(--muted); margin:0 0 22px; }
+  .row { display:flex; flex-wrap:wrap; gap:18px; align-items:flex-start; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:18px; padding:18px 20px; }
+  .card h2 { font-size:16px; margin:0 0 10px; }
+  .glyphs { display:flex; gap:28px; align-items:center; }
+  .glyphs svg { width:96px; height:96px; color:var(--ink); }
+  .cap { font-size:12px; color:var(--muted); text-align:center; margin-top:4px; }
+  .bar { display:flex; align-items:center; gap:14px; height:30px; padding:0 14px; border-radius:8px; margin-top:10px; font-size:12px; }
+  .bar.light { background:#ececec; color:#111; } .bar.dark { background:#2a2a2c; color:#f2f2f2; }
+  .bar svg { width:17px; height:17px; }
+  .priv { width:30px; height:22px; border-radius:11px; background:#f19a37; display:grid; place-items:center; }
+  .priv svg { width:14px; height:14px; color:#fff; }
+  .apps { display:flex; gap:22px; } .apps figure { margin:0; text-align:center; }
+  .apps svg { width:150px; height:150px; filter:drop-shadow(0 6px 14px rgba(0,0,0,.18)); }
+  figcaption { font-size:13px; color:var(--muted); margin-top:6px; }
+</style></head><body><main>
+<h1>Record button + flame</h1>
+<p class="sub">Menu bar: off = ring with the flame inside · recording = the button lights up, flame cut out.</p>
+<svg width="0" height="0" style="position:absolute"><defs>
+  <path id="flame" d="M12 4.24c0.73 2.44 3.42 4.15 4.15 7.44 0.85 3.78 -1.34 7.69 -4.15 7.69s-5 -2.44 -4.39 -5.86c0.37 -2.07 1.71 -3.17 2.07 -5.12 0.98 0.98 1.22 2.2 1.1 3.29 1.22 -1.34 1.59 -4.27 1.22 -7.44z"/>
+  <g id="off"><circle cx="12" cy="12" r="9.6" fill="none" stroke="currentColor" stroke-width="1.9"/><use href="#flame" fill="currentColor"/></g>
+  <g id="on"><path fill="currentColor" fill-rule="evenodd" d="M12 1.6a10.4 10.4 0 1 1 0 20.8 10.4 10.4 0 0 1 0-20.8zM12 4.24c0.73 2.44 3.42 4.15 4.15 7.44 0.85 3.78 -1.34 7.69 -4.15 7.69s-5 -2.44 -4.39 -5.86c0.37 -2.07 1.71 -3.17 2.07 -5.12 0.98 0.98 1.22 2.2 1.1 3.29 1.22 -1.34 1.59 -4.27 1.22 -7.44z"/></g>
+  <g id="sysmic"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M6.3 11.5a5.7 5.7 0 0 0 11.4 0M12 17.2v3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></g>
+  <linearGradient id="red" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff5a45"/><stop offset="1" stop-color="#d42a1c"/></linearGradient>
+  <linearGradient id="gum" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4f7f86"/><stop offset="1" stop-color="#23474d"/></linearGradient>
+  <linearGradient id="fire" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff3b14"/><stop offset=".5" stop-color="#ff7a1a"/><stop offset="1" stop-color="#ffd84a"/></linearGradient>
+  <linearGradient id="cream" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbf7ef"/><stop offset="1" stop-color="#e9e1d2"/></linearGradient>
+</defs></svg>
+
+<div class="row">
+  <section class="card">
+    <h2>Menu bar</h2>
+    <div class="glyphs">
+      <div><svg viewBox="0 0 24 24"><use href="#off"/></svg><div class="cap">off</div></div>
+      <div><svg viewBox="0 0 24 24"><use href="#on"/></svg><div class="cap">recording</div></div>
+    </div>
+    <div class="bar light"><span class="priv"><svg viewBox="0 0 24 24"><use href="#sysmic"/></svg></span><svg viewBox="0 0 24 24"><use href="#off"/></svg><svg viewBox="0 0 24 24"><use href="#on"/></svg><span style="margin-left:auto;opacity:.6">light · off / rec</span></div>
+    <div class="bar dark"><span class="priv"><svg viewBox="0 0 24 24"><use href="#sysmic"/></svg></span><svg viewBox="0 0 24 24"><use href="#off"/></svg><svg viewBox="0 0 24 24"><use href="#on"/></svg><span style="margin-left:auto;opacity:.6">dark · off / rec</span></div>
+  </section>
+
+  <section class="card">
+    <h2>App icon</h2>
+    <div class="apps">
+      <figure><svg viewBox="0 0 1024 1024"><rect x="100" y="100" width="824" height="824" rx="185" fill="url(#gum)"/>
+        <g transform="translate(152 152) scale(30)"><path fill="url(#red)" fill-rule="evenodd" d="M12 1.6a10.4 10.4 0 1 1 0 20.8 10.4 10.4 0 0 1 0-20.8zM12 4.24c0.73 2.44 3.42 4.15 4.15 7.44 0.85 3.78 -1.34 7.69 -4.15 7.69s-5 -2.44 -4.39 -5.86c0.37 -2.07 1.71 -3.17 2.07 -5.12 0.98 0.98 1.22 2.2 1.1 3.29 1.22 -1.34 1.59 -4.27 1.22 -7.44z"/></g></svg>
+        <figcaption>1 · Red button, flame cut through</figcaption></figure>
+      <figure><svg viewBox="0 0 1024 1024"><rect x="100" y="100" width="824" height="824" rx="185" fill="url(#gum)"/>
+        <g transform="translate(152 152) scale(30)"><circle cx="12" cy="12" r="10.4" fill="url(#red)"/><use href="#flame" fill="url(#cream)"/></g></svg>
+        <figcaption>2 · Red button, cream flame</figcaption></figure>
+      <figure><svg viewBox="0 0 1024 1024"><rect x="100" y="100" width="824" height="824" rx="185" fill="url(#cream)"/>
+        <g transform="translate(152 152) scale(30)"><circle cx="12" cy="12" r="10.4" fill="url(#red)"/><use href="#flame" fill="url(#fire)" transform="translate(12 12) scale(.001) translate(-12 -12)" opacity="0"/><use href="#flame" fill="#ffd84a"/></g></svg>
+        <figcaption>3 · Cream tile, red button, gold flame</figcaption></figure>
+    </div>
+  </section>
+</div>
+</main></body></html>

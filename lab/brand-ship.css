@@ -1,0 +1,46 @@
+/* Hot Mic brand, shipped 2026-10-14 (Nate's picks = lab/brand.html defaults at 450c594).
+   Chrome only as trim on real edges; the lyrics themselves stay flat. Generated from the brand lab's
+   applied CSS, so the lab and the app match. */
+
+/* wordmark: the FLORA line mark, no H tile */
+.titlebar .app-name .hm-tile-img { display: none !important; }
+.hm-word.svgmark { background: none !important; filter: drop-shadow(0 1px 0 rgba(0,0,0,.5)) !important; padding: 0 !important; font-size: 0 !important; }
+.hm-word.svgmark img { height: 30px; width: auto; display: block; }
+
+/* record: lilac-ice chrome ring, always (Nate 2026-10-14: no gold/orange); recording shows in the red dot itself */
+.transport .rec-btn { border-radius: 50% !important; background: radial-gradient(circle at 50% 50%, #1a1820 52%, transparent 53%), conic-gradient(from 200deg, #f4f2ff, #8f84c8, #ffffff, #6b6199, #e9e6ff, #8f84c8, #f4f2ff) !important; box-shadow: 0 1px 2px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.25) !important; }
+.transport .rec-btn span { background: #c94a52 !important; }
+.transport .rec-btn.on { animation: none !important; }
+.transport .rec-btn.on span { background: #ff3b47 !important; box-shadow: 0 0 8px rgba(255,59,71,.85) !important; animation: hmrecdot 1.4s ease-in-out infinite !important; }
+@keyframes hmrecdot { 50% { background: #ff6b74; box-shadow: 0 0 14px rgba(255,59,71,1); } }
+
+/* play: brushed chrome face */
+.transport .tbtn.play { color: #2a2540 !important; background: repeating-radial-gradient(circle at 50% 50%, rgba(255,255,255,.18) 0 1px, rgba(0,0,0,.05) 1px 2px), conic-gradient(from 210deg, #f6f4ff, #a79ddc, #ffffff, #8a80bf, #eeebff, #a79ddc, #f6f4ff) !important; box-shadow: 0 0 0 1px #2b2640, 0 4px 12px -4px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.8) !important; }
+
+/* chrome trim, intensity 70 */
+:root { --tr-hi: rgba(255,255,255,0.77); --tr-hi2: rgba(255,255,255,0.29); --tr-mid: rgba(185,178,242,0.77); --tr-mid2: rgba(185,178,242,0.52); --tr-glow: rgba(185,178,242,0.48); --tr-gw: 11.8px; }
+/* top bar: along its bottom edge */
+.titlebar { border-bottom-color: transparent !important; box-shadow: inset 0 -1px 0 var(--tr-mid), inset 0 -2px 0 var(--tr-hi), 0 2px var(--tr-gw) -2px var(--tr-glow) !important; }
+/* sidebar / main divider */
+.side { border-right-color: transparent !important; box-shadow: inset -1px 0 0 var(--tr-mid), inset -2px 0 0 var(--tr-hi), 2px 0 var(--tr-gw) -2px var(--tr-glow) !important; position: relative; z-index: 2; }
+/* divider above the key/chords row */
+.strip { border-bottom-color: transparent !important; box-shadow: inset 0 -1px 0 var(--tr-mid), inset 0 -2px 0 var(--tr-hi), 0 2px var(--tr-gw) -2px var(--tr-glow) !important; z-index: 1; }
+/* divider above the lyrics (the key/chords row itself gets no frame) */
+.tune { border-bottom-color: transparent !important; box-shadow: inset 0 -1px 0 var(--tr-mid), inset 0 -2px 0 var(--tr-hi), 0 2px var(--tr-gw) -2px var(--tr-glow) !important; position: relative; z-index: 1; }
+/* section header rules */
+.notes .sec-head { box-shadow: none !important; background-image: linear-gradient(var(--tr-mid2), var(--tr-mid2)) !important; background-size: 100% 1px !important; background-position: 0 100% !important; background-repeat: no-repeat !important; outline: 0 !important; }
+/* timeline panel frame */
+.strip-canvas { box-shadow: 0 0 0 1px var(--tr-mid), inset 0 1px 0 var(--tr-hi), 0 -1px 0 0 var(--tr-hi2), 0 0 var(--tr-gw) 0 var(--tr-glow) !important; }
+/* transport button group */
+.transport { border-radius: 12px; padding: 3px 6px; margin: -3px -6px -3px 0; box-shadow: 0 0 0 1px var(--tr-mid), inset 0 1px 0 var(--tr-hi), 0 -1px 0 0 var(--tr-hi2), 0 0 var(--tr-gw) 0 var(--tr-glow) !important; }
+/* selected session */
+.side .s-row.on { box-shadow: 0 0 0 1px var(--tr-mid), inset 0 1px 0 var(--tr-hi), 0 -1px 0 0 var(--tr-hi2), 0 0 var(--tr-gw) 0 var(--tr-glow) !important; }
+.side .side-list { width: auto !important; margin: 0 !important; padding: 0 12px !important; box-sizing: border-box; }
+.side .search { width: auto !important; margin-left: 20px !important; margin-right: 21px !important; box-sizing: border-box; }
+.side .s-main span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.side .s-row { width: 100% !important; margin-left: 0 !important; margin-right: 0 !important; box-sizing: border-box; }
+.side .s-row.on::before { left: 5px !important; top: 12px !important; bottom: 12px !important; width: 2px !important; border-radius: 2px !important; transform: none !important; }
+
+/* the timeline's content stays inside its frame's corners */
+.strip-canvas { overflow: hidden; }
+.strip-canvas canvas { border-radius: inherit; }

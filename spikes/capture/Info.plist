@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleIdentifier</key>
+    <string>io.bluegum.hotmic.spike-capture</string>
+    <key>CFBundleName</key>
+    <string>hm-capture</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Hot Mic records your voice while you write music.</string>
+    <key>NSAudioCaptureUsageDescription</key>
+    <string>Hot Mic records what your music software is playing so it can remove it from your voice.</string>
+</dict>
+</plist>

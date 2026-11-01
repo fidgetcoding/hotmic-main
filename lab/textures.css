@@ -1,0 +1,64 @@
+/* Hot Mic design lab: surface materials, independent of the look. Photo textures are CC0 (see textures/CREDITS.md).
+   Wood goes on the side cheeks; felt behind the sessions list and the lyrics; tolex, leather, brushed metal and
+   rubber become the faceplate (title bar, sessions, the panel around the screen, the key/shapes bar). */
+
+:root[data-texture="walnut"] { --tx-wood: url("textures/walnut.jpg"); }
+:root[data-texture="oak"] { --tx-wood: url("textures/oak.jpg"); }
+:root[data-texture="rosewood"] { --tx-wood: url("textures/rosewood.jpg"); }
+:root[data-texture="felt-charcoal"] { --tx-felt: url("textures/felt-charcoal.jpg"); --tx-felt-tone: #1b1b1e; }
+:root[data-texture="felt-green"] { --tx-felt: url("textures/felt-green.jpg"); --tx-felt-tone: #133826; }
+:root[data-texture="felt-oxblood"] { --tx-felt: url("textures/felt-oxblood.jpg"); --tx-felt-tone: #45100e; }
+:root[data-texture="tolex"] { --tx-face: url("textures/tolex.jpg"); --tx-face-size: 260px; --tx-face-tone: #121212; }
+:root[data-texture="leather"] { --tx-face: url("textures/leather.jpg"); --tx-face-size: 420px; --tx-face-tone: #4a2510; }
+:root[data-texture="brushed"] { --tx-face: url("textures/brushed.jpg"); --tx-face-size: 520px; --tx-face-tone: #4a4d52; }
+:root[data-texture="rubber"] { --tx-face: url("textures/rubber.jpg"); --tx-face-size: 300px; --tx-face-tone: #161618; }
+
+/* How much of the look's own color sits over the material: less on dark looks, more on light ones so ink stays readable. */
+:root { --tx-veil: 38%; --tx-veil-np: 72%; }
+:root[data-texture="brushed"]:not([data-look="walnut"]):not([data-look="tape"]) { --tx-veil: 52%; }
+:root:is([data-look="walnut"], [data-look="tape"], [data-look="tube-light"]) { --tx-veil: 70%; --tx-veil-np: 90%; }
+
+/* ---------- wood: real side cheeks on every look ---------- */
+:root:is([data-texture="walnut"], [data-texture="oak"], [data-texture="rosewood"]) {
+  .win {
+    padding: 0 32px;
+    /* cheek shading, then an opaque faceplate in the middle so the wood only shows in the cheeks */
+    background:
+      linear-gradient(90deg, rgba(0, 0, 0, 0.55), rgba(255, 235, 200, 0.14) 30%, rgba(0, 0, 0, 0) 62%, rgba(0, 0, 0, 0.6)) left / 32px 100% no-repeat,
+      linear-gradient(90deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0) 38%, rgba(255, 235, 200, 0.14) 70%, rgba(0, 0, 0, 0.55)) right / 32px 100% no-repeat,
+      linear-gradient(var(--bg), var(--bg)) center / calc(100% - 64px) 100% no-repeat,
+      var(--tx-wood) left top / 200px auto repeat-y, var(--tx-wood) right top / 200px auto repeat-y, var(--bg);
+  }
+  .win-body, .titlebar { box-shadow: inset 1px 0 0 rgba(0, 0, 0, 0.55), inset -1px 0 0 rgba(0, 0, 0, 0.55); }
+}
+
+/* ---------- felt: the sessions list and the area behind the lyrics ---------- */
+:root:is([data-texture="felt-charcoal"], [data-texture="felt-green"], [data-texture="felt-oxblood"]) {
+  .side { background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.18)), var(--tx-felt) 0 0 / 300px 300px, var(--tx-felt-tone); }
+  .side .s-row b, .side .side-head b, .side .s-main > span { color: #f1ece2; }
+  .side .s-main > span, .side .s-time { color: rgba(241, 236, 226, 0.55); }
+  .side .s-row.on { background: rgba(0, 0, 0, 0.28); box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.35); }
+  .side .search { background: rgba(0, 0, 0, 0.28); color: rgba(241, 236, 226, 0.6); }
+  .side .search input { color: #f1ece2; }
+  .notes { background: linear-gradient(color-mix(in srgb, var(--np-bg) var(--tx-veil-np), transparent), color-mix(in srgb, var(--np-bg) var(--tx-veil-np), transparent)), var(--tx-felt) 0 0 / 300px 300px, var(--np-bg); }
+  .sec-head, .np-bar { background: transparent; }
+}
+/* felt on light faceplates: keep the lyrics on their own paper, felt stays in the sessions list */
+:root:is([data-look="walnut"], [data-look="tape"], [data-look="tube-light"]):is([data-texture="felt-charcoal"], [data-texture="felt-green"], [data-texture="felt-oxblood"]) .notes { background: var(--np-bg); }
+
+/* ---------- faceplate materials ---------- */
+:root:is([data-texture="tolex"], [data-texture="leather"], [data-texture="brushed"], [data-texture="rubber"]) {
+  --tx-plate: linear-gradient(color-mix(in srgb, var(--bg) var(--tx-veil), transparent), color-mix(in srgb, var(--bg) var(--tx-veil), transparent)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(0, 0, 0, 0.22)), var(--tx-face) 0 0 / var(--tx-face-size) auto, var(--tx-face-tone);
+  --plate: var(--tx-plate);
+  .titlebar, .side, .tune { background: var(--tx-plate); }
+  .side .s-main > span, .side .s-time { color: color-mix(in srgb, var(--ink) 58%, transparent); }
+  .strip { background-color: transparent; background-image: var(--tx-plate); }
+}
+/* vintage strips keep their corner screws on top of the material */
+:root:is([data-look="walnut"], [data-look="echo"], [data-look="decap"], [data-look="decap-coral"], [data-look="decap-lime"], [data-look="decap-neon"], [data-look="tape"], [data-look="tape-dark"], [data-look="tube"], [data-look="tube-light"]):is([data-texture="tolex"], [data-texture="leather"], [data-texture="brushed"], [data-texture="rubber"]) {
+  .strip { background: var(--screw) 4px 4px / 12px 12px no-repeat, var(--screw) right 4px top 4px / 12px 12px no-repeat, var(--screw) left 4px bottom 4px / 12px 12px no-repeat, var(--screw) right 4px bottom 4px / 12px 12px no-repeat, var(--tx-plate); }
+  .titlebar { background: var(--screw) 8px 7px / 12px 12px no-repeat, var(--screw) right 8px top 7px / 12px 12px no-repeat, var(--tx-plate); }
+}
+/* glass blurs its panels; a material should read solid there */
+:root[data-look="glass"]:is([data-texture="tolex"], [data-texture="leather"], [data-texture="brushed"], [data-texture="rubber"]) :is(.titlebar, .side) { backdrop-filter: none; }

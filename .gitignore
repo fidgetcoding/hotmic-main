@@ -1,0 +1,25 @@
+.build/
+.swiftpm/
+spikes/aec/.venv/
+spikes/capture/hm-capture
+fixtures/spike0/
+*.dmg
+dist/
+
+# real sessions exported for the design lab (your lyrics + local paths)
+lab/sessions/
+.playwright-mcp/
+
+# bench corpus: downloaded audio, released lyrics, run outputs (never committed)
+bench/local/
+bench/__pycache__/
+
+# secrets and machine files
+.env*
+*.pem
+*.key
+*.p12
+*.p8
+*.mobileprovision
+.DS_Store
+__pycache__/

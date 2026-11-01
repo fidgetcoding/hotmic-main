@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flame Note Icons</title>
+<style>
+  :root { --bg:#f6f4ef; --ink:#1d1d1f; --muted:#6e6e73; --line:#e4e0d8; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.45 -apple-system, BlinkMacSystemFont, sans-serif; }
+  main { max-width:1180px; margin:0 auto; padding:28px 16px 48px; }
+  h1 { font-size:24px; margin:0 0 4px; } p.sub { color:var(--muted); margin:0 0 22px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:18px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:18px; padding:18px 20px; }
+  .card h2 { font-size:17px; margin:0 0 2px; } .card p { color:var(--muted); margin:0 0 12px; font-size:13px; }
+  .big { display:flex; gap:16px; align-items:center; }
+  .glyph { width:92px; height:92px; color:var(--ink); }
+  .app { width:120px; height:120px; filter:drop-shadow(0 6px 14px rgba(0,0,0,.18)); }
+  .bar { display:flex; align-items:center; gap:14px; height:30px; padding:0 14px; border-radius:8px; margin-top:10px; font-size:12px; }
+  .bar.light { background:#ececec; color:#111; } .bar.dark { background:#2a2a2c; color:#f2f2f2; }
+  .bar svg { width:18px; height:18px; }
+  .priv { width:30px; height:22px; border-radius:11px; background:#f19a37; display:grid; place-items:center; }
+  .priv svg { width:14px; height:14px; color:#fff; }
+  .lbl { margin-left:auto; opacity:.6; }
+</style></head><body><main>
+<h1>Flame × music note</h1>
+<p class="sub">Three fusions. Menu bar shows off / recording (dot). App icons: fire on blue gum, and cream inside the red record button.</p>
+<svg width="0" height="0" style="position:absolute"><defs>
+  <!-- 1 · Fire note: the note's stem burns into a flame; its right tongue is the flag -->
+  <g id="g1">
+    <ellipse cx="8.2" cy="18.3" rx="3.5" ry="2.6" transform="rotate(-22 8.2 18.3)"/>
+    <path d="M10.6 17.8V10.2C10.6 7.6 9.3 6.3 9.9 3.9 10.8 5.1 11.5 5.5 12.2 5.5 12 3.9 12.7 2.3 14.2 1.3 14 3.4 15.7 4.6 16.5 6.7 17.4 9 16.3 11.2 14.6 12.1 15.1 10.7 14.8 9.5 14 8.8 14 9.9 13.4 10.7 12.8 11V17.8z"/>
+  </g>
+  <!-- 2 · Note in the fire: a flame with an eighth note cut out of it -->
+  <mask id="m2"><rect width="24" height="24" fill="#fff"/>
+    <g fill="#000"><ellipse cx="10.9" cy="16.3" rx="2.05" ry="1.5" transform="rotate(-22 10.9 16.3)"/><rect x="12.3" y="9" width="1.05" height="7.2"/><path d="M13.35 9c1.4.5 2.4 1.3 2.3 2.9-.4-.9-1.2-1.3-2.3-1.4z"/></g></mask>
+  <g id="g2"><path mask="url(#m2)" d="M12 1.6c.9 3 4.2 5.1 5.1 9.1 1 4.6-1.7 9.4-5.1 9.4s-6.1-3-5.4-7.2c.45-2.5 2.1-3.9 2.55-6.3 1.2 1.2 1.5 2.7 1.35 4.05 1.5-1.65 1.95-5.25 1.5-9.05z"/></g>
+  <!-- 3 · Flaming beam: two eighth notes whose beam is a lick of fire -->
+  <g id="g3">
+    <ellipse cx="6.3" cy="18.6" rx="2.9" ry="2.2" transform="rotate(-22 6.3 18.6)"/>
+    <ellipse cx="16.3" cy="16.6" rx="2.9" ry="2.2" transform="rotate(-22 16.3 16.6)"/>
+    <path d="M8.2 18.2V9.6h1.7v8.6zM18.2 16.2V7.6h1.7v8.6z"/>
+    <path d="M8.2 10.4 19.9 8.2C19.4 6.4 18.4 5.4 17.6 3.6 17.4 4.8 16.8 5.5 16 5.8 16.2 4.2 15.6 2.6 14.2 1.6 14.3 3.6 13.1 4.8 12.4 6.2 12.1 5.5 11.5 5.1 10.8 4.9 11 6.4 9.6 7.4 8.8 8.6 8.5 9.1 8.3 9.7 8.2 10.4z"/>
+  </g>
+  <g id="dot"><circle cx="21.2" cy="3.6" r="2.4"/></g>
+  <g id="sysmic"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M6.3 11.5a5.7 5.7 0 0 0 11.4 0M12 17.2v3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></g>
+  <linearGradient id="gum" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4f7f86"/><stop offset="1" stop-color="#23474d"/></linearGradient>
+  <linearGradient id="fire" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff3b14"/><stop offset=".5" stop-color="#ff7a1a"/><stop offset="1" stop-color="#ffd84a"/></linearGradient>
+  <linearGradient id="red" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff5a45"/><stop offset="1" stop-color="#d42a1c"/></linearGradient>
+</defs></svg>
+
+<div class="grid" id="grid"></div>
+<script>
+  const variants = [
+    ['g1', '1 · Fire note', 'The note’s stem burns up into a flame; the flame’s right tongue is the flag.'],
+    ['g2', '2 · Note in the fire', 'A flame with an eighth note cut out of it. Cleanest at small sizes.'],
+    ['g3', '3 · Flaming beam', 'Two eighth notes (♫) whose beam is a lick of fire.'],
+  ];
+  const grid = document.getElementById('grid');
+  for (const [id, title, desc] of variants) {
+    const bar = cls => `<div class="bar ${cls}"><span class="priv"><svg viewBox="0 0 24 24"><use href="#sysmic"/></svg></span>
+      <svg viewBox="0 0 24 24" fill="currentColor"><use href="#${id}"/></svg>
+      <svg viewBox="0 0 24 24" fill="currentColor"><use href="#${id}"/><use href="#dot"/></svg><span class="lbl">${cls} · off / rec</span></div>`;
+    grid.insertAdjacentHTML('beforeend', `<section class="card"><h2>${title}</h2><p>${desc}</p>
+      <div class="big">
+        <svg class="glyph" viewBox="0 0 24 24" fill="currentColor"><use href="#${id}"/></svg>
+        <svg class="app" viewBox="0 0 1024 1024"><rect x="100" y="100" width="824" height="824" rx="185" fill="url(#gum)"/>
+          <g transform="translate(176 170) scale(28)" fill="url(#fire)"><use href="#${id}"/></g></svg>
+        <svg class="app" viewBox="0 0 1024 1024"><rect x="100" y="100" width="824" height="824" rx="185" fill="url(#gum)"/>
+          <circle cx="512" cy="512" r="330" fill="url(#red)"/>
+          <g transform="translate(314 308) scale(16.5)" fill="#fbf5ea"><use href="#${id}"/></g></svg>
+      </div>${bar('light')}${bar('dark')}</section>`);
+  }
+</script>
+</main></body></html>

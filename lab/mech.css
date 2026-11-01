@@ -1,0 +1,146 @@
+/* Hot Mic design lab: editing + section mechanics (kept apart from the looks in lab.css / notes.css). */
+
+/* toolbar over the lyrics */
+.np-bar { position: sticky; top: -18px; z-index: 4; display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 860px; margin: -18px auto 8px; padding: 14px 0 10px; background: var(--np-bg); }
+.np-left { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.np-left b { font-size: 13px; }
+.np-left span { color: var(--faint); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.np-btn { padding: 5px 12px; border-radius: 8px; border: 1px solid var(--line-2); background: linear-gradient(180deg, var(--raise), var(--raise-2)); box-shadow: inset 0 1px 0 var(--hl), 0 1px 2px rgba(0, 0, 0, 0.3); color: var(--ink); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.np-btn:hover { border-color: var(--accent); color: var(--accent); }
+.np-btn.primary { background: var(--accent-grad); border-color: transparent; color: var(--on-accent); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 14px -4px var(--glow); }
+.sec-head { top: 26px; }
+
+/* it always looks a little editable */
+.notes:not(.is-editing) .row { cursor: text; }
+.notes:not(.is-editing) .row:hover .lyric { box-shadow: 0 1px 0 color-mix(in srgb, var(--accent) 22%, transparent); }
+
+/* section breaks */
+.sec.unnamed { margin-top: 4px; }
+.gap { position: relative; height: 10px; margin: -2px 0; display: flex; align-items: center; }
+.add-break { position: absolute; left: -8px; display: inline-flex; align-items: center; gap: 6px; padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; color: var(--accent); background: var(--np-bg); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent); opacity: 0; transition: opacity 0.12s; z-index: 2; }
+.add-break em { font-style: normal; font-weight: 500; color: var(--faint); }
+.gap::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px dashed color-mix(in srgb, var(--accent) 35%, transparent); opacity: 0; transition: opacity 0.12s; }
+.gap:hover .add-break, .gap:hover::before { opacity: 1; }
+.add-break.suggest { opacity: 0.55; }
+.gap:has(.suggest)::before { opacity: 0.35; }
+.is-editing .add-break { opacity: 0.6; }
+.sec-name { cursor: text; border-radius: 4px; padding: 0 2px; }
+.sec-name:hover { background: var(--accent-soft); }
+.sec-name.renaming { background: var(--display); box-shadow: 0 0 0 2px var(--accent); outline: none; text-transform: none; letter-spacing: 0; }
+.sec-x { width: 18px; height: 18px; border-radius: 50%; color: var(--faint); font-size: 13px; line-height: 1; opacity: 0; }
+.sec-head:hover .sec-x { opacity: 1; }
+.sec-x:hover { background: var(--fire-soft); color: var(--fire); }
+
+/* edit mode: every line is a text field */
+.is-editing .row { cursor: text; }
+.edit-row { align-items: baseline; gap: 12px; }
+.edit-chords { flex: none; width: 92px; text-align: right; font: 600 11px var(--mono); color: var(--accent); opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.edit-line { flex: 1; min-width: 0; padding: 4px 10px; border-radius: 8px; color: var(--ink); background: color-mix(in srgb, var(--display) 80%, transparent); box-shadow: inset 0 0 0 1px var(--line); outline: none; cursor: text; }
+.edit-line:focus { background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--accent), 0 0 0 4px color-mix(in srgb, var(--accent) 14%, transparent); }
+.is-editing .np-bar b { color: var(--accent); }
+
+/* recording pill: quiet when not recording */
+.rec-pill.off { background: transparent; color: var(--faint); box-shadow: inset 0 0 0 1px var(--line); }
+
+/* record button: the biggest, easiest thing on the transport */
+.rec-btn { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; margin-right: 2px; background: var(--surface); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--rec) 55%, transparent), 0 1px 0 rgba(255, 255, 255, 0.06); transition: transform 0.08s, box-shadow 0.15s; }
+.rec-btn span { width: 14px; height: 14px; border-radius: 50%; background: var(--rec); transition: border-radius 0.15s, width 0.15s, height 0.15s; }
+.rec-btn:hover { box-shadow: inset 0 0 0 1.5px var(--rec), 0 0 14px color-mix(in srgb, var(--rec) 35%, transparent); }
+.rec-btn:active { transform: scale(0.94); }
+.rec-btn.on { background: var(--rec); box-shadow: 0 0 0 4px color-mix(in srgb, var(--rec) 22%, transparent), 0 0 22px color-mix(in srgb, var(--rec) 55%, transparent); animation: recglow 1.4s ease-in-out infinite; }
+.rec-btn.on span { width: 11px; height: 11px; border-radius: 2px; background: #fff; }
+@keyframes recglow { 50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--rec) 10%, transparent), 0 0 30px color-mix(in srgb, var(--rec) 40%, transparent); } }
+.rec-btn.big { width: 64px; height: 64px; flex: none; }
+.rec-btn.big span { width: 26px; height: 26px; }
+
+/* empty session */
+.strip-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 18px; }
+.strip-empty[hidden] { display: none; }
+.strip-empty b { display: block; font-size: 15px; color: var(--ink); }
+.strip-empty span { color: var(--faint); font-size: 12px; }
+.is-recording .strip { box-shadow: inset 0 2px 0 var(--rec); }
+
+/* a rule change flashes the lines it swapped */
+.row.flash { animation: flash 1.8s ease-out; }
+@keyframes flash { 0%, 30% { background: color-mix(in srgb, var(--accent) 28%, transparent); } 100% { background: transparent; } }
+
+/* Ableton-style square stop */
+.tbtn.stop .sq { width: 11px; height: 11px; border-radius: 1.5px; background: currentColor; display: block; }
+
+/* beat drop */
+.strip-drop { position: absolute; inset: 0; z-index: 4; display: flex; align-items: center; justify-content: center; text-align: center; border: 1.5px dashed color-mix(in srgb, var(--accent) 55%, transparent); border-radius: 10px; background: color-mix(in srgb, var(--bg) 82%, transparent); }
+.strip-drop[hidden] { display: none; }
+.strip-drop b { display: block; font-size: 15px; color: var(--ink); margin-bottom: 3px; }
+.strip-drop span { color: var(--faint); font-size: 12px; }
+.strip-drop button { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+#win.drop-on { outline: 2px dashed var(--accent); outline-offset: -6px; }
+#win.drop-on .strip::after { content: "Drop to use this beat"; position: absolute; inset: 8px 16px; display: grid; place-items: center; border-radius: 10px; background: color-mix(in srgb, var(--accent) 18%, var(--bg)); color: var(--ink); font-weight: 600; font-size: 15px; z-index: 30; }
+.strip { position: relative; }
+.tbtn.snap, [data-look] .tbtn.snap { width: auto !important; min-width: 46px; padding: 0 9px !important; overflow: visible; font: 700 10px/1 var(--ui); letter-spacing: 0.08em; }
+
+/* chord shapes sit to the right of their lyric line */
+.row-main:has(> .music-shapes), .row-main:has(> .music-keys) { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.row-main:has(> .music-shapes) > .lyric, .row-main:has(> .music-keys) > .lyric { flex: 0 1 auto; min-width: 0; }
+.row-main > .music-shapes, .row-main > .music-keys { margin: 0 !important; flex: none; gap: 8px !important; }
+.row-main > .music-shapes .chord-cell, .row-main > .music-keys .chord-cell { transform: scale(0.82); transform-origin: left center; margin-right: -10px; }
+
+/* edit mode looks like the normal sheet: just a cursor and a soft line under what you're typing */
+.is-editing .row[data-key] .lyric { cursor: text; outline: none; border-radius: 6px; transition: background 0.15s, box-shadow 0.15s; }
+.is-editing .row[data-key] .lyric:hover { box-shadow: 0 1px 0 color-mix(in srgb, var(--accent) 35%, transparent); }
+.is-editing .row[data-key] .lyric:focus { background: color-mix(in srgb, var(--accent) 7%, transparent); box-shadow: 0 1px 0 var(--accent); }
+.is-editing .lyric .w { cursor: text; }
+.word-swap { color: var(--accent) !important; border-color: color-mix(in srgb, var(--accent) 45%, transparent) !important; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* live words while recording (app): dimmer, with a blinking accent caret, at the end of the sheet */
+.live-line { color: color-mix(in srgb, var(--ink) 62%, transparent); padding-bottom: 40px; }
+.live-line .lyric { color: inherit; }
+.live-line .lyric .w { cursor: default; }
+.live-caret { display: inline-block; width: 2px; height: 1.05em; margin-left: 3px; vertical-align: -0.12em; background: var(--accent); box-shadow: 0 0 8px var(--glow, transparent); animation: livecaret 1s steps(2, start) infinite; }
+@keyframes livecaret { 50% { opacity: 0; } }
+.live-notice { margin-top: 6px; font: 12px var(--ui); color: var(--faint); }
+.i.big.empty-mic { width: 36px; height: 36px; fill: none; stroke: var(--accent); stroke-width: 1.6; filter: drop-shadow(0 0 10px var(--glow, transparent)); }
+
+/* ---------- Settings: gear in the title bar + popover (every style) ---------- */
+.tb-gear { width: 30px; height: 28px; display: inline-grid; place-items: center; border-radius: 8px; color: var(--muted); flex: none; }
+.tb-gear:hover { color: var(--ink); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.tb-gear .i { width: 17px; height: 17px; }
+.settings-pop { position: fixed; z-index: 80; width: 340px; max-height: calc(100vh - 90px); overflow: auto; padding: 14px; border-radius: 14px;
+  background: var(--surface, #1e1b26); color: var(--ink); border: 1px solid var(--line-2, rgba(255,255,255,.12)); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); font: 12.5px/1.4 var(--ui); }
+.settings-pop[hidden] { display: none; }
+.set-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.set-head b { font-size: 15px; }
+.set-x { width: 26px; height: 26px; border-radius: 50%; color: var(--muted); font-size: 18px; }
+.set-x:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--ink); }
+.set-sec { padding: 10px 0; border-top: 1px solid var(--line, rgba(255,255,255,.08)); }
+.set-h { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-bottom: 8px; }
+.set-styles { display: grid; gap: 6px; }
+.set-style { display: grid; grid-template-columns: 44px 1fr; grid-template-rows: auto auto; column-gap: 10px; align-items: center; text-align: left; padding: 7px; border-radius: 10px; border: 1px solid var(--line, rgba(255,255,255,.08)); }
+.set-style:hover { border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+.set-style.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.set-sw { grid-row: 1 / 3; width: 44px; height: 34px; border-radius: 6px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.35); }
+.set-style b { font-size: 13px; }
+.set-style span:last-child { font-size: 11px; color: var(--muted); }
+.set-accents { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.set-acc { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; text-align: left; color: var(--muted); }
+.set-acc i { width: 14px; height: 14px; border-radius: 50%; flex: none; box-shadow: 0 0 0 1px rgba(0,0,0,.3); }
+.set-acc:hover { color: var(--ink); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.set-acc.on { color: var(--ink); background: color-mix(in srgb, var(--accent) 14%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 50%, transparent); }
+.set-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.set-btn { padding: 5px 12px; border-radius: 8px; border: 1px solid var(--line-2, rgba(255,255,255,.12)); color: var(--ink); }
+.set-btn:hover { border-color: var(--accent); }
+.set-foot { padding-top: 8px; border-top: 1px solid var(--line, rgba(255,255,255,.08)); color: var(--faint); font-size: 11px; }
+:root:is([data-look="notebook"], [data-look="notebook-light"]) .settings-pop { background: var(--paper), var(--surface); }
+
+/* in the app the look lives in Settings (⌘,), not in the window */
+.in-app #themeToggle, .in-app #settingsBtn { display: none !important; }
+
+#win.drop-on.drop-import .strip::after { content: "Drop a recording · Hot Mic splits it into takes"; }
+.import-banner { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 80; min-width: 280px; overflow: hidden;
+  padding: 10px 16px; border-radius: 12px; background: var(--surface, #222); color: var(--ink, #eee); font: 600 13px var(--ui, system-ui);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.7); }
+.import-banner i { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--accent); transition: width 0.2s; }
+.import-banner.err { border-color: color-mix(in srgb, var(--fire, #e5533d) 60%, transparent); }
+.import-hint { display: block; margin-top: 6px; font-size: 12px; color: var(--muted); }
+.import-hint button, .strip-empty [data-act-import] { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; font: inherit; }
+.np-right { display: flex; gap: 8px; }
+.live-line .live-done { display: block; color: var(--ink); }

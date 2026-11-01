@@ -1,0 +1,5283 @@
+{
+  "about": "Hot Mic lyric decoding scenarios, read by Tests/LibraryTests/LyricScenarioTests.swift. Inputs: `live` lines as [text, at, end, fixed?] (fixed = Whisper on that line; \"\" = Whisper gave nothing), or `words` as [word, at] (arrival-timed, 0.3 s each, cut into lines by the live rules) with `fixes` aligned to the resulting lines; `takes` as {id, at, dur, kind, text, words?, chords?}. Each option's `sheet` is what the window would show: lines, each a list of versions oldest to newest (the newest shows unless one is starred with '★ '); a version may be {text, chords}. `decided` = the option chosen (the harness asserts it); null = open, the harness reports which option today's code produces. Punctuation counts: the harness compares lowercased text WITH commas and periods. The lines are test material.",
+  "groups": [
+    {
+      "id": "breaks",
+      "name": "Where a line ends",
+      "blurb": "The live recognizer cuts your singing into lines as you go: a pause of 0.9 s, 16 words, or 1.2 s of quiet ends a line. These ask where the cuts should fall."
+    },
+    {
+      "id": "strays",
+      "name": "Stray words and ad-libs",
+      "blurb": "One-word bits, yeahs, stutters, false starts, talking, counting in."
+    },
+    {
+      "id": "repeats",
+      "name": "Same line again: repeat or version?",
+      "blurb": "The heart of it. When you sing a line again, is it a new line on the sheet (a chorus, a hook) or a version of the one before (you reworked it)?"
+    },
+    {
+      "id": "text",
+      "name": "Which words show",
+      "blurb": "Two readings of every line: what the live recognizer heard as you sang, and what Whisper hears a second later from that line's own audio."
+    },
+    {
+      "id": "rap",
+      "name": "Fast rap, over a beat, quiet mic",
+      "blurb": "Fast rap on a quiet AirPods mic broke the live recognizer into fragments and Whisper gave nothing back on most of them."
+    },
+    {
+      "id": "chords",
+      "name": "Chords under the words",
+      "blurb": "What the Chords switch shows."
+    },
+    {
+      "id": "song",
+      "name": "The whole session",
+      "blurb": "Order, sections, recording again into the same session, imported recordings."
+    },
+    {
+      "id": "round3",
+      "name": "The ones that depend",
+      "blurb": "The two readings of every line. LIVE WORDS: what Apple's recognizer hears the instant you sing, rough but immediate. WHISPER: a second listen a moment later on that line's own audio, usually better, sometimes worse. Today Whisper's words show when it gives any. Drilling a line versus meaning it five times, and other cases that depend."
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "A1",
+      "group": "breaks",
+      "title": "A short catch of breath inside a line",
+      "input": {
+        "words": [
+          [
+            "I'm",
+            2.87
+          ],
+          [
+            "feeling",
+            3.3
+          ],
+          [
+            "good",
+            3.8
+          ],
+          [
+            "tonight",
+            4.4
+          ]
+        ],
+        "fixes": [
+          "I'm feeling good, tonight"
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "One line; the breath shows as a comma",
+          "sheet": [
+            [
+              "I'm feeling good, tonight"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Two lines, any audible gap cuts",
+          "sheet": [
+            [
+              "I'm feeling good"
+            ],
+            [
+              "tonight"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "A2",
+      "group": "breaks",
+      "title": "A real pause between phrases",
+      "input": {
+        "words": [
+          [
+            "I'm",
+            2.87
+          ],
+          [
+            "feeling",
+            3.3
+          ],
+          [
+            "good",
+            3.8
+          ],
+          [
+            "and",
+            5.0
+          ],
+          [
+            "you're",
+            5.3
+          ],
+          [
+            "feeling",
+            5.6
+          ],
+          [
+            "alright",
+            5.9
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Two lines (a pause of 0.9 s ends a line)",
+          "sheet": [
+            [
+              "I'm feeling good"
+            ],
+            [
+              "and you're feeling alright"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "One line (only a pause over 1.5 s ends a line)",
+          "sheet": [
+            [
+              "I'm feeling good and you're feeling alright"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "A5",
+      "group": "breaks",
+      "title": "Rapping straight through, no pauses",
+      "input": {
+        "words": [
+          [
+            "yo",
+            1.0
+          ],
+          [
+            "we",
+            1.3
+          ],
+          [
+            "got",
+            1.6
+          ],
+          [
+            "killer",
+            1.9
+          ],
+          [
+            "flows",
+            2.2
+          ],
+          [
+            "and",
+            2.5
+          ],
+          [
+            "all",
+            2.8
+          ],
+          [
+            "that",
+            3.1
+          ],
+          [
+            "stuff",
+            3.4
+          ],
+          [
+            "so",
+            3.7
+          ],
+          [
+            "just",
+            4.0
+          ],
+          [
+            "relax",
+            4.3
+          ],
+          [
+            "and",
+            4.6
+          ],
+          [
+            "you'll",
+            4.9
+          ],
+          [
+            "be",
+            5.2
+          ],
+          [
+            "able",
+            5.5
+          ],
+          [
+            "to",
+            5.8
+          ],
+          [
+            "get",
+            6.1
+          ],
+          [
+            "on",
+            6.4
+          ],
+          [
+            "more",
+            6.7
+          ],
+          [
+            "tracks",
+            7.0
+          ],
+          [
+            "and",
+            7.3
+          ],
+          [
+            "that's",
+            7.6
+          ],
+          [
+            "a",
+            7.9
+          ],
+          [
+            "fact",
+            8.2
+          ],
+          [
+            "so",
+            8.5
+          ],
+          [
+            "get",
+            8.8
+          ],
+          [
+            "back",
+            9.1
+          ]
+        ],
+        "fixes": [
+          "yo, we got killer flows, and all that stuff, so just relax, and you'll be able",
+          "to get on more tracks, and that's a fact, so get back"
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Cut at 16 words",
+          "sheet": [
+            [
+              "yo, we got killer flows and all that stuff so just relax and you'll be able"
+            ],
+            [
+              "to get on more tracks and that's a fact so get back"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Cut at Whisper's commas (once a line has 4 words or more), commas kept",
+          "sheet": [
+            [
+              "yo, we got killer flows"
+            ],
+            [
+              "and all that stuff"
+            ],
+            [
+              "so just relax, and you'll be able to get on more tracks"
+            ],
+            [
+              "and that's a fact, so get back"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "Cut at 12 words",
+          "sheet": [
+            [
+              "yo, we got killer flows and all that stuff so just relax"
+            ],
+            [
+              "and you'll be able to get on more tracks and that's a fact"
+            ],
+            [
+              "so get back"
+            ]
+          ]
+        },
+        {
+          "key": "d",
+          "label": "One long line, wrapped",
+          "sheet": [
+            [
+              "yo, we got killer flows and all that stuff so just relax and you'll be able to get on more tracks and that's a fact so get back"
+            ]
+          ]
+        }
+      ],
+      "decided": "b"
+    },
+    {
+      "id": "A12",
+      "group": "breaks",
+      "title": "A 16-word cut lands mid-phrase",
+      "input": {
+        "live": [
+          [
+            "Hey yo my name is Nate",
+            1.69,
+            3.43,
+            "ay yo, my name is Nate,"
+          ],
+          [
+            "and I'm willing to say that it's about to be a good",
+            4.33,
+            7.73,
+            "and i'm willing to say, that its about to be a good"
+          ],
+          [
+            "day",
+            7.69,
+            7.99,
+            ""
+          ],
+          [
+            "but if I pray then I don't know because you gotta hear",
+            8.89,
+            13.99,
+            "but, if i pray, then i don't know, because, you gotta hear"
+          ],
+          [
+            "the flow to trust the road and every time I know she",
+            13.69,
+            18.09,
+            "the flow, to trust the road, and every time i know, she"
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Leave the cuts where the live recognizer made them (lone “day” joins the line before)",
+          "sheet": [
+            [
+              "ay yo, my name is Nate"
+            ],
+            [
+              "and i'm willing to say, that its about to be a good day"
+            ],
+            [
+              "but, if i pray, then i don't know, because, you gotta hear"
+            ],
+            [
+              "the flow, to trust the road, and every time i know, she"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Re-cut at Whisper's commas (a comma ends the line once it has 4 words or more), commas kept",
+          "sheet": [
+            [
+              "ay yo, my name is Nate"
+            ],
+            [
+              "and i'm willing to say"
+            ],
+            [
+              "that its about to be a good day"
+            ],
+            [
+              "but, if i pray"
+            ],
+            [
+              "then i don't know"
+            ],
+            [
+              "because, you gotta hear the flow"
+            ],
+            [
+              "to trust the road"
+            ],
+            [
+              "and every time i know, she"
+            ]
+          ]
+        }
+      ],
+      "decided": "b"
+    },
+    {
+      "id": "A7",
+      "group": "breaks",
+      "title": "Two words left over after a cut",
+      "input": {
+        "live": [
+          [
+            "and I'm willing to say that it's about to be a good",
+            4.3,
+            7.7
+          ],
+          [
+            "day bro",
+            8.7,
+            9.3
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Two lines: two words can stand alone",
+          "sheet": [
+            [
+              "and I'm willing to say that it's about to be a good"
+            ],
+            [
+              "day bro"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Joined: up to 3 words right after a line that was cut mid-phrase pull up into it",
+          "sheet": [
+            [
+              "and I'm willing to say that it's about to be a good day bro"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "Joined only when Whisper puts no comma or period at the end of the first line",
+          "sheet": [
+            [
+              "and I'm willing to say that it's about to be a good day bro"
+            ]
+          ]
+        }
+      ],
+      "decided": null
+    },
+    {
+      "id": "A13",
+      "group": "breaks",
+      "title": "Slow singing with a pause after every two or three words",
+      "input": {
+        "live": [
+          [
+            "hold me",
+            2.0,
+            2.8
+          ],
+          [
+            "close tonight",
+            3.9,
+            4.9
+          ],
+          [
+            "never let go",
+            6.0,
+            7.2
+          ],
+          [
+            "till the morning",
+            8.3,
+            9.5
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Lines of two or three words, as sung",
+          "sheet": [
+            [
+              "hold me"
+            ],
+            [
+              "close tonight"
+            ],
+            [
+              "never let go"
+            ],
+            [
+              "till the morning"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Short bits join up until a line has 5 words or the pause is over 2 s",
+          "sheet": [
+            [
+              "hold me close tonight never let go"
+            ],
+            [
+              "till the morning"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "Join everything until a pause over 2 s",
+          "sheet": [
+            [
+              "hold me close tonight never let go till the morning"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "A8",
+      "group": "breaks",
+      "title": "One breath that Whisper punctuates into three phrases",
+      "input": {
+        "live": [
+          [
+            "Are you testing out another hot mic we're getting after it looked for a hot pic",
+            2.43,
+            6.77,
+            "it's not another hot mic, we're getting after it, looking for a hot spike, yeah,"
+          ],
+          [
+            "yeah",
+            7.67,
+            7.97,
+            "yeah"
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "One line, as sung in one breath (the lone “yeah” joins it)",
+          "sheet": [
+            [
+              "it's not another hot mic, we're getting after it, looking for a hot spike, yeah, yeah"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Split at Whisper's commas, commas kept",
+          "sheet": [
+            [
+              "it's not another hot mic"
+            ],
+            [
+              "we're getting after it"
+            ],
+            [
+              "looking for a hot spike, yeah, yeah"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "Split only at periods and question marks",
+          "sheet": [
+            [
+              "it's not another hot mic, we're getting after it, looking for a hot spike, yeah, yeah"
+            ]
+          ]
+        }
+      ],
+      "decided": "b"
+    },
+    {
+      "id": "A9",
+      "group": "breaks",
+      "title": "Stop pressed in the middle of a line",
+      "input": {
+        "live": [
+          [
+            "yo yo you already know",
+            7.0,
+            9.0
+          ],
+          [
+            "I'm about to",
+            10.0,
+            10.9,
+            "",
+            true
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Keep it, it's what you sang",
+          "sheet": [
+            [
+              "yo, yo, you already know"
+            ],
+            [
+              "I'm about to"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Drop a last line under 4 words",
+          "sheet": [
+            [
+              "yo, yo, you already know"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "Keep it, with a stop mark",
+          "sheet": [
+            [
+              "yo, yo, you already know"
+            ],
+            [
+              "I'm about to ⏹"
+            ]
+          ]
+        }
+      ],
+      "decided": "c"
+    },
+    {
+      "id": "A10",
+      "group": "breaks",
+      "title": "A two-word pickup before a long line",
+      "input": {
+        "live": [
+          [
+            "Damn brother",
+            1.93,
+            2.49
+          ],
+          [
+            "everybody got a mother and another lover but I got a little something for my other",
+            3.39,
+            7.99
+          ],
+          [
+            "lover",
+            8.19,
+            8.49
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "The pickup is its own line",
+          "sheet": [
+            [
+              "damn brother"
+            ],
+            [
+              "everybody got a mother and another lover but I got a little something for my other lover"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "The pickup joins the line after it",
+          "sheet": [
+            [
+              "damn brother everybody got a mother and another lover but I got a little something for my other lover"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "A6",
+      "group": "strays",
+      "title": "One word left hanging after a cut",
+      "input": {
+        "live": [
+          [
+            "and I'm willing to say that it's about to be a good",
+            4.33,
+            7.73
+          ],
+          [
+            "day",
+            7.69,
+            7.99
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Joins the line before",
+          "sheet": [
+            [
+              "and I'm willing to say that it's about to be a good day"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Its own line",
+          "sheet": [
+            [
+              "and I'm willing to say that it's about to be a good"
+            ],
+            [
+              "day"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "B2",
+      "group": "strays",
+      "title": "One word before the first line",
+      "input": {
+        "live": [
+          [
+            "Yo",
+            1.0,
+            1.3
+          ],
+          [
+            "my name is Nate",
+            2.0,
+            3.2
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Joins the line after, with a comma",
+          "sheet": [
+            [
+              "yo, my name is Nate"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Its own line",
+          "sheet": [
+            [
+              "yo"
+            ],
+            [
+              "my name is Nate"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "A11",
+      "group": "strays",
+      "title": "A “yeah” that lands as its own line",
+      "input": {
+        "live": [
+          [
+            "That boy",
+            35.09,
+            35.39
+          ],
+          [
+            "yeah",
+            36.33,
+            36.63
+          ],
+          [
+            "Do you know I'm that guy yeah",
+            38.09,
+            40.53
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Joins the line before, with a comma: “That boy, yeah”",
+          "sheet": [
+            [
+              "that boy, yeah"
+            ],
+            [
+              "do you know I'm that guy, yeah"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Joins the line after",
+          "sheet": [
+            [
+              "that boy"
+            ],
+            [
+              "yeah, Do you know I'm that guy, yeah"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "Dropped",
+          "sheet": [
+            [
+              "that boy"
+            ],
+            [
+              "do you know I'm that guy, yeah"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "B3",
+      "group": "strays",
+      "title": "An ad-lib on its own between two lines",
+      "input": {
+        "live": [
+          [
+            "Try killing all these lines on these killer tracks",
+            11.67,
+            13.83
+          ],
+          [
+            "yeah",
+            14.5,
+            14.8
+          ],
+          [
+            "and every time I be spitting raps they listen to me",
+            15.7,
+            19.2
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Joins the line before, with a comma",
+          "sheet": [
+            [
+              "try killing all these lines on these killer tracks, yeah"
+            ],
+            [
+              "and every time I be spitting raps they listen to me"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Joins the line after",
+          "sheet": [
+            [
+              "try killing all these lines on these killer tracks"
+            ],
+            [
+              "yeah, and every time I be spitting raps they listen to me"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "Its own line",
+          "sheet": [
+            [
+              "try killing all these lines on these killer tracks"
+            ],
+            [
+              "yeah"
+            ],
+            [
+              "and every time I be spitting raps they listen to me"
+            ]
+          ]
+        },
+        {
+          "key": "d",
+          "label": "Dropped",
+          "sheet": [
+            [
+              "try killing all these lines on these killer tracks"
+            ],
+            [
+              "and every time I be spitting raps they listen to me"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "B4",
+      "group": "strays",
+      "title": "A line that starts with an ad-lib",
+      "input": {
+        "live": [
+          [
+            "yeah that's necessary",
+            13.67,
+            15.23
+          ],
+          [
+            "yeah come around",
+            16.33,
+            17.83
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Keep every word as sung",
+          "sheet": [
+            [
+              "yeah, that's necessary"
+            ],
+            [
+              "yeah, come around"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Strip a leading yeah / uh / ay",
+          "sheet": [
+            [
+              "that's necessary"
+            ],
+            [
+              "come around"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "B6",
+      "group": "strays",
+      "title": "A stutter line",
+      "input": {
+        "live": [
+          [
+            "And she gotta know",
+            24.79,
+            25.83
+          ],
+          [
+            "Shazam",
+            27.83,
+            28.13
+          ],
+          [
+            "Cause I'm cause I'm cause I'm",
+            30.59,
+            32.79
+          ],
+          [
+            "That boy",
+            35.09,
+            35.39
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Keep it word for word",
+          "sheet": [
+            [
+              "and she gotta know, Shazam"
+            ],
+            [
+              "cause I'm cause I'm cause I'm"
+            ],
+            [
+              "that boy"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Collapse the repeat: “Cause I'm”",
+          "sheet": [
+            [
+              "and she gotta know, Shazam"
+            ],
+            [
+              "cause I'm"
+            ],
+            [
+              "that boy"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "Drop it, it's not a lyric",
+          "sheet": [
+            [
+              "and she gotta know, Shazam"
+            ],
+            [
+              "that boy"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "B7",
+      "group": "strays",
+      "title": "A false start inside a line",
+      "input": {
+        "words": [
+          [
+            "I'm",
+            2.87
+          ],
+          [
+            "I'm",
+            3.37
+          ],
+          [
+            "feeling",
+            3.67
+          ],
+          [
+            "good",
+            3.97
+          ]
+        ],
+        "fixes": [
+          "I'm feeling good"
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Whisper's clean line",
+          "sheet": [
+            [
+              "I'm feeling good"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Keep the stutter as heard live",
+          "sheet": [
+            [
+              "I'm I'm feeling good"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "B8",
+      "group": "strays",
+      "title": "A false start, then the line for real",
+      "input": {
+        "live": [
+          [
+            "I'm feeling",
+            2.87,
+            3.4
+          ],
+          [
+            "I'm feeling good tonight",
+            4.9,
+            6.3
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "One line, 2 versions, the real one shows",
+          "sheet": [
+            [
+              "I'm feeling",
+              "I'm feeling good tonight"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "The false start is dropped",
+          "sheet": [
+            [
+              "I'm feeling good tonight"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "Two lines",
+          "sheet": [
+            [
+              "I'm feeling"
+            ],
+            [
+              "I'm feeling good tonight"
+            ]
+          ]
+        }
+      ],
+      "decided": "b"
+    },
+    {
+      "id": "B9",
+      "group": "strays",
+      "title": "Fillers inside a line",
+      "input": {
+        "live": [
+          [
+            "I'm like uh feeling good you know",
+            2.9,
+            5.1,
+            "I'm feeling good, you know"
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Whisper's line, fillers gone",
+          "sheet": [
+            [
+              "I'm feeling good, you know"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Every word as sung",
+          "sheet": [
+            [
+              "I'm like, uh, feeling good you know"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "B10",
+      "group": "strays",
+      "title": "Talking between takes",
+      "input": {
+        "live": [
+          [
+            "I'm feeling good tonight",
+            2.9,
+            4.4
+          ],
+          [
+            "hold on let me try that again",
+            7.0,
+            8.6
+          ],
+          [
+            "I'm feeling good tonight",
+            11.0,
+            12.5
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "The talk shows as a line (delete it yourself)",
+          "sheet": [
+            [
+              "I'm feeling good tonight",
+              "I'm feeling good tonight"
+            ],
+            [
+              "hold on let me try that again"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Lines that read like talk are dropped (Hot Mic guesses)",
+          "sheet": [
+            [
+              "I'm feeling good tonight",
+              "I'm feeling good tonight"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "Shown dimmed as “talk”, never a version",
+          "sheet": [
+            [
+              "I'm feeling good tonight",
+              "I'm feeling good tonight"
+            ],
+            [
+              "hold on let me try that again (talk)"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "B11",
+      "group": "strays",
+      "title": "Counting in",
+      "input": {
+        "live": [
+          [
+            "one two three four",
+            1.0,
+            2.5
+          ],
+          [
+            "I'm feeling good tonight",
+            3.5,
+            5.0
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Keep it as a line",
+          "sheet": [
+            [
+              "one two three four"
+            ],
+            [
+              "I'm feeling good tonight"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Drop a count-in (a line of only numbers right before a sung line)",
+          "sheet": [
+            [
+              "I'm feeling good tonight"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "Keep it, but it can never become a version",
+          "sheet": [
+            [
+              "one two three four"
+            ],
+            [
+              "I'm feeling good tonight"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "B12",
+      "group": "strays",
+      "title": "Scat and made-up words",
+      "input": {
+        "live": [
+          [
+            "glerp glerp glerp derp derp",
+            20.0,
+            23.0,
+            "glerp, glerp, glerp, 26000, derp, derp, derp,"
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Keep them",
+          "sheet": [
+            [
+              "glerp, glerp, glerp, 26000, derp, derp, derp"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Drop lines with no real words",
+          "sheet": []
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "B13",
+      "group": "strays",
+      "title": "Humming, beatboxing, no words",
+      "input": {
+        "live": [],
+        "takes": [
+          {
+            "id": "t1",
+            "at": 4.0,
+            "dur": 6.0,
+            "kind": "playing",
+            "text": "*humming*"
+          }
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Nothing on the sheet",
+          "sheet": []
+        },
+        {
+          "key": "b",
+          "label": "A “(humming)” marker where it happened",
+          "sheet": [
+            [
+              "(humming)"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "C1",
+      "group": "repeats",
+      "title": "The same line twice in a row, word for word",
+      "input": {
+        "live": [
+          [
+            "they listening to me and say what what",
+            23.7,
+            26.9
+          ],
+          [
+            "they listening to me and say what what",
+            29.9,
+            32.6
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Two lines",
+          "sheet": [
+            [
+              "they listening to me and say what what"
+            ],
+            [
+              "they listening to me and say what what"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "One line marked ×2",
+          "sheet": [
+            [
+              "they listening to me and say what what ×2"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "One line, 2 versions",
+          "sheet": [
+            [
+              "they listening to me and say what what",
+              "they listening to me and say what what"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "C2",
+      "group": "repeats",
+      "title": "A chorus test, as Whisper actually heard it",
+      "input": {
+        "live": [
+          [
+            "and every time I'll be spitting wraps they listen to me and",
+            14.97,
+            20.07,
+            "and every time i be spitting raps they listen to me and saying what what"
+          ],
+          [
+            "What but they listen to me and say what",
+            23.73,
+            26.93,
+            "what they listening to me and say what what"
+          ],
+          [
+            "But they listen to me and say why what",
+            29.87,
+            32.57,
+            "They listen to me and say what what"
+          ],
+          [
+            "What are they still listening to me say what",
+            35.53,
+            38.43,
+            "and they still listen to me and say what what"
+          ],
+          [
+            "Yeah",
+            40.67,
+            40.97,
+            "Yeah"
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Four lines, written out",
+          "sheet": [
+            [
+              "and every time i be spitting raps they listen to me and saying what what"
+            ],
+            [
+              "what they listening to me and say what what"
+            ],
+            [
+              "they listen to me and say what what"
+            ],
+            [
+              "and they still listen to me and say what what, Yeah"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "First line, then one hook line with 3 versions",
+          "sheet": [
+            [
+              "and every time i be spitting raps they listen to me and saying what what"
+            ],
+            [
+              "what they listening to me and say what what",
+              "they listen to me and say what what",
+              "and they still listen to me and say what what, Yeah"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "First line, then the hook once marked ×3",
+          "sheet": [
+            [
+              "and every time i be spitting raps they listen to me and saying what what"
+            ],
+            [
+              "they listening to me and say what what ×3"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "C3",
+      "group": "repeats",
+      "title": "The same line again right away, one word changed",
+      "input": {
+        "live": [
+          [
+            "I'm feeling good tonight",
+            2.9,
+            4.4
+          ],
+          [
+            "I'm feeling fine tonight",
+            5.4,
+            6.9
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Two lines: back to back means you meant it twice",
+          "sheet": [
+            [
+              "I'm feeling good tonight"
+            ],
+            [
+              "I'm feeling fine tonight"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "One line, 2 versions: back to back means you redid it",
+          "sheet": [
+            [
+              "I'm feeling good tonight",
+              "I'm feeling fine tonight"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "Two lines, unless only one word changed (then a version)",
+          "sheet": [
+            [
+              "I'm feeling good tonight",
+              "I'm feeling fine tonight"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "C4",
+      "group": "repeats",
+      "title": "A line reworked one line later (the loop)",
+      "input": {
+        "live": [
+          [
+            "streetlights humming in a minor key",
+            2.0,
+            4.0
+          ],
+          [
+            "counting all the cars that never stop",
+            5.0,
+            7.5
+          ],
+          [
+            "streetlights buzzing in a minor key",
+            9.0,
+            11.0
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Two lines, the first with 2 versions",
+          "sheet": [
+            [
+              "streetlights humming in a minor key",
+              "streetlights buzzing in a minor key"
+            ],
+            [
+              "counting all the cars that never stop"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Three lines",
+          "sheet": [
+            [
+              "streetlights humming in a minor key"
+            ],
+            [
+              "counting all the cars that never stop"
+            ],
+            [
+              "streetlights buzzing in a minor key"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "C11",
+      "group": "repeats",
+      "title": "A 2-bar loop, three times round",
+      "input": {
+        "live": [
+          [
+            "I'm feeling good",
+            2.87,
+            4.13
+          ],
+          [
+            "and you're feeling all right",
+            5.03,
+            6.53
+          ],
+          [
+            "I know I'm feeling good",
+            8.97,
+            10.23
+          ],
+          [
+            "Feeling all right",
+            12.23,
+            13.23
+          ],
+          [
+            "So I'm not feeling good",
+            15.23,
+            16.47
+          ],
+          [
+            "You're feeling all right",
+            18.23,
+            19.47
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "2 lines × 3 versions",
+          "sheet": [
+            [
+              "I'm feeling good",
+              "i know I'm feeling good",
+              "so I'm not feeling good"
+            ],
+            [
+              "and you're feeling all right",
+              "feeling all right",
+              "you're feeling all right"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "6 lines",
+          "sheet": [
+            [
+              "I'm feeling good"
+            ],
+            [
+              "and you're feeling all right"
+            ],
+            [
+              "i know I'm feeling good"
+            ],
+            [
+              "feeling all right"
+            ],
+            [
+              "so I'm not feeling good"
+            ],
+            [
+              "you're feeling all right"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "2 lines marked ×3",
+          "sheet": [
+            [
+              "I'm feeling good ×3"
+            ],
+            [
+              "and you're feeling all right ×3"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "C5",
+      "group": "repeats",
+      "title": "Half the words changed",
+      "input": {
+        "live": [
+          [
+            "streetlights humming in a minor key",
+            2.0,
+            4.0
+          ],
+          [
+            "counting all the cars that never stop",
+            5.0,
+            7.5
+          ],
+          [
+            "headlights buzzing in a major key",
+            9.0,
+            11.0
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "A version (half the words match)",
+          "sheet": [
+            [
+              "streetlights humming in a minor key",
+              "headlights buzzing in a major key"
+            ],
+            [
+              "counting all the cars that never stop"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "A new line (needs more than half)",
+          "sheet": [
+            [
+              "streetlights humming in a minor key"
+            ],
+            [
+              "counting all the cars that never stop"
+            ],
+            [
+              "headlights buzzing in a major key"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "A version when the line ends the same way (the rhyme word matches)",
+          "sheet": [
+            [
+              "streetlights humming in a minor key",
+              "headlights buzzing in a major key"
+            ],
+            [
+              "counting all the cars that never stop"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "C6",
+      "group": "repeats",
+      "title": "Same start, different ending",
+      "input": {
+        "live": [
+          [
+            "I'm feeling good tonight",
+            2.9,
+            4.4
+          ],
+          [
+            "and you're feeling alright",
+            5.4,
+            6.9
+          ],
+          [
+            "I'm feeling kinda tired",
+            8.0,
+            9.5
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "A version",
+          "sheet": [
+            [
+              "I'm feeling good tonight",
+              "I'm feeling kinda tired"
+            ],
+            [
+              "and you're feeling alright"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "A new line",
+          "sheet": [
+            [
+              "I'm feeling good tonight"
+            ],
+            [
+              "and you're feeling alright"
+            ],
+            [
+              "I'm feeling kinda tired"
+            ]
+          ]
+        }
+      ],
+      "decided": "b"
+    },
+    {
+      "id": "C7",
+      "group": "repeats",
+      "title": "Two lines that rhyme",
+      "input": {
+        "live": [
+          [
+            "Do you know I'm that guy yeah",
+            38.09,
+            40.53
+          ],
+          [
+            "and everybody fly yeah",
+            41.43,
+            43.43
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Two lines",
+          "sheet": [
+            [
+              "do you know I'm that guy, yeah"
+            ],
+            [
+              "and everybody fly, yeah"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "One line, 2 versions",
+          "sheet": [
+            [
+              "do you know I'm that guy, yeah",
+              "and everybody fly, yeah"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "C8",
+      "group": "repeats",
+      "title": "Two short lines that match by fluke",
+      "input": {
+        "live": [
+          [
+            "that boy",
+            10.0,
+            10.4
+          ],
+          [
+            "run it back",
+            12.0,
+            13.0
+          ],
+          [
+            "that guy",
+            15.0,
+            15.4
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Three lines: a version needs at least 2 matching words",
+          "sheet": [
+            [
+              "that boy"
+            ],
+            [
+              "run it back"
+            ],
+            [
+              "that guy"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "“that guy” is a version of “that boy”",
+          "sheet": [
+            [
+              "that boy",
+              "that guy"
+            ],
+            [
+              "run it back"
+            ]
+          ]
+        }
+      ],
+      "decided": "b"
+    },
+    {
+      "id": "C9",
+      "group": "repeats",
+      "title": "The hook comes back with an extra yeah",
+      "input": {
+        "live": [
+          [
+            "they listening to me and say what what",
+            23.7,
+            26.9
+          ],
+          [
+            "run it back",
+            28.0,
+            29.0
+          ],
+          [
+            "they listening to me and say what what yeah",
+            30.0,
+            33.0
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "A repeat: yeah / uh / ay on the ends are ignored when comparing",
+          "sheet": [
+            [
+              "they listening to me and say what what"
+            ],
+            [
+              "run it back"
+            ],
+            [
+              "they listening to me and say what what, yeah"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "A version (the words differ)",
+          "sheet": [
+            [
+              "they listening to me and say what what",
+              "they listening to me and say what what, yeah"
+            ],
+            [
+              "run it back"
+            ]
+          ]
+        }
+      ],
+      "decided": null
+    },
+    {
+      "id": "C10",
+      "group": "repeats",
+      "title": "Call and response",
+      "input": {
+        "live": [
+          [
+            "say what",
+            10.0,
+            10.5
+          ],
+          [
+            "what",
+            11.2,
+            11.4
+          ],
+          [
+            "say what",
+            12.0,
+            12.5
+          ],
+          [
+            "what",
+            13.2,
+            13.4
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Two lines: “say what what” twice",
+          "sheet": [
+            [
+              "say what, what"
+            ],
+            [
+              "say what, what"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Four lines, as sung",
+          "sheet": [
+            [
+              "say what"
+            ],
+            [
+              "what"
+            ],
+            [
+              "say what"
+            ],
+            [
+              "what"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "One line marked ×2",
+          "sheet": [
+            [
+              "say what, what ×2"
+            ]
+          ]
+        },
+        {
+          "key": "d",
+          "label": "One line, 2 versions",
+          "sheet": [
+            [
+              "say what, what",
+              "say what, what"
+            ]
+          ]
+        }
+      ],
+      "decided": null
+    },
+    {
+      "id": "C12",
+      "group": "repeats",
+      "title": "A 4-bar loop, twice round",
+      "input": {
+        "live": [
+          [
+            "streetlights humming in a minor key",
+            2.0,
+            4.0
+          ],
+          [
+            "counting all the cars that never stop",
+            5.0,
+            7.5
+          ],
+          [
+            "every window lit but nobody home",
+            8.5,
+            10.5
+          ],
+          [
+            "I keep driving till the morning comes",
+            11.5,
+            13.5
+          ],
+          [
+            "streetlights buzzing in a minor key",
+            15.0,
+            17.0
+          ],
+          [
+            "counting every car that never stops",
+            18.0,
+            20.5
+          ],
+          [
+            "every window lit and nobody home",
+            21.5,
+            23.5
+          ],
+          [
+            "I keep driving till the morning calls",
+            24.5,
+            26.5
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "4 lines × 2 versions",
+          "sheet": [
+            [
+              "streetlights humming in a minor key",
+              "streetlights buzzing in a minor key"
+            ],
+            [
+              "counting all the cars that never stop",
+              "counting every car that never stops"
+            ],
+            [
+              "every window lit but nobody home",
+              "every window lit and nobody home"
+            ],
+            [
+              "i keep driving till the morning comes",
+              "i keep driving till the morning calls"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "8 lines",
+          "sheet": [
+            [
+              "streetlights humming in a minor key"
+            ],
+            [
+              "counting all the cars that never stop"
+            ],
+            [
+              "every window lit but nobody home"
+            ],
+            [
+              "i keep driving till the morning comes"
+            ],
+            [
+              "streetlights buzzing in a minor key"
+            ],
+            [
+              "counting every car that never stops"
+            ],
+            [
+              "every window lit and nobody home"
+            ],
+            [
+              "i keep driving till the morning calls"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "C13",
+      "group": "repeats",
+      "title": "How far back does a line look for its earlier self?",
+      "input": {
+        "live": [
+          [
+            "streetlights humming in a minor key",
+            2.0,
+            4.0
+          ],
+          [
+            "counting all the cars that never stop",
+            5.0,
+            7.5
+          ],
+          [
+            "every window lit but nobody home",
+            8.5,
+            10.5
+          ],
+          [
+            "I keep driving till the morning comes",
+            11.5,
+            13.5
+          ],
+          [
+            "radio static in a borrowed car",
+            15.0,
+            17.0
+          ],
+          [
+            "gas light blinking like a falling star",
+            18.0,
+            20.0
+          ],
+          [
+            "nothing out here but the open road",
+            21.0,
+            23.0
+          ],
+          [
+            "and a name I never said out loud",
+            24.0,
+            26.0
+          ],
+          [
+            "streetlights buzzing in a minor key",
+            27.5,
+            29.5
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Anywhere in the session: it's a version of line 1",
+          "sheet": [
+            [
+              "streetlights humming in a minor key",
+              "streetlights buzzing in a minor key"
+            ],
+            [
+              "counting all the cars that never stop"
+            ],
+            [
+              "every window lit but nobody home"
+            ],
+            [
+              "i keep driving till the morning comes"
+            ],
+            [
+              "radio static in a borrowed car"
+            ],
+            [
+              "gas light blinking like a falling star"
+            ],
+            [
+              "nothing out here but the open road"
+            ],
+            [
+              "and a name I never said out loud"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Only the last 4 lines count: it's a new line",
+          "sheet": [
+            [
+              "streetlights humming in a minor key"
+            ],
+            [
+              "counting all the cars that never stop"
+            ],
+            [
+              "every window lit but nobody home"
+            ],
+            [
+              "i keep driving till the morning comes"
+            ],
+            [
+              "radio static in a borrowed car"
+            ],
+            [
+              "gas light blinking like a falling star"
+            ],
+            [
+              "nothing out here but the open road"
+            ],
+            [
+              "and a name I never said out loud"
+            ],
+            [
+              "streetlights buzzing in a minor key"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "Only the last 8 lines count: it's a version",
+          "sheet": [
+            [
+              "streetlights humming in a minor key",
+              "streetlights buzzing in a minor key"
+            ],
+            [
+              "counting all the cars that never stop"
+            ],
+            [
+              "every window lit but nobody home"
+            ],
+            [
+              "i keep driving till the morning comes"
+            ],
+            [
+              "radio static in a borrowed car"
+            ],
+            [
+              "gas light blinking like a falling star"
+            ],
+            [
+              "nothing out here but the open road"
+            ],
+            [
+              "and a name I never said out loud"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "C15",
+      "group": "repeats",
+      "title": "A whole verse sung again with changes",
+      "input": {
+        "live": [
+          [
+            "streetlights humming in a minor key",
+            2.0,
+            4.0
+          ],
+          [
+            "counting all the cars that never stop",
+            5.0,
+            7.5
+          ],
+          [
+            "every window lit but nobody home",
+            8.5,
+            10.5
+          ],
+          [
+            "I keep driving till the morning comes",
+            11.5,
+            13.5
+          ],
+          [
+            "streetlights buzzing in a minor key",
+            16.5,
+            18.5
+          ],
+          [
+            "counting every car that never stops",
+            19.5,
+            22.0
+          ],
+          [
+            "every window lit and nobody home",
+            23.0,
+            25.0
+          ],
+          [
+            "I keep driving till the morning calls",
+            26.0,
+            28.0
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Line by line: 4 lines × 2 versions, flip each line",
+          "sheet": [
+            [
+              "streetlights humming in a minor key",
+              "streetlights buzzing in a minor key"
+            ],
+            [
+              "counting all the cars that never stop",
+              "counting every car that never stops"
+            ],
+            [
+              "every window lit but nobody home",
+              "every window lit and nobody home"
+            ],
+            [
+              "i keep driving till the morning comes",
+              "i keep driving till the morning calls"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "A second copy of the verse: 8 lines",
+          "sheet": [
+            [
+              "streetlights humming in a minor key"
+            ],
+            [
+              "counting all the cars that never stop"
+            ],
+            [
+              "every window lit but nobody home"
+            ],
+            [
+              "i keep driving till the morning comes"
+            ],
+            [
+              "streetlights buzzing in a minor key"
+            ],
+            [
+              "counting every car that never stops"
+            ],
+            [
+              "every window lit and nobody home"
+            ],
+            [
+              "i keep driving till the morning calls"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "One section with Take 1 / Take 2: flip the whole verse at once (a bigger build)",
+          "sheet": [
+            [
+              "streetlights humming in a minor key",
+              "streetlights buzzing in a minor key"
+            ],
+            [
+              "counting all the cars that never stop",
+              "counting every car that never stops"
+            ],
+            [
+              "every window lit but nobody home",
+              "every window lit and nobody home"
+            ],
+            [
+              "i keep driving till the morning comes",
+              "i keep driving till the morning calls"
+            ]
+          ]
+        }
+      ],
+      "decided": "c"
+    },
+    {
+      "id": "C16",
+      "group": "repeats",
+      "title": "Drilling a hook five times in a row",
+      "input": {
+        "live": [
+          [
+            "they listening to me and say what what",
+            10.0,
+            13.0
+          ],
+          [
+            "they listening to me and say what what",
+            14.0,
+            17.0
+          ],
+          [
+            "they listening to me and say what what",
+            18.0,
+            21.0
+          ],
+          [
+            "they listening to me and say what what",
+            22.0,
+            25.0
+          ],
+          [
+            "they listening to me and say what what",
+            26.0,
+            29.0
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Five lines",
+          "sheet": [
+            [
+              "they listening to me and say what what"
+            ],
+            [
+              "they listening to me and say what what"
+            ],
+            [
+              "they listening to me and say what what"
+            ],
+            [
+              "they listening to me and say what what"
+            ],
+            [
+              "they listening to me and say what what"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "One line marked ×5",
+          "sheet": [
+            [
+              "they listening to me and say what what ×5"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "One line, 5 versions",
+          "sheet": [
+            [
+              "they listening to me and say what what",
+              "they listening to me and say what what",
+              "they listening to me and say what what",
+              "they listening to me and say what what",
+              "they listening to me and say what what"
+            ]
+          ]
+        }
+      ],
+      "decided": "b"
+    },
+    {
+      "id": "C18",
+      "group": "repeats",
+      "title": "Record again into the same session, rework an old line",
+      "input": {
+        "live": [
+          [
+            "streetlights humming in a minor key",
+            2.0,
+            4.0
+          ],
+          [
+            "counting all the cars that never stop",
+            5.0,
+            7.5
+          ],
+          [
+            "streetlights buzzing in a minor key",
+            52.0,
+            54.0
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Same song: it's a version of the old line",
+          "sheet": [
+            [
+              "streetlights humming in a minor key",
+              "streetlights buzzing in a minor key"
+            ],
+            [
+              "counting all the cars that never stop"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "A new recording starts fresh: a new line",
+          "sheet": [
+            [
+              "streetlights humming in a minor key"
+            ],
+            [
+              "counting all the cars that never stop"
+            ],
+            [
+              "streetlights buzzing in a minor key"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "C17",
+      "group": "repeats",
+      "title": "A starred version against a newer one",
+      "harness": false,
+      "input": {
+        "live": [
+          [
+            "I'm feeling good tonight",
+            2.9,
+            4.4
+          ],
+          [
+            "I'm feeling fine tonight",
+            9.0,
+            10.5
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "The starred one shows",
+          "sheet": [
+            [
+              "★ I'm feeling good tonight",
+              "I'm feeling fine tonight"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "The newest always shows",
+          "sheet": [
+            [
+              "I'm feeling good tonight",
+              "I'm feeling fine tonight"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "C19",
+      "group": "repeats",
+      "title": "Which version shows when you haven't starred one",
+      "harness": false,
+      "input": {
+        "live": [
+          [
+            "I'm feeling good tonight",
+            2.9,
+            4.4
+          ],
+          [
+            "I'm feeling fine tonight",
+            9.0,
+            10.5
+          ],
+          [
+            "I'm feeling great tonight",
+            15.0,
+            16.5
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "The newest",
+          "sheet": [
+            [
+              "I'm feeling good tonight",
+              "I'm feeling fine tonight",
+              "I'm feeling great tonight"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "The first",
+          "sheet": [
+            [
+              "★ I'm feeling good tonight",
+              "I'm feeling fine tonight",
+              "I'm feeling great tonight"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "The one you sang the same way twice in a row (settled); else the newest",
+          "sheet": [
+            [
+              "I'm feeling good tonight",
+              "I'm feeling fine tonight",
+              "I'm feeling great tonight"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "C20",
+      "group": "repeats",
+      "title": "What Hot Mic should suggest as the best take of a line",
+      "harness": false,
+      "input": {
+        "live": []
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "No suggestion, just the newest",
+          "sheet": []
+        },
+        {
+          "key": "b",
+          "label": "The wording you sang the same way twice in a row (it settled)",
+          "sheet": []
+        },
+        {
+          "key": "c",
+          "label": "The longest, most complete one",
+          "sheet": []
+        },
+        {
+          "key": "d",
+          "label": "The one Whisper was surest about",
+          "sheet": []
+        }
+      ],
+      "decided": "b"
+    },
+    {
+      "id": "D1",
+      "group": "text",
+      "title": "Whisper hears it better than the live recognizer",
+      "input": {
+        "live": [
+          [
+            "Are you testing out another hot mic we're getting after it looked for a hot pic",
+            2.43,
+            6.77,
+            "it's not another hot mic, we're getting after it, looking for a hot spike, yeah,"
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Whisper's words show",
+          "sheet": [
+            [
+              "it's not another hot mic"
+            ],
+            [
+              "we're getting after it"
+            ],
+            [
+              "looking for a hot spike, yeah"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "The live words show",
+          "sheet": [
+            [
+              "are you testing out another hot mic we're getting after it looked for a hot pic"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "D2",
+      "group": "text",
+      "title": "Whisper hears it worse",
+      "input": {
+        "live": [
+          [
+            "that's the way it goes though",
+            61.21,
+            62.45,
+            "that's the way in Reno"
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Whisper's words show, always",
+          "sheet": [
+            [
+              "that's the way in Reno"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "The live words show, always",
+          "sheet": [
+            [
+              "that's the way it goes though"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "Whisper shows, and what was heard live stays one flip away (“heard live”)",
+          "sheet": [
+            [
+              "that's the way in Reno"
+            ]
+          ]
+        }
+      ],
+      "decided": null
+    },
+    {
+      "id": "D3",
+      "group": "text",
+      "title": "Whisper gives nothing back on a short line",
+      "input": {
+        "live": [
+          [
+            "Old road",
+            64.51,
+            65.01,
+            ""
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "The live words stay",
+          "sheet": [
+            [
+              "old road"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "The line is dropped",
+          "sheet": []
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "D4",
+      "group": "text",
+      "title": "Whisper's fix of one line swallows the start of the next",
+      "input": {
+        "live": [
+          [
+            "Around the harbor I would just walk every time I cross lines I get cold yeah",
+            55.41,
+            60.75,
+            "harbor all over this town, every time i cross lines i get cold, yeah, that's the way"
+          ],
+          [
+            "that's the way it goes though",
+            61.21,
+            62.45,
+            "that's the way in Reno"
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "As is (the words appear twice)",
+          "sheet": [
+            [
+              "harbor all over this town"
+            ],
+            [
+              "every time i cross lines i get cold"
+            ],
+            [
+              "yeah, that's the way"
+            ],
+            [
+              "that's the way in Reno"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Trim the overlap off the end of the first line",
+          "sheet": [
+            [
+              "harbor all over this town"
+            ],
+            [
+              "every time i cross lines i get cold, yeah"
+            ],
+            [
+              "that's the way in Reno"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "Trim it off the start of the second line",
+          "sheet": [
+            [
+              "harbor all over this town"
+            ],
+            [
+              "every time i cross lines i get cold"
+            ],
+            [
+              "yeah, that's the way"
+            ],
+            [
+              "in Reno"
+            ]
+          ]
+        }
+      ],
+      "decided": null
+    },
+    {
+      "id": "D6",
+      "group": "text",
+      "title": "The whole take's transcription is junk",
+      "input": {
+        "live": [
+          [
+            "yo yo yo",
+            2.0,
+            3.5
+          ],
+          [
+            "streetlights humming in a minor key",
+            5.0,
+            8.0
+          ]
+        ],
+        "takes": [
+          {
+            "id": "t1",
+            "at": 1.0,
+            "dur": 8.0,
+            "kind": "playing",
+            "text": "*sad music*"
+          }
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "The live lines stay",
+          "sheet": [
+            [
+              "yo yo yo"
+            ],
+            [
+              "streetlights humming in a minor key"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "The take wins: nothing",
+          "sheet": []
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "D7",
+      "group": "text",
+      "title": "An imported recording of a loop: Whisper collapses the repeats",
+      "input": {
+        "live": [],
+        "takes": [
+          {
+            "id": "t1",
+            "at": 0.0,
+            "dur": 21.5,
+            "kind": "playing",
+            "text": "so why am i feeling good, if you're feeling alright,",
+            "words": [
+              [
+                "so",
+                2.0,
+                2.3
+              ],
+              [
+                "why",
+                2.3,
+                2.6
+              ],
+              [
+                "am",
+                2.6,
+                2.8
+              ],
+              [
+                "i",
+                2.8,
+                3.1
+              ],
+              [
+                "feeling",
+                3.1,
+                3.5
+              ],
+              [
+                "good,",
+                3.5,
+                3.9
+              ],
+              [
+                "if",
+                4.5,
+                4.8
+              ],
+              [
+                "you're",
+                4.8,
+                5.1
+              ],
+              [
+                "feeling",
+                5.1,
+                5.5
+              ],
+              [
+                "alright,",
+                5.5,
+                6.0
+              ]
+            ]
+          }
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Two lines, what Whisper gives",
+          "sheet": [
+            [
+              "so why am i feeling good"
+            ],
+            [
+              "if you're feeling alright"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Nothing better is possible without live lines",
+          "sheet": [
+            [
+              "so why am i feeling good"
+            ],
+            [
+              "if you're feeling alright"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "D8",
+      "group": "text",
+      "title": "Whisper stops halfway through a long take",
+      "input": {
+        "live": [
+          [
+            "Cause I'm cause I'm cause I'm",
+            30.59,
+            32.79
+          ],
+          [
+            "That boy",
+            35.09,
+            35.39
+          ],
+          [
+            "yeah",
+            36.33,
+            36.63
+          ],
+          [
+            "Do you know I'm that guy yeah",
+            38.09,
+            40.53
+          ],
+          [
+            "and everybody fly yeah",
+            41.43,
+            43.43
+          ],
+          [
+            "Yeah",
+            46.39,
+            46.69
+          ],
+          [
+            "You missed the line yeah",
+            49.89,
+            51.59
+          ]
+        ],
+        "takes": [
+          {
+            "id": "t1",
+            "at": 0.0,
+            "dur": 55.2,
+            "kind": "playing",
+            "text": "damn brother, everybody got a mother and another lover, but i got a little something for my other lover, you call another brother, summer mother, i got another for the lover, summer, i'm in the suburbs and i got a boat, she gotta blow, yeah she gotta blow, cause i'm that fella, and she gotta know, cause i'm that,"
+          }
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Every live line shows",
+          "sheet": [
+            [
+              "cause I'm cause I'm cause I'm"
+            ],
+            [
+              "that boy, yeah"
+            ],
+            [
+              "do you know I'm that guy, yeah"
+            ],
+            [
+              "and everybody fly, yeah, Yeah"
+            ],
+            [
+              "you missed the line, yeah"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Only what Whisper transcribed",
+          "sheet": []
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "D9",
+      "group": "text",
+      "title": "A whispered line the live recognizer missed, that Whisper caught",
+      "input": {
+        "live": [
+          [
+            "I'm feeling good tonight",
+            2.9,
+            4.4,
+            "I'm feeling good tonight,"
+          ],
+          [
+            "and you're feeling alright",
+            9.0,
+            10.5,
+            "and you're feeling alright,"
+          ]
+        ],
+        "takes": [
+          {
+            "id": "t1",
+            "at": 0.0,
+            "dur": 12.0,
+            "kind": "playing",
+            "text": "i'm feeling good tonight, whisper it slow, and you're feeling alright,"
+          }
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Lost",
+          "sheet": [
+            [
+              "I'm feeling good tonight"
+            ],
+            [
+              "and you're feeling alright"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Whisper's extra words become a line in the gap",
+          "sheet": [
+            [
+              "I'm feeling good tonight"
+            ],
+            [
+              "whisper it slow"
+            ],
+            [
+              "and you're feeling alright"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "Shown dimmed as “Whisper also heard”",
+          "sheet": [
+            [
+              "I'm feeling good tonight"
+            ],
+            [
+              "whisper it slow (Whisper also heard)"
+            ],
+            [
+              "and you're feeling alright"
+            ]
+          ]
+        }
+      ],
+      "decided": null
+    },
+    {
+      "id": "D10",
+      "group": "text",
+      "title": "Slang",
+      "input": {
+        "live": [
+          [
+            "I'm finna go",
+            2.0,
+            3.0,
+            "I'm going to go"
+          ]
+        ],
+        "protect": [
+          "finna"
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Whisper's words",
+          "sheet": [
+            [
+              "I'm going to go"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "The live words whenever the two disagree",
+          "sheet": [
+            [
+              "I'm finna go"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "Your own word list (finna, aight, bruh…) that Whisper may not overwrite",
+          "sheet": [
+            [
+              "I'm finna go"
+            ]
+          ]
+        }
+      ],
+      "decided": "c"
+    },
+    {
+      "id": "D11",
+      "group": "text",
+      "title": "Names and numbers",
+      "input": {
+        "live": [
+          [
+            "hey yo my name is name",
+            1.69,
+            3.43,
+            "ay yo, my name is Nate,"
+          ],
+          [
+            "twenty six thousand on the dash",
+            5.0,
+            7.0,
+            "26000 on the dash"
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Whisper's spelling: Nate, 26000",
+          "sheet": [
+            [
+              "ay yo, my name is Nate"
+            ],
+            [
+              "26000 on the dash"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Numbers written out as words",
+          "sheet": [
+            [
+              "ay yo, my name is Nate"
+            ],
+            [
+              "twenty six thousand on the dash"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "The live words",
+          "sheet": [
+            [
+              "hey yo, my name is name"
+            ],
+            [
+              "twenty six thousand on the dash"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "D12",
+      "group": "text",
+      "title": "Whisper's commas and periods",
+      "compare": "exact",
+      "input": {
+        "live": [
+          [
+            "are you testing out another hot mic",
+            2.43,
+            6.77,
+            "it's not another hot mic, we're getting after it, looking for a hot spike, yeah,"
+          ],
+          [
+            "and do you know",
+            72.0,
+            72.75,
+            "Do you know?"
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "As Whisper writes them",
+          "sheet": [
+            [
+              "it's not another hot mic"
+            ],
+            [
+              "we're getting after it"
+            ],
+            [
+              "looking for a hot spike, yeah"
+            ],
+            [
+              "do you know?"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Drop trailing commas and periods, keep ? and !",
+          "sheet": [
+            [
+              "it's not another hot mic"
+            ],
+            [
+              "we're getting after it"
+            ],
+            [
+              "looking for a hot spike, yeah"
+            ],
+            [
+              "do you know?"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "No punctuation at all",
+          "sheet": [
+            [
+              "it's not another hot mic"
+            ],
+            [
+              "we're getting after it"
+            ],
+            [
+              "looking for a hot spike, yeah"
+            ],
+            [
+              "do you know"
+            ]
+          ]
+        }
+      ],
+      "decided": "b"
+    },
+    {
+      "id": "D13",
+      "group": "text",
+      "title": "Capital letters",
+      "compare": "exact",
+      "input": {
+        "live": [
+          [
+            "but they listen to me and say why what",
+            29.87,
+            32.57,
+            "They listen to me and say what what"
+          ],
+          [
+            "what are they still listening to me say what",
+            35.53,
+            38.43,
+            "and they still listen to me and say what what"
+          ],
+          [
+            "run it back",
+            40.0,
+            41.0
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "As Whisper writes them",
+          "sheet": [
+            [
+              "they listen to me and say what what"
+            ],
+            [
+              "and they still listen to me and say what what"
+            ],
+            [
+              "run it back"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Every line starts with a capital",
+          "sheet": [
+            [
+              "they listen to me and say what what"
+            ],
+            [
+              "and they still listen to me and say what what"
+            ],
+            [
+              "run it back"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "All lowercase except I and names",
+          "sheet": [
+            [
+              "they listen to me and say what what"
+            ],
+            [
+              "and they still listen to me and say what what"
+            ],
+            [
+              "run it back"
+            ]
+          ]
+        }
+      ],
+      "decided": "c"
+    },
+    {
+      "id": "E1",
+      "group": "rap",
+      "title": "Beat-mode rap: fragments, Whisper silent on most of them",
+      "input": {
+        "live": [
+          [
+            "And you",
+            52.85,
+            53.45,
+            ""
+          ],
+          [
+            "Around the harbor I would just walk every time I cross lines I get cold yeah",
+            55.41,
+            60.75,
+            "harbor all over this town, every time i cross lines i get cold, yeah, that's the way"
+          ],
+          [
+            "that's the way it goes though",
+            61.21,
+            62.45,
+            "that's the way in Reno"
+          ],
+          [
+            "Old road",
+            64.51,
+            65.01,
+            ""
+          ],
+          [
+            "Ferry",
+            67.21,
+            67.51,
+            ""
+          ],
+          [
+            "He knows",
+            69.71,
+            70.01,
+            ""
+          ],
+          [
+            "And do you know",
+            72.01,
+            72.75,
+            "Do you know?"
+          ],
+          [
+            "Did you know",
+            74.71,
+            75.25,
+            ""
+          ],
+          [
+            "and",
+            76.21,
+            76.51,
+            ""
+          ]
+        ],
+        "takes": [
+          {
+            "id": "rap1",
+            "at": 44.9,
+            "dur": 58.2,
+            "kind": "rap",
+            "text": "i'm on the night-bus, i'm riding north-side, on that side-road, and all-night, i'm off that ferry, and everybody wave, everybody follow me, a storm ain't stopping me, nothing gonna follow me, the other road's stopping me, the captain said it was wrong to me, the captain said it stopped me, the captain said it stopped me, and I got a lantern, and this guy got the lantern, and I'm only trying to find the harbor,"
+          }
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "The live fragments, as tonight",
+          "sheet": [
+            [
+              "and you"
+            ],
+            [
+              "harbor all over this town"
+            ],
+            [
+              "every time i cross lines i get cold"
+            ],
+            [
+              "yeah, that's the way"
+            ],
+            [
+              "that's the way in Reno"
+            ],
+            [
+              "old road, Ferry"
+            ],
+            [
+              "he knows"
+            ],
+            [
+              "do you know?"
+            ],
+            [
+              "did you know, and"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "When most fixes come back empty and the lines are fragments, the whole take's Whisper text stands in, cut at its commas (4-word rule)",
+          "sheet": [
+            [
+              "i'm on the night-bus"
+            ],
+            [
+              "i'm riding north-side, on that side-road"
+            ],
+            [
+              "and all-night, i'm off that ferry"
+            ],
+            [
+              "and everybody wave, everybody follow me"
+            ],
+            [
+              "a storm ain't stopping me"
+            ],
+            [
+              "nothing gonna follow me"
+            ],
+            [
+              "the other road's stopping me"
+            ],
+            [
+              "the captain said it was wrong to me"
+            ],
+            [
+              "the captain said it stopped me"
+            ],
+            [
+              "the captain said it stopped me"
+            ],
+            [
+              "and I got a lantern"
+            ],
+            [
+              "and this guy got the lantern"
+            ],
+            [
+              "and I'm only trying to find the harbor"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "Always the whole take's Whisper text for rap takes",
+          "sheet": [
+            [
+              "i'm on the night-bus"
+            ],
+            [
+              "i'm riding north-side"
+            ],
+            [
+              "on that side-road"
+            ],
+            [
+              "and all-night"
+            ],
+            [
+              "…"
+            ]
+          ]
+        },
+        {
+          "key": "d",
+          "label": "Whisper's phrases as the lines, the live fragments kept one flip away",
+          "sheet": [
+            [
+              "i'm on the night-bus"
+            ],
+            [
+              "i'm riding north-side"
+            ],
+            [
+              "on that side-road"
+            ],
+            [
+              "…"
+            ]
+          ]
+        }
+      ],
+      "decided": "b"
+    },
+    {
+      "id": "E2",
+      "group": "rap",
+      "title": "Over a beat: should lines follow the bars?",
+      "harness": false,
+      "input": {
+        "live": []
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Pauses and phrases, like Freestyle",
+          "sheet": []
+        },
+        {
+          "key": "b",
+          "label": "One bar per line",
+          "sheet": []
+        },
+        {
+          "key": "c",
+          "label": "Two bars per line",
+          "sheet": []
+        },
+        {
+          "key": "d",
+          "label": "Four bars per line",
+          "sheet": []
+        }
+      ],
+      "decided": null
+    },
+    {
+      "id": "E3",
+      "group": "rap",
+      "title": "A very quiet mic",
+      "harness": false,
+      "input": {
+        "live": []
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Nothing special",
+          "sheet": []
+        },
+        {
+          "key": "b",
+          "label": "Boost quiet line clips before Whisper hears them",
+          "sheet": []
+        },
+        {
+          "key": "c",
+          "label": "Just show a “your mic is quiet” notice while recording",
+          "sheet": []
+        }
+      ],
+      "decided": "b"
+    },
+    {
+      "id": "F1",
+      "group": "chords",
+      "title": "Chords under lines you sang over the guitar",
+      "input": {
+        "live": [
+          [
+            "I'm feeling good tonight",
+            2.9,
+            4.4
+          ],
+          [
+            "and you're feeling alright",
+            5.4,
+            6.9
+          ]
+        ],
+        "takes": [
+          {
+            "id": "t1",
+            "at": 0.0,
+            "dur": 10.0,
+            "kind": "playing",
+            "text": "i'm feeling good tonight, and you're feeling alright",
+            "chords": [
+              [
+                "G",
+                0.0,
+                4.8
+              ],
+              [
+                "C",
+                4.8,
+                10.0
+              ]
+            ]
+          }
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Each line shows the chord under it",
+          "sheet": [
+            [
+              {
+                "text": "I'm feeling good tonight",
+                "chords": [
+                  "G"
+                ]
+              }
+            ],
+            [
+              {
+                "text": "and you're feeling alright",
+                "chords": [
+                  "C"
+                ]
+              }
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "No chords on live lines",
+          "sheet": [
+            [
+              "I'm feeling good tonight"
+            ],
+            [
+              "and you're feeling alright"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "F2",
+      "group": "chords",
+      "title": "Chords “heard” in a voice-only take",
+      "input": {
+        "live": [
+          [
+            "I'm feeling good tonight",
+            2.9,
+            4.4
+          ],
+          [
+            "and you're feeling alright",
+            5.4,
+            6.9
+          ]
+        ],
+        "takes": [
+          {
+            "id": "t1",
+            "at": 0.0,
+            "dur": 10.0,
+            "kind": "rap",
+            "text": "i'm feeling good tonight, and you're feeling alright",
+            "chords": [
+              [
+                "A",
+                0.0,
+                4.8
+              ],
+              [
+                "D",
+                4.8,
+                10.0
+              ]
+            ]
+          }
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Show them anyway",
+          "sheet": [
+            [
+              {
+                "text": "I'm feeling good tonight",
+                "chords": [
+                  "A"
+                ]
+              }
+            ],
+            [
+              {
+                "text": "and you're feeling alright",
+                "chords": [
+                  "D"
+                ]
+              }
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Chords only when an instrument was heard (take kind “playing”)",
+          "sheet": [
+            [
+              "I'm feeling good tonight"
+            ],
+            [
+              "and you're feeling alright"
+            ]
+          ]
+        }
+      ],
+      "decided": "b"
+    },
+    {
+      "id": "G1",
+      "group": "song",
+      "title": "Lines saved out of time order",
+      "input": {
+        "live": [
+          [
+            "and you're feeling alright",
+            5.0,
+            6.5
+          ],
+          [
+            "I'm feeling good tonight",
+            2.0,
+            3.5
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "In the order sung",
+          "sheet": [
+            [
+              "I'm feeling good tonight"
+            ],
+            [
+              "and you're feeling alright"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "In the order saved",
+          "sheet": [
+            [
+              "and you're feeling alright"
+            ],
+            [
+              "I'm feeling good tonight"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "G6",
+      "group": "song",
+      "title": "Two takes in one session",
+      "input": {
+        "live": [
+          [
+            "streetlights humming in a minor key",
+            2.0,
+            4.0
+          ],
+          [
+            "counting all the cars that never stop",
+            5.0,
+            7.5
+          ],
+          [
+            "every window lit but nobody home",
+            16.0,
+            18.0
+          ],
+          [
+            "I keep driving till the morning comes",
+            19.0,
+            21.0
+          ]
+        ],
+        "takes": [
+          {
+            "id": "t1",
+            "at": 1.0,
+            "dur": 7.5,
+            "kind": "playing",
+            "text": "streetlights humming in a minor key, counting all the cars that never stop,"
+          },
+          {
+            "id": "t2",
+            "at": 15.0,
+            "dur": 7.0,
+            "kind": "playing",
+            "text": "every window lit but nobody home, i keep driving till the morning comes,"
+          }
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "One run of lines, no sections until you add one",
+          "sheet": [
+            [
+              "streetlights humming in a minor key"
+            ],
+            [
+              "counting all the cars that never stop"
+            ],
+            [
+              "every window lit but nobody home"
+            ],
+            [
+              "i keep driving till the morning comes"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Each take becomes a section",
+          "sheet": [
+            [
+              "streetlights humming in a minor key"
+            ],
+            [
+              "counting all the cars that never stop"
+            ],
+            [
+              "every window lit but nobody home"
+            ],
+            [
+              "i keep driving till the morning comes"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "G4",
+      "group": "song",
+      "title": "A long silence between lines",
+      "harness": false,
+      "input": {
+        "live": []
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Nothing happens",
+          "sheet": []
+        },
+        {
+          "key": "b",
+          "label": "A dotted “new part?” hint at the gap; one click adds the section",
+          "sheet": []
+        },
+        {
+          "key": "c",
+          "label": "A section is added for you",
+          "sheet": []
+        }
+      ],
+      "decided": null
+    },
+    {
+      "id": "G5",
+      "group": "song",
+      "title": "A whole song: verse, chorus twice, verse, chorus twice",
+      "input": {
+        "live": [
+          [
+            "streetlights humming in a minor key",
+            2.0,
+            4.0
+          ],
+          [
+            "counting all the cars that never stop",
+            5.0,
+            7.5
+          ],
+          [
+            "every window lit but nobody home",
+            8.5,
+            10.5
+          ],
+          [
+            "I keep driving till the morning comes",
+            11.5,
+            13.5
+          ],
+          [
+            "they listening to me and say what what",
+            15.0,
+            18.0
+          ],
+          [
+            "they listening to me and say what what",
+            19.0,
+            22.0
+          ],
+          [
+            "radio static in a borrowed car",
+            24.0,
+            26.0
+          ],
+          [
+            "gas light blinking like a falling star",
+            27.0,
+            29.0
+          ],
+          [
+            "nothing out here but the open road",
+            30.0,
+            32.0
+          ],
+          [
+            "and a name I never said out loud",
+            33.0,
+            35.0
+          ],
+          [
+            "they listening to me and say what what",
+            37.0,
+            40.0
+          ],
+          [
+            "they listening to me and say what what",
+            41.0,
+            44.0
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Written out every time: 12 lines",
+          "sheet": [
+            [
+              "streetlights humming in a minor key"
+            ],
+            [
+              "counting all the cars that never stop"
+            ],
+            [
+              "every window lit but nobody home"
+            ],
+            [
+              "i keep driving till the morning comes"
+            ],
+            [
+              "they listening to me and say what what"
+            ],
+            [
+              "they listening to me and say what what"
+            ],
+            [
+              "radio static in a borrowed car"
+            ],
+            [
+              "gas light blinking like a falling star"
+            ],
+            [
+              "nothing out here but the open road"
+            ],
+            [
+              "and a name I never said out loud"
+            ],
+            [
+              "they listening to me and say what what"
+            ],
+            [
+              "they listening to me and say what what"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "The hook once per chorus, marked ×2",
+          "sheet": [
+            [
+              "streetlights humming in a minor key"
+            ],
+            [
+              "counting all the cars that never stop"
+            ],
+            [
+              "every window lit but nobody home"
+            ],
+            [
+              "i keep driving till the morning comes"
+            ],
+            [
+              "they listening to me and say what what ×2"
+            ],
+            [
+              "radio static in a borrowed car"
+            ],
+            [
+              "gas light blinking like a falling star"
+            ],
+            [
+              "nothing out here but the open road"
+            ],
+            [
+              "and a name I never said out loud"
+            ],
+            [
+              "they listening to me and say what what ×2"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "The hook once, every later one a version of it",
+          "sheet": [
+            [
+              "streetlights humming in a minor key"
+            ],
+            [
+              "counting all the cars that never stop"
+            ],
+            [
+              "every window lit but nobody home"
+            ],
+            [
+              "i keep driving till the morning comes"
+            ],
+            [
+              "they listening to me and say what what",
+              "they listening to me and say what what",
+              "they listening to me and say what what",
+              "they listening to me and say what what"
+            ],
+            [
+              "radio static in a borrowed car"
+            ],
+            [
+              "gas light blinking like a falling star"
+            ],
+            [
+              "nothing out here but the open road"
+            ],
+            [
+              "and a name I never said out loud"
+            ]
+          ]
+        }
+      ],
+      "decided": null
+    },
+    {
+      "id": "G3",
+      "group": "song",
+      "title": "An imported voice memo is cut into lines",
+      "input": {
+        "live": [],
+        "takes": [
+          {
+            "id": "t1",
+            "at": 0.0,
+            "dur": 12.0,
+            "kind": "playing",
+            "text": "yeah, yeah, yeah, you already know, this is Nate, with the flow, i'm just testing, how it goes,",
+            "words": [
+              [
+                "yeah,",
+                1.0,
+                1.2
+              ],
+              [
+                "yeah,",
+                1.4,
+                1.6
+              ],
+              [
+                "yeah,",
+                1.8,
+                2.0
+              ],
+              [
+                "you",
+                2.2,
+                2.4
+              ],
+              [
+                "already",
+                2.4,
+                2.7
+              ],
+              [
+                "know,",
+                2.7,
+                3.0
+              ],
+              [
+                "this",
+                3.2,
+                3.4
+              ],
+              [
+                "is",
+                3.4,
+                3.5
+              ],
+              [
+                "Nate,",
+                3.5,
+                3.9
+              ],
+              [
+                "with",
+                4.1,
+                4.3
+              ],
+              [
+                "the",
+                4.3,
+                4.4
+              ],
+              [
+                "flow,",
+                4.4,
+                4.8
+              ],
+              [
+                "i'm",
+                5.0,
+                5.2
+              ],
+              [
+                "just",
+                5.2,
+                5.4
+              ],
+              [
+                "testing,",
+                5.4,
+                5.8
+              ],
+              [
+                "how",
+                6.0,
+                6.2
+              ],
+              [
+                "it",
+                6.2,
+                6.3
+              ],
+              [
+                "goes,",
+                6.3,
+                6.8
+              ]
+            ]
+          }
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Today's rules",
+          "sheet": [
+            [
+              "yeah, yeah, yeah, you already know"
+            ],
+            [
+              "this is Nate, with the flow"
+            ],
+            [
+              "i'm just testing, how it goes"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Cut at every comma",
+          "sheet": [
+            [
+              "yeah"
+            ],
+            [
+              "yeah"
+            ],
+            [
+              "yeah"
+            ],
+            [
+              "you already know"
+            ],
+            [
+              "this is Nate"
+            ],
+            [
+              "with the flow"
+            ],
+            [
+              "i'm just testing"
+            ],
+            [
+              "how it goes"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "Cut at commas only after 3 words",
+          "sheet": [
+            [
+              "yeah, yeah, yeah, you already know"
+            ],
+            [
+              "this is Nate"
+            ],
+            [
+              "with the flow"
+            ],
+            [
+              "i'm just testing"
+            ],
+            [
+              "how it goes"
+            ]
+          ]
+        }
+      ],
+      "decided": "a"
+    },
+    {
+      "id": "H1",
+      "group": "round3",
+      "title": "The same hook five times in a row, in rhythm, word for word",
+      "input": {
+        "live": [
+          [
+            "they listening to me and say what what",
+            10,
+            13.0
+          ],
+          [
+            "they listening to me and say what what",
+            14,
+            17.0
+          ],
+          [
+            "they listening to me and say what what",
+            18,
+            21.0
+          ],
+          [
+            "they listening to me and say what what",
+            22,
+            25.0
+          ],
+          [
+            "they listening to me and say what what",
+            26,
+            29.0
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Once, marked ×5: you meant it five times",
+          "sheet": [
+            [
+              "they listening to me and say what what ×5"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Once, no marker: you were drilling the delivery",
+          "sheet": [
+            [
+              "they listening to me and say what what"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "Five lines, written out",
+          "sheet": [
+            [
+              "they listening to me and say what what"
+            ],
+            [
+              "they listening to me and say what what"
+            ],
+            [
+              "they listening to me and say what what"
+            ],
+            [
+              "they listening to me and say what what"
+            ],
+            [
+              "they listening to me and say what what"
+            ]
+          ]
+        }
+      ],
+      "decided": null
+    },
+    {
+      "id": "H2",
+      "group": "round3",
+      "title": "Five passes, a word changing each time",
+      "input": {
+        "live": [
+          [
+            "I'm feeling good tonight",
+            10,
+            13
+          ],
+          [
+            "I'm feeling fine tonight",
+            14,
+            17
+          ],
+          [
+            "I'm feeling great tonight",
+            18,
+            21
+          ],
+          [
+            "I'm feeling right tonight",
+            22,
+            25
+          ],
+          [
+            "I'm feeling free tonight",
+            26,
+            29
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "One line, 5 versions, the newest shows",
+          "sheet": [
+            [
+              "I'm feeling good tonight",
+              "I'm feeling fine tonight",
+              "I'm feeling great tonight",
+              "I'm feeling right tonight",
+              "I'm feeling free tonight"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Five lines",
+          "sheet": [
+            [
+              "I'm feeling good tonight"
+            ],
+            [
+              "I'm feeling fine tonight"
+            ],
+            [
+              "I'm feeling great tonight"
+            ],
+            [
+              "I'm feeling right tonight"
+            ],
+            [
+              "I'm feeling free tonight"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "The last one, marked ×5",
+          "sheet": [
+            [
+              "I'm feeling free tonight ×5"
+            ]
+          ]
+        }
+      ],
+      "decided": null
+    },
+    {
+      "id": "H3",
+      "group": "round3",
+      "title": "The same hook five times, but ragged: you stop and restart twice",
+      "input": {
+        "live": [
+          [
+            "they listening to me and say what what",
+            10,
+            13.0
+          ],
+          [
+            "they listening to me and say what what",
+            14,
+            17.0
+          ],
+          [
+            "they listening to me and say what what",
+            21,
+            24.0
+          ],
+          [
+            "they listening to me and say what what",
+            25,
+            28.0
+          ],
+          [
+            "they listening to me and say what what",
+            33,
+            36.0
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Still one line ×5",
+          "sheet": [
+            [
+              "they listening to me and say what what ×5"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Once, no marker (the stops say you were drilling)",
+          "sheet": [
+            [
+              "they listening to me and say what what"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "A long stop starts a new count: ×2 / ×2 / once",
+          "sheet": [
+            [
+              "they listening to me and say what what ×2"
+            ],
+            [
+              "they listening to me and say what what ×2"
+            ],
+            [
+              "they listening to me and say what what"
+            ]
+          ]
+        }
+      ],
+      "decided": null
+    },
+    {
+      "id": "H4",
+      "group": "round3",
+      "title": "A cut-off start, then the hook three times",
+      "input": {
+        "live": [
+          [
+            "they listening to",
+            10,
+            11
+          ],
+          [
+            "they listening to me and say what what",
+            13,
+            16.0
+          ],
+          [
+            "they listening to me and say what what",
+            17,
+            20.0
+          ],
+          [
+            "they listening to me and say what what",
+            21,
+            24.0
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Cut-off dropped, hook ×3",
+          "sheet": [
+            [
+              "they listening to me and say what what ×3"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Cut-off kept as its own line, hook ×3",
+          "sheet": [
+            [
+              "they listening to"
+            ],
+            [
+              "they listening to me and say what what ×3"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "Cut-off kept as a version of the hook",
+          "sheet": [
+            [
+              "they listening to",
+              "they listening to me and say what what ×3"
+            ]
+          ]
+        }
+      ],
+      "decided": null
+    },
+    {
+      "id": "H5",
+      "group": "round3",
+      "title": "Hook twice, then a changed hook three times",
+      "input": {
+        "live": [
+          [
+            "they listening to me and say what what",
+            10,
+            13.0
+          ],
+          [
+            "they listening to me and say what what",
+            14,
+            17.0
+          ],
+          [
+            "they listening to me and say what now",
+            18,
+            21
+          ],
+          [
+            "they listening to me and say what now",
+            22,
+            25
+          ],
+          [
+            "they listening to me and say what now",
+            26,
+            29
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Two lines: “…what what ×2” then “…what now ×3”",
+          "sheet": [
+            [
+              "they listening to me and say what what ×2"
+            ],
+            [
+              "they listening to me and say what now ×3"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Five lines written out",
+          "sheet": [
+            [
+              "they listening to me and say what what"
+            ],
+            [
+              "they listening to me and say what what"
+            ],
+            [
+              "they listening to me and say what now"
+            ],
+            [
+              "they listening to me and say what now"
+            ],
+            [
+              "they listening to me and say what now"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "One line, 2 versions (what what → what now), the newest shows",
+          "sheet": [
+            [
+              "they listening to me and say what what",
+              "they listening to me and say what now"
+            ]
+          ]
+        }
+      ],
+      "decided": null
+    },
+    {
+      "id": "H6",
+      "group": "round3",
+      "title": "When Hot Mic guesses wrong between ×5 and versions",
+      "harness": false,
+      "input": {
+        "live": []
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "A chip on the line (“×5”) that flips to “5 versions” or “written out”",
+          "sheet": []
+        },
+        {
+          "key": "b",
+          "label": "No chip; the rule decides and you edit by hand",
+          "sheet": []
+        },
+        {
+          "key": "c",
+          "label": "Hot Mic asks right after the take: hook, or working it out?",
+          "sheet": []
+        }
+      ],
+      "decided": null
+    },
+    {
+      "id": "H7",
+      "group": "round3",
+      "title": "Call and response: how long a pause makes “what” its own line",
+      "input": {
+        "live": [
+          [
+            "say what",
+            10,
+            10.5
+          ],
+          [
+            "what",
+            11.8,
+            12.0
+          ],
+          [
+            "say what",
+            13.0,
+            13.5
+          ],
+          [
+            "what",
+            14.8,
+            15.0
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Under 1 s the “what” joins (“say what, what”); over 1 s it stands alone",
+          "sheet": [
+            [
+              "say what"
+            ],
+            [
+              "what"
+            ],
+            [
+              "say what"
+            ],
+            [
+              "what"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Always joins: two lines",
+          "sheet": [
+            [
+              "say what, what"
+            ],
+            [
+              "say what, what"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "Always its own line: four lines",
+          "sheet": [
+            [
+              "say what"
+            ],
+            [
+              "what"
+            ],
+            [
+              "say what"
+            ],
+            [
+              "what"
+            ]
+          ]
+        }
+      ],
+      "decided": null
+    },
+    {
+      "id": "H8",
+      "group": "round3",
+      "title": "The hook, a different line, the hook with a yeah on the end",
+      "input": {
+        "live": [
+          [
+            "they listening to me and say what what",
+            23.7,
+            26.7
+          ],
+          [
+            "run it back",
+            28.0,
+            29.0
+          ],
+          [
+            "they listening to me and say what what yeah",
+            30.0,
+            33.0
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "The hook comes back as a repeat; the yeah is ignored when comparing",
+          "sheet": [
+            [
+              "they listening to me and say what what"
+            ],
+            [
+              "run it back"
+            ],
+            [
+              "they listening to me and say what what, yeah"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "The hook with yeah is a version of the hook",
+          "sheet": [
+            [
+              "they listening to me and say what what",
+              "they listening to me and say what what, yeah"
+            ],
+            [
+              "run it back"
+            ]
+          ]
+        }
+      ],
+      "decided": null
+    },
+    {
+      "id": "H9",
+      "group": "round3",
+      "title": "Live words or Whisper's words: which shows",
+      "input": {
+        "live": [
+          [
+            "that's the way it goes though",
+            61.21,
+            62.45,
+            "that's the way in Reno"
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Whisper shows; the live words stay one flip away",
+          "sheet": [
+            [
+              "that's the way in Reno"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Live shows; Whisper's words stay one flip away",
+          "sheet": [
+            [
+              "that's the way it goes though"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "Whisper only",
+          "sheet": [
+            [
+              "that's the way in Reno"
+            ]
+          ]
+        },
+        {
+          "key": "d",
+          "label": "Live only",
+          "sheet": [
+            [
+              "that's the way it goes though"
+            ]
+          ]
+        }
+      ],
+      "decided": null
+    },
+    {
+      "id": "H10",
+      "group": "round3",
+      "title": "Whisper heard the start of the next line twice",
+      "input": {
+        "live": [
+          [
+            "Around the harbor I would just walk every time I cross lines I get cold yeah",
+            55.41,
+            60.75,
+            "harbor all over this town, every time i cross lines i get cold, yeah, that's the way"
+          ],
+          [
+            "that's the way it goes though",
+            61.21,
+            62.45,
+            "that's the way in Reno"
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Trim the leaked words off the end of the first line",
+          "sheet": [
+            [
+              "harbor all over this town"
+            ],
+            [
+              "every time i cross lines i get cold, yeah"
+            ],
+            [
+              "that's the way in Reno"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Leave both",
+          "sheet": [
+            [
+              "harbor all over this town"
+            ],
+            [
+              "every time i cross lines i get cold"
+            ],
+            [
+              "yeah, that's the way"
+            ],
+            [
+              "that's the way in Reno"
+            ]
+          ]
+        }
+      ],
+      "decided": null
+    },
+    {
+      "id": "H11",
+      "group": "round3",
+      "title": "A whispered line the live recognizer missed, that Whisper caught",
+      "input": {
+        "live": [
+          [
+            "I'm feeling good tonight",
+            2.9,
+            4.4,
+            "I'm feeling good tonight,"
+          ],
+          [
+            "and you're feeling alright",
+            9.0,
+            10.5,
+            "and you're feeling alright,"
+          ]
+        ],
+        "takes": [
+          {
+            "id": "t1",
+            "at": 0.0,
+            "dur": 12.0,
+            "kind": "playing",
+            "text": "i'm feeling good tonight, whisper it slow, and you're feeling alright,"
+          }
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Its own line in the gap, like any other",
+          "sheet": [
+            [
+              "I'm feeling good tonight"
+            ],
+            [
+              "whisper it slow"
+            ],
+            [
+              "and you're feeling alright"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Its own line, dimmed, marked “Whisper also heard”",
+          "sheet": [
+            [
+              "I'm feeling good tonight"
+            ],
+            [
+              "whisper it slow (Whisper also heard)"
+            ],
+            [
+              "and you're feeling alright"
+            ]
+          ]
+        },
+        {
+          "key": "c",
+          "label": "A small “+” in the gap you click to reveal it",
+          "sheet": [
+            [
+              "I'm feeling good tonight"
+            ],
+            [
+              "+"
+            ],
+            [
+              "and you're feeling alright"
+            ]
+          ]
+        },
+        {
+          "key": "d",
+          "label": "Nothing",
+          "sheet": [
+            [
+              "I'm feeling good tonight"
+            ],
+            [
+              "and you're feeling alright"
+            ]
+          ]
+        }
+      ],
+      "decided": null
+    },
+    {
+      "id": "H12",
+      "group": "round3",
+      "title": "Over a beat: should the sheet cut lines by bars?",
+      "harness": false,
+      "input": {
+        "live": []
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Same as Freestyle: pauses and phrases",
+          "sheet": []
+        },
+        {
+          "key": "b",
+          "label": "One bar per line",
+          "sheet": []
+        },
+        {
+          "key": "c",
+          "label": "Two bars per line",
+          "sheet": []
+        },
+        {
+          "key": "d",
+          "label": "Cut by phrases, but show a faint bar grid under the lines",
+          "sheet": []
+        }
+      ],
+      "decided": null
+    },
+    {
+      "id": "H13",
+      "group": "round3",
+      "title": "A long silence between lines",
+      "harness": false,
+      "input": {
+        "live": []
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "A dotted “fill?” marker in the gap; click it to add a section or a note to yourself",
+          "sheet": []
+        },
+        {
+          "key": "b",
+          "label": "A section break is added for you",
+          "sheet": []
+        },
+        {
+          "key": "c",
+          "label": "Nothing",
+          "sheet": []
+        }
+      ],
+      "decided": null
+    },
+    {
+      "id": "H14",
+      "group": "round3",
+      "title": "Hooks and verses as separate blocks",
+      "harness": false,
+      "input": {
+        "live": []
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Automatic blocks: a line group that comes back is the hook, the rest are verses, a blank line between blocks",
+          "sheet": []
+        },
+        {
+          "key": "b",
+          "label": "Blocks only where you add a section",
+          "sheet": []
+        },
+        {
+          "key": "c",
+          "label": "Blocks at long pauses only",
+          "sheet": []
+        }
+      ],
+      "decided": null
+    },
+    {
+      "id": "H15",
+      "group": "round3",
+      "title": "Two words left over after a cut (A7, said plainly)",
+      "input": {
+        "live": [
+          [
+            "and I'm willing to say that it's about to be a good",
+            4.3,
+            7.7
+          ],
+          [
+            "day bro",
+            8.7,
+            9.3
+          ]
+        ]
+      },
+      "options": [
+        {
+          "key": "a",
+          "label": "Joined: “…a good day bro”",
+          "sheet": [
+            [
+              "and I'm willing to say that it's about to be a good day bro"
+            ]
+          ]
+        },
+        {
+          "key": "b",
+          "label": "Two lines",
+          "sheet": [
+            [
+              "and I'm willing to say that it's about to be a good"
+            ],
+            [
+              "day bro"
+            ]
+          ]
+        }
+      ],
+      "decided": null
+    }
+  ]
+}

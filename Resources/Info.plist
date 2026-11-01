@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDisplayName</key>
+	<string>Hot Mic</string>
+	<key>CFBundleExecutable</key>
+	<string>HotMic</string>
+	<key>CFBundleIconFile</key>
+	<string>HotMic</string>
+	<key>CFBundleIdentifier</key>
+	<string>io.bluegum.hotmic</string>
+	<key>CFBundleName</key>
+	<string>Hot Mic</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>14.2</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>NSAudioCaptureUsageDescription</key>
+	<string>Hot Mic hears what your music software is playing so it can take it out of your voice recording.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_hotmic._tcp</string>
+	</array>
+	<key>NSHumanReadableCopyright</key>
+	<string>© 2026 Nate Davidovich · blue gum</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Hot Mic lets phones in the room join your session and sing takes into it.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Hot Mic listens for your humming and singing while you make music.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Hot Mic shows your words live as you sing, using on-device speech recognition. Nothing leaves your Mac.</string>
+</dict>
+</plist>

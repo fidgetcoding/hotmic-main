@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hot Mic Accents</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Archivo+Narrow:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #12100e; --ink: #f0e2c0; --muted: #b59b6a; --line: rgba(214, 168, 74, 0.2); --acc: #e3b04f; }
+  * { box-sizing: border-box; }
+  html { background: #0b0908; min-height: 100%; }
+  body { margin: 0; background: radial-gradient(90% 60% at 50% 0%, #2a2016, #0b0908 70%) fixed; color: var(--ink); font: 14px/1.4 "Archivo", system-ui, sans-serif; }
+  header { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 16px 24px; background: rgba(18, 16, 14, 0.92); border-bottom: 1px solid var(--line); backdrop-filter: blur(8px); }
+  h1 { margin: 0; font: 700 18px "Archivo", sans-serif; letter-spacing: 0.02em; }
+  header p { margin: 0; color: var(--muted); font-size: 13px; }
+  .seg { display: flex; padding: 3px; gap: 3px; border-radius: 8px; background: rgba(0, 0, 0, 0.4); margin-left: auto; }
+  .seg button, .btn { font: 700 11px "Archivo Narrow", sans-serif; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink); background: transparent; border: 0; border-radius: 6px; padding: 7px 12px; cursor: pointer; }
+  .seg button.on { background: linear-gradient(180deg, #f1cd7c, #b9862c); color: #1d1305; }
+  a.back { color: var(--acc); font-weight: 600; text-decoration: none; }
+  main { display: grid; grid-template-columns: repeat(auto-fill, minmax(560px, 1fr)); gap: 22px; padding: 22px 24px 60px; }
+  .card { border-radius: 14px; background: rgba(255, 255, 255, 0.03); box-shadow: 0 0 0 1px var(--line); overflow: hidden; }
+  .card.cur { box-shadow: 0 0 0 2px var(--acc), 0 0 24px -6px var(--acc); }
+  .frame { position: relative; height: 0; padding-bottom: 27.5%; overflow: hidden; }
+  .frame iframe { position: absolute; left: 0; top: 0; width: 1180px; height: 325px; border: 0; transform-origin: 0 0; pointer-events: none; background: transparent; }
+  .meta { display: flex; align-items: center; gap: 10px; padding: 10px 14px; }
+  .sw { width: 14px; height: 14px; border-radius: 50%; box-shadow: 0 0 10px currentColor; background: currentColor; }
+  .meta b { font-size: 14px; }
+  .meta .num { color: var(--muted); font: 600 11px ui-monospace, monospace; }
+  .meta .spacer { flex: 1; }
+  .star { width: 34px; height: 30px; border-radius: 7px; border: 0; background: rgba(0, 0, 0, 0.35); color: #8f8a7e; font-size: 17px; cursor: pointer; }
+  .star.on { color: #ff9a3c; text-shadow: 0 0 10px rgba(255, 140, 50, 0.6); }
+  .btn.use { background: rgba(0, 0, 0, 0.35); }
+  .btn.use.on { background: linear-gradient(180deg, #f1cd7c, #b9862c); color: #1d1305; }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); padding: 9px 16px; border-radius: 999px; background: #000; color: #fff; font-size: 13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Hot Mic · accent colors</h1>
+  <p>Every preview is the live app. ☆ adds it to your favorites in the lab; "Use this" switches the lab to it.</p>
+  <div class="seg" id="mode"><button data-look="tube" class="on">Dark</button><button data-look="tube-light">Light</button></div>
+  <a class="back" href="index.html">← Back to the lab</a>
+</header>
+<main id="grid"></main>
+<script>
+  const ACCENTS = [['ice', 'Ice', '#8fe2ff'], ['violet', 'Violet', '#a77bff'], ['aurora', 'Aurora · ice + violet takes', '#8fe2ff'], ['dusk', 'Dusk · violet + ice takes', '#a77bff'], ['lilac', 'Lilac ice', '#b4c4ff'], ['periwinkle', 'Periwinkle', '#8f9cff'], ['frost', 'Frost violet', '#c9b8ff'], ['oxblood', 'Oxblood', '#c73b52'], ['ox-ice', 'Oxblood + ice', '#c73b52'], ['ox-violet', 'Oxblood + violet', '#b8405e']];
+  const STORE = 'hotmicLab2';
+  const read = () => { try { return JSON.parse(localStorage.getItem(STORE) || '{}'); } catch (e) { return {}; } };
+  const write = (d) => { try { localStorage.setItem(STORE, JSON.stringify(d)); return true; } catch (e) { return false; } };
+  let look = read().look === 'tube-light' ? 'tube-light' : 'tube';
+  const grid = document.getElementById('grid');
+  const src = (id) => `index.html?m=${look}#only=strip&panel=0&sidebar=0&mode=beat&loop=1&t=24&look=${look}&accent=${id}`;
+  function toast(m) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); }
+  function render() {
+    const d = read(), stars = (d.stars && d.stars.accent) || [], cur = d.accent || 'amber';
+    document.querySelectorAll('#mode button').forEach((b) => b.classList.toggle('on', b.dataset.look === look));
+    grid.innerHTML = ACCENTS.map(([id, nm, col], i) => `
+      <section class="card${id === cur ? ' cur' : ''}" style="--acc:${col}">
+        <div class="frame"><iframe src="${src(id)}" title="${nm}"></iframe></div>
+        <div class="meta"><span class="sw" style="color:${col}"></span><span class="num">${String(i + 1).padStart(2, '0')}</span><b>${nm}</b><span class="spacer"></span>
+          <button class="star${stars.includes(id) ? ' on' : ''}" data-star="${id}" title="Favorite">${stars.includes(id) ? '★' : '☆'}</button>
+          <button class="btn use${id === cur ? ' on' : ''}" data-use="${id}">${id === cur ? 'In use' : 'Use this'}</button></div>
+      </section>`).join('');
+    fit();
+  }
+  function fit() { document.querySelectorAll('.frame').forEach((f) => { const s = f.clientWidth / 1180; f.querySelector('iframe').style.transform = `scale(${s})`; f.style.paddingBottom = `${325 * s}px`; f.style.height = '0'; }); }
+  grid.addEventListener('click', (e) => {
+    const st = e.target.closest('[data-star]'), us = e.target.closest('[data-use]');
+    if (!st && !us) return;
+    const d = read(); d.stars = d.stars || {};
+    if (st) { const id = st.dataset.star, set = new Set(d.stars.accent || []); set.has(id) ? set.delete(id) : set.add(id); d.stars.accent = [...set]; }
+    if (us) d.accent = us.dataset.use;
+    if (!write(d)) { // storage not shared: hand the pick to the lab through the URL
+      location.href = st ? `index.html#star=accent:${st.dataset.star}` : `index.html#accent=${us.dataset.use}`; return;
+    }
+    toast(st ? 'Saved to your favorites' : 'The lab now uses this accent');
+    meta();
+  });
+  // Only the meta row changes on a star or a pick; the live previews stay loaded.
+  function meta() {
+    const d = read(), stars = (d.stars && d.stars.accent) || [], cur = d.accent || 'amber';
+    document.querySelectorAll('.card').forEach((c, i) => {
+      const id = ACCENTS[i][0], st = c.querySelector('.star'), us = c.querySelector('.use');
+      c.classList.toggle('cur', id === cur); st.classList.toggle('on', stars.includes(id)); st.textContent = stars.includes(id) ? '★' : '☆';
+      us.classList.toggle('on', id === cur); us.textContent = id === cur ? 'In use' : 'Use this';
+    });
+  }
+  document.getElementById('mode').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return; look = b.dataset.look; const d = read(); d.look = look; write(d);
+    document.querySelectorAll('#mode button').forEach((x) => x.classList.toggle('on', x.dataset.look === look));
+    document.querySelectorAll('.card iframe').forEach((f, i) => { f.src = src(ACCENTS[i][0]); });
+  });
+  window.addEventListener('storage', (e) => { if (e.key === STORE) meta(); });
+  window.addEventListener('resize', fit);
+  render();
+</script>
+</body>
+</html>

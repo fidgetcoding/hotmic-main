@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hot Mic flames</title>
+<style>
+  :root { --bg: #121016; --ink: #ece8f4; --dim: #8d86a0; --card: #1b1822; --line: #2c2836; --pick: #c9b8ff; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 -apple-system, system-ui, sans-serif; padding: 28px 16px 60px; }
+  h1 { font-size: 20px; margin: 0 0 4px; } p { color: var(--dim); margin: 0 0 22px; max-width: 760px; }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; cursor: pointer; }
+  .card.on { border-color: var(--pick); box-shadow: 0 0 0 2px var(--pick) inset; }
+  .card h2 { font-size: 15px; margin: 0 0 2px; } .card .why { color: var(--dim); font-size: 12.5px; margin-bottom: 12px; }
+  .sizes { display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; }
+  .sizes figure { margin: 0; text-align: center; color: var(--dim); font-size: 11px; }
+  .bar { margin-top: 12px; display: flex; align-items: center; gap: 8px; background: #0d0b11; border-radius: 8px; padding: 8px 10px; }
+  .bar span { font: 400 21px/1 Yellowtail, cursive; color: #dfe5ff; }
+  .tag { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 99px; background: var(--pick); color: #17131f; margin-left: 6px; vertical-align: 2px; }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Yellowtail&display=swap" rel="stylesheet">
+</head><body>
+<h1>The H on fire</h1>
+<p>The idea: the top of the H on fire, a little hot rod. Each take is shown at Dock size down to 16 px, plus the title-bar tile. Click a card to choose it; the URL remembers it (#pick=…). None of these shipped (Nate 2026-10-14: the plain H stays).</p>
+<div class="grid" id="grid"></div>
+<script>
+// The H's stem tops in the 1024 icon: left ≈ (515, 342), right ≈ (673, 351); the left curl ≈ (361, 396).
+const tongue = (x, y, h, w, lean = 0) => {
+  // One flame tongue rising from (x, y): a teardrop with a flicked tip.
+  const tx = x + lean * h, ty = y - h;
+  return `M${x - w} ${y} C${x - w} ${y - h * 0.45} ${tx - w * 0.9} ${ty + h * 0.35} ${tx} ${ty}`
+    + ` C${tx + w * 0.25} ${ty + h * 0.3} ${x + w * 1.05} ${y - h * 0.35} ${x + w} ${y} Z`;
+};
+const lick = (x, y, len, thick, rise) => {
+  // A hot-rod flame lick streaming right: thick at the root, a long curled point.
+  const ex = x + len, ey = y - rise;
+  return `M${x} ${y + thick / 2} C${x + len * 0.35} ${y + thick * 0.6} ${x + len * 0.6} ${ey + thick * 0.4} ${ex} ${ey}`
+    + ` C${x + len * 0.55} ${ey - thick * 0.1} ${x + len * 0.3} ${y - thick * 0.7} ${x} ${y - thick / 2} Z`;
+};
+const FIRE = `<linearGradient id="fire" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff2d55"/><stop offset=".45" stop-color="#ff8a00"/><stop offset="1" stop-color="#ffe36e"/></linearGradient>
+  <linearGradient id="fireR" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ff2d55"/><stop offset=".5" stop-color="#ff8a00"/><stop offset="1" stop-color="#ffe36e"/></linearGradient>
+  <linearGradient id="ice" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#7b6cff"/><stop offset=".5" stop-color="#b9b4ff"/><stop offset="1" stop-color="#f2f4ff"/></linearGradient>
+  <filter id="heat" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10"/></filter>`;
+const TAKES = {
+  torches: { name: 'Twin torches', why: 'A flame off each stem top. Reads at every size.',
+    art: () => {
+      const f = [tongue(515, 352, 150, 46, 0.12), tongue(673, 360, 120, 40, 0.18), tongue(515, 352, 82, 22, 0.1), tongue(673, 360, 66, 19, 0.15)];
+      return `<path d="${f[0]} ${f[1]}" fill="url(#fire)" opacity=".55" filter="url(#heat)"/><path d="${f[0]} ${f[1]}" fill="url(#fire)"/><path d="${f[2]} ${f[3]}" fill="#ffe9a8"/>`;
+    } },
+  hotrod: { name: 'Hot rod', why: 'Hot-rod licks streaming back off the top of the H.',
+    art: () => {
+      const l = [lick(380, 380, 330, 46, 70), lick(470, 340, 300, 40, 40), lick(560, 352, 240, 34, 60), lick(430, 410, 190, 26, 30)];
+      return `<g transform="translate(1024 0) scale(-1 1)"><path d="${l.join(' ')}" fill="url(#fireR)" opacity=".5" filter="url(#heat)"/><path d="${l.join(' ')}" fill="url(#fireR)"/></g>`;
+    } },
+  crown: { name: 'Crown of fire', why: 'A row of tongues along the whole top edge, like the H is a burner.',
+    art: () => {
+      const xs = [380, 450, 520, 595, 670], hs = [70, 110, 150, 115, 130];
+      const f = xs.map((x, i) => tongue(x, 372 - (i === 4 ? -6 : 0), hs[i], 30, i % 2 ? -0.1 : 0.12)).join(' ');
+      return `<path d="${f}" fill="url(#fire)" opacity=".5" filter="url(#heat)"/><path d="${f}" fill="url(#fire)"/>`;
+    } },
+  blaze: { name: 'One blaze', why: 'A single big flame off the right stem, leaning like it is moving fast.',
+    art: () => {
+      const f = tongue(673, 362, 230, 62, 0.35), g = tongue(673, 362, 120, 30, 0.3);
+      return `<path d="${f}" fill="url(#fire)" opacity=".55" filter="url(#heat)"/><path d="${f}" fill="url(#fire)"/><path d="${g}" fill="#ffe9a8"/>`;
+    } },
+  ice: { name: 'Ice torches', why: 'Twin torches in the lilac-ice accent, so the fire matches the chrome.',
+    art: () => {
+      const f = [tongue(515, 352, 150, 46, 0.12), tongue(673, 360, 120, 40, 0.18), tongue(515, 352, 82, 22, 0.1), tongue(673, 360, 66, 19, 0.15)];
+      return `<path d="${f[0]} ${f[1]}" fill="url(#ice)" opacity=".6" filter="url(#heat)"/><path d="${f[0]} ${f[1]}" fill="url(#ice)"/><path d="${f[2]} ${f[3]}" fill="#ffffff"/>`;
+    } },
+};
+const DEFAULT = 'crown';   // reads as 'the top of the H on fire' down to 32 px
+let base = '';
+const build = (key) => base.replace('</defs>', FIRE + '</defs>').replace(/<rect x="100" y="100" width="824" height="824" rx="185" fill="url\(#gloss\)"\/>/, (m) => `<g>${TAKES[key].art()}</g>${m}`);
+window.HM_FLAME = { build, TAKES, DEFAULT };
+fetch('flame-base.svg').then((r) => r.text()).then((t) => {
+  base = t;
+  const pick = (location.hash.match(/pick=(\w+)/) || [])[1] || DEFAULT;
+  const grid = document.getElementById('grid');
+  Object.entries(TAKES).forEach(([k, v]) => {
+    const svg = build(k), url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    const card = document.createElement('div'); card.className = 'card' + (k === pick ? ' on' : ''); card.dataset.key = k;
+    card.innerHTML = `<h2>${v.name}</h2><div class="why">${v.why}</div>
+      <div class="sizes">${[160, 64, 32, 16].map((s) => `<figure><img src="${url}" width="${s}" height="${s}" alt=""><figcaption>${s}</figcaption></figure>`).join('')}</div>
+      <div class="bar"><img src="${url}" width="28" height="28" alt=""><span>Hot Mic</span></div>`;
+    card.onclick = () => { location.hash = 'pick=' + k; document.querySelectorAll('.card').forEach((c) => c.classList.toggle('on', c === card)); };
+    grid.appendChild(card);
+  });
+});
+</script>
+</body></html>

@@ -1,0 +1,94 @@
+/* Hot Mic design lab: Tube Amp locks + accent colors (2026-10-12).
+   - The waveform screen is the same tube-lit screen in light and dark; only the chrome around it changes.
+   - The thin glowing line under the top ribbon (from the old default look) is back, in the accent color.
+   - Accents: each palette sets a handful of --acc-* values; the rules below spread them across the UI. */
+
+/* ---------- one screen for both modes ---------- */
+:root[data-look="tube-light"] {
+  --s-bg: radial-gradient(120% 140% at 50% 0%, #2e1806 0%, #0d0603 70%); --s-wave: #563313; --s-played: #ff9a3c; --s-ink: #ffcf8a; --s-faint: #a1733c; --s-grid: #382210;
+  --s-a: #ffd06b; --s-b: #ff7a3a; --s-c: #e3b04f; --s-head: #fff0cc; --s-loop: #ff9a3c; --s-glow: rgba(255, 140, 50, 0.42);
+}
+:root[data-look="tube-light"] .strip { --surface: #0b0705; }
+:root[data-look="tube-light"] .strip-canvas { box-shadow: 0 0 0 6px #0a0705, 0 0 0 7px rgba(255, 255, 255, 0.08), 0 0 0 9px var(--plate-edge), inset 0 0 40px var(--s-glow), inset 0 3px 12px rgba(0, 0, 0, 0.8); }
+:root[data-look="tube-light"] .strip-canvas::after { background: repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px), linear-gradient(160deg, rgba(255, 255, 255, 0.08), transparent 35%); }
+:root[data-look="tube-light"] :is(.clock, .tune-key b) { text-shadow: 0 0 8px var(--s-played); }
+
+/* ---------- the thin line under the top ribbon ---------- */
+:root:is([data-look="tube"], [data-look="tube-light"]) .titlebar::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; z-index: 5; pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--line-a, var(--s-played)) 18%, var(--line-b, var(--s-a)) 50%, var(--line-a, var(--s-played)) 82%, transparent);
+  box-shadow: 0 0 6px var(--s-glow), 0 0 1px var(--s-played); opacity: 0.95;
+}
+
+/* ---------- light / dark switch ---------- */
+.theme-toggle { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 8px; margin-left: 2px; border-radius: 6px; color: var(--muted); background: rgba(0, 0, 0, 0.22); box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.45), 0 1px 0 var(--hl, rgba(255, 255, 255, 0.06)); }
+.theme-toggle .i { width: 14px; height: 14px; }
+.theme-toggle .tt-track { position: relative; width: 26px; height: 14px; border-radius: 7px; background: rgba(0, 0, 0, 0.45); box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6); }
+.theme-toggle .tt-knob { position: absolute; top: 1px; right: 1px; width: 12px; height: 12px; border-radius: 50%; background: var(--keycap, #ddd); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.5); transition: right 0.15s, left 0.15s; }
+.theme-toggle .moon { color: var(--s-played); filter: drop-shadow(0 0 4px var(--s-glow)); }
+.theme-toggle.light .tt-knob { right: 13px; }
+.theme-toggle.light .sun { color: var(--accent); filter: drop-shadow(0 0 4px var(--glow)); }
+.theme-toggle.light .moon { color: var(--muted); filter: none; }
+.theme-toggle:not(.light) .sun { color: var(--muted); }
+:root[data-look="tube-light"] .theme-toggle { background: rgba(90, 60, 20, 0.12); box-shadow: inset 0 2px 4px rgba(90, 60, 20, 0.25), 0 1px 0 var(--hl); }
+:root[data-look="tube-light"] .theme-toggle .tt-track { background: rgba(90, 60, 20, 0.22); }
+
+/* ---------- accent palettes ---------- */
+/* --acc: the lit color · --acc-2: its bright highlight · --acc-b / --acc-c: the other take colors · --acc-d: dark ink for light mode */
+[data-accent="orange"]  { --acc: #ff7a2a; --acc-2: #ffc08a; --acc-b: #ffb347; --acc-c: #e05a2a; --acc-d: #b8480f; }
+[data-accent="cream"]   { --acc: #f1dfb6; --acc-2: #fff6e0; --acc-b: #d9b98a; --acc-c: #c49a6c; --acc-d: #7a5a2c; }
+[data-accent="gold"]    { --acc: #ffc933; --acc-2: #ffe9a3; --acc-b: #ff9f2e; --acc-c: #e0b04a; --acc-d: #9a6c00; }
+[data-accent="crimson"] { --acc: #ff3b52; --acc-2: #ffa0ab; --acc-b: #ff8a5c; --acc-c: #c9405a; --acc-d: #b0162c; }
+[data-accent="magenta"] { --acc: #ff4fb8; --acc-2: #ffb3e1; --acc-b: #b77bff; --acc-c: #ff7a8f; --acc-d: #b0157a; }
+[data-accent="violet"]  { --acc: #a77bff; --acc-2: #d9c6ff; --acc-b: #ff7ad1; --acc-c: #6f8cff; --acc-d: #5b33c4; }
+[data-accent="cobalt"]  { --acc: #4d7cff; --acc-2: #b3c8ff; --acc-b: #7ad7ff; --acc-c: #a58bff; --acc-d: #2148c4; }
+[data-accent="ice"]     { --acc: #8fe2ff; --acc-2: #e2f8ff; --acc-b: #b8c8ff; --acc-c: #6fc4d8; --acc-d: #1c7a99; }
+[data-accent="teal"]    { --acc: #3fd0c4; --acc-2: #b3f2ec; --acc-b: #4f9fd8; --acc-c: #e3b04f; --acc-d: #0f7f78; }
+[data-accent="mint"]    { --acc: #6fe3a8; --acc-2: #caf7df; --acc-b: #3fc6c0; --acc-c: #d4e86a; --acc-d: #1c8a55; }
+[data-accent="lime"]    { --acc: #b6f23a; --acc-2: #e6ffb0; --acc-b: #62e3a0; --acc-c: #f2d23a; --acc-d: #4f7a00; }
+/* round 2 (Nate 2026-10-12): between his two stars, ice + violet, plus oxblood */
+[data-accent="aurora"]     { --acc: #8fe2ff; --acc-2: #e2f8ff; --acc-b: #a77bff; --acc-c: #d9c6ff; --acc-d: #1c7a99; }
+[data-accent="dusk"]       { --acc: #a77bff; --acc-2: #e6dcff; --acc-b: #8fe2ff; --acc-c: #6fc4d8; --acc-d: #5b33c4; }
+[data-accent="lilac"]      { --acc: #b4c4ff; --acc-2: #eef0ff; --acc-b: #8fe2ff; --acc-c: #a77bff; --acc-d: #3b4fb0; }
+[data-accent="periwinkle"] { --acc: #8f9cff; --acc-2: #d7dcff; --acc-b: #8fe2ff; --acc-c: #c6a8ff; --acc-d: #3340b8; }
+[data-accent="frost"]      { --acc: #c9b8ff; --acc-2: #f3eeff; --acc-b: #9fe6ff; --acc-c: #8f9cff; --acc-d: #5a3fb0; }
+[data-accent="oxblood"]    { --acc: #c73b52; --acc-2: #f2a3ad; --acc-b: #e0707a; --acc-c: #8f2a3a; --acc-d: #6e1424; }
+[data-accent="ox-ice"]     { --acc: #c73b52; --acc-2: #f2a3ad; --acc-b: #8fe2ff; --acc-c: #b8c8ff; --acc-d: #6e1424; }
+[data-accent="ox-violet"]  { --acc: #b8405e; --acc-2: #f0b0c4; --acc-b: #a77bff; --acc-c: #d9c6ff; --acc-d: #6e1430; }
+
+/* spread an accent across the Tube looks (amber = the look's own colors, no override) */
+:root:is([data-look="tube"], [data-look="tube-light"]):not([data-accent="amber"]) {
+  --accent: var(--acc); --accent-2: var(--acc-2);
+  --accent-soft: color-mix(in srgb, var(--acc) 14%, transparent);
+  --accent-grad: linear-gradient(180deg, var(--acc-2) 0%, color-mix(in srgb, var(--acc) 82%, #000) 100%);
+  --on-accent: #120a04; --glow: color-mix(in srgb, var(--acc) 50%, transparent); --chg: color-mix(in srgb, var(--acc) 20%, transparent);
+  /* the tube screen, tinted to the accent */
+  --s-bg: radial-gradient(120% 140% at 50% 0%, color-mix(in srgb, var(--acc) 20%, #0b0705) 0%, #0a0604 72%);
+  --s-wave: color-mix(in srgb, var(--acc) 30%, #120a05); --s-played: var(--acc); --s-ink: var(--acc-2);
+  --s-faint: color-mix(in srgb, var(--acc) 50%, #2a1f16); --s-grid: color-mix(in srgb, var(--acc) 14%, #160e08);
+  --s-a: var(--acc-2); --s-b: var(--acc-b); --s-c: var(--acc-c); --s-head: color-mix(in srgb, var(--acc-2) 70%, #fff);
+  --s-loop: var(--acc); --s-glow: color-mix(in srgb, var(--acc) 42%, transparent);
+  --wave: var(--s-wave); --wave-played: var(--s-played); --tone-a: var(--acc-2); --tone-b: var(--acc-b); --tone-c: var(--acc-c);
+  --playhead: var(--s-head); --loop: var(--acc);
+}
+/* light mode: the screen keeps the lit accent, chrome text uses the darker ink so it reads on cream */
+:root[data-look="tube-light"]:not([data-accent="amber"]) {
+  --accent: var(--acc-d); --accent-soft: color-mix(in srgb, var(--acc-d) 13%, transparent);
+  --accent-grad: linear-gradient(180deg, var(--acc-2) 0%, var(--acc) 100%); --glow: color-mix(in srgb, var(--acc) 34%, transparent);
+}
+
+/* titlebar room for the light/dark switch */
+:root:is([data-look="tube"], [data-look="tube-light"]) .tb-right { gap: 8px; }
+:root:is([data-look="tube"], [data-look="tube-light"]) .mic select { max-width: 112px; }
+:root:is([data-look="tube"], [data-look="tube-light"]) .rec-pill { padding: 0 9px; }
+
+/* gallery previews: index.html#only=strip shows just the top ribbon + the screen */
+.only-strip body { background: transparent; }
+.only-strip .desk { padding: 0; min-height: 0; display: block; }
+.only-strip .win { width: 100%; height: auto; min-height: 0; border-radius: 10px; }
+.only-strip :is(.notes, #tune, .side, .lab, .lab-fab, .hud) { display: none !important; }
+
+/* light mode: the play knob and lit transport keys stay bright (the dark ink shade read as muddy) */
+:root[data-look="tube-light"]:not([data-accent="amber"]) .tbtn.play,
+:root[data-look="tube-light"]:not([data-accent="amber"]) .tbtn.on { background: var(--accent-grad) !important; color: color-mix(in srgb, var(--acc-d) 85%, #000) !important; }
+:root[data-look="tube-light"]:not([data-accent="amber"]) .tbtn.play .i { color: inherit; fill: currentColor; }
