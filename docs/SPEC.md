@@ -142,6 +142,42 @@ Every user has a profile that reflects their own writing back at them. **Analysi
 - **Over time:** how the above shifts across sessions and months.
 - **Source:** your own takes + imported finished songs (hub import). Only your own material, on your profile; analysis runs on-device or in your account, never shared without you turning it on.
 
+## Line judge: talk, writing and what it learned (shipped)
+
+A songwriting session is mostly talk, and Hot Mic used to keep all of it: on the livestream test corpus, 56 to 85% of a stitched whole song was chatter. The judge sorts every line of a session after Stop. **It only sorts and hides. It never changes a word and never suggests one.**
+
+**The chain, weakest first:**
+1. **Rules:** today's chatter list. Judges a line talk for the whole song only; rules alone never hide a line in the notepad.
+2. **Model pass after Stop:** Apple's on-device model (FoundationModels, macOS 26, Apple Intelligence on; no account, no key, nothing leaves the Mac) reads the session's lines in the order sung, one line at a time with 3 lines before and 2 after, and answers LYRIC or TALK. Answers are smoothed over the session, because talk and writing come in stretches.
+3. **Learner:** a small logistic regression in pure Swift, per user, trained a little on every correction. It only has a say when it is sure (`LineJudgeConfig`: confidence, minimum corrections, and it stands down when it keeps losing to the verdicts it would move).
+4. **You:** a click on a line always wins and survives every re-run.
+
+**Fails safe:** model missing, refusing, stalled or erroring leaves those lines to the rules, and the outcome goes in `hotmic.log`. The pass never runs during a recording, and stops at once when one starts. Raw logs (take sidecars, `live-lines.json`) are never touched, so the pass can be re-run or thrown away: answers live beside them in `line-judgments.json`, line sound measurements in `line-audio.json`.
+
+**What it learns from:** one click (Talk on a line, Lyric on a set-aside line) at full weight; picking a version of a line, editing its words, deleting a stretch and undoing a delete at half weight. Stored at the top of the Hot Mic folder as `line-judge.json`: hashed words and numbers, never the words themselves. Visible and resettable in Settings; never leaves the Mac.
+
+**In the window:** lines judged talk leave the notepad and wait in a quiet list above it ("12 lines of talk set aside"); nothing is deleted, and the whole song skips them. A row's Talk button sends a line there, a set-aside line's Lyric button brings it back. A small dot marks sessions the model judged. Settings has a switch for each layer.
+
+**Defaults:** model on where it is available; learner on.
+
+**Measured on the livestream test corpus (6 sessions, 1,704 lines, offline).** Lines marked unsure in the labels aren't scored. The learner row is leave-one-out: taught on simulated corrections (up to 30 per session) from the other 5 sessions, measured on the one it never saw.
+
+| Judge | Talk precision | Talk recall | Writing kept | Whole-song talk |
+|---|---|---|---|---|
+| Rules | 0.67 | 0.03 | 0.93 | 71% |
+| On-device model | 0.93 | 0.88 | 0.89 | 30% |
+| Model + learner | 0.91 | 0.91 | 0.91 | 25% |
+
+- The learner's gain needs several sessions behind it. Taught on one session and measured on another, it barely moves (30 pairs: 3 better, 6 worse, the rest unchanged). Taught and measured inside one session it didn't change a line. Thresholds and smoothing were tuned on this same corpus, so expect real sessions to do somewhat worse.
+- **Playback isn't judged.** Neither the model nor a rule for repeated runs of lines could tell it from writing, so a finished recording heard through the mic stays in the notepad unless you set it aside. In a real Beat-mode session the app cancels its own playback anyway. The verdict exists in the file format, nothing writes it yet.
+- **Costs:** the model hides about 11% of real writing lines until you bring them back. Pitch and voicing added nothing measurable, because only a quarter of the lines have times good enough to measure.
+- **Guardrails:** Apple's default guardrails refuse 80% of the lines of one session (149 of 185), and the permissive setting still refuses whole batches of explicit lines in words. Explicit words are masked in what the model reads, and only there; with that, 8 of 1,704 lines were refused and 1 timed out.
+- **Other models:** a 1.7B local LLM through MLX (Qwen3, 4-bit, one try with the same prompt) called nearly everything talk and kept 4% of writing. Nothing to download.
+
+**Not fixed: Whisper's word times.** They still collapse on most lines, so a whole-song clip can start or stop in the wrong place. With every line judged right, the song would still hold 4 to 16% talk on the four sessions with real writing in them.
+
+**Run it:** `bench/run.sh <id> judge <cond>`, or `hotmic-bench judge`, `verdicts`, `plan`, `teach`, `replay`. `bench/lines.py` gives lines their true labels.
+
 ## Architecture
 
 ```
@@ -299,6 +335,17 @@ Protocol per boundary, value types, `Duration`/sample counts never raw `Double` 
 | Enrichment latency | Take files within 5 s; MIDI/lyrics/tuned within 60 s of the take ending |
 | Overlay | Never steals focus or keystrokes from the DAW; hover-expand ≤ 150 ms; idle pill invisible in screenshots at default opacity unless looked for |
 | Ship | Signed, notarized, installs clean on a fresh macOS 14.2+ machine |
+
+## Verify by hand: library audio in the window
+
+Audio in the window plays through `hotmic-media://library/<path>` (Sources/MediaScheme), which serves only audio files inside the library folder. Its range handling, types and path rules are unit tested; it has never played real audio. Installed app, a session you recorded before:
+
+1. Click a word in the middle of the session. Playback starts from that word within about a second.
+2. Click a word in another line while it plays. It jumps there; no gap of more than a second, no echo of the old spot.
+3. Open a session longer than 5 minutes and click a word at about 4:55. Play carries on past 5:00 into the next file.
+4. Beat tab, same session: playback is the voice with what was playing.
+5. Drag across the strip and press play at five different spots. It plays from each one.
+6. A session in iCloud Drive that hasn't downloaded yet: it stays silent until the file arrives, and the window doesn't freeze.
 
 ## Boundaries
 
