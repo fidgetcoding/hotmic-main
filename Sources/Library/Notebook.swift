@@ -61,7 +61,8 @@ public struct Notebook: Equatable, Sendable {
         guard let lyrics = take.lyrics else { return [] }
         var bar: ((Double) -> Double?) = { _ in nil }
         if let p = take.position, p.playing, p.tempo > 0 {
-            let first = Double(p.bar) + (Double(p.beat - 1) + Double(p.sixteenth - 1) / 4) / Double(p.beatsPerBar)
+            let first = p.quarters.map { $0 / Double(p.beatsPerBar) + 1 }
+                ?? Double(p.bar) + (Double(p.beat - 1) + Double(p.sixteenth - 1) / 4) / Double(p.beatsPerBar)
             let padding = take.padding ?? 0
             bar = { t in first + (t - padding) * p.tempo / 60 / Double(p.beatsPerBar) }
         }
