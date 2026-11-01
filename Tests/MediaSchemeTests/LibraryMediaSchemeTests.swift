@@ -39,6 +39,13 @@ final class LibraryMediaRulesTests: XCTestCase {
         XCTAssertNil(LibraryMedia.resolve(url(library.appendingPathComponent("link.m4a").path), root: library))
     }
 
+    func testEveryServedFileHasAPlayableType() {
+        for ext in LibraryMedia.audioExtensions {
+            XCTAssertTrue(LibraryMedia.type(of: URL(fileURLWithPath: "/a.\(ext)")).hasPrefix("audio/"), ext)
+        }
+        XCTAssertEqual(LibraryMedia.type(of: URL(fileURLWithPath: "/a.M4A")), "audio/mp4", "case doesn't matter")
+    }
+
     func testRanges() {
         XCTAssertEqual(LibraryMedia.span(header: nil, size: 100), .whole)
         XCTAssertEqual(LibraryMedia.span(header: "bytes=0-1", size: 100), .part(0...1))
@@ -48,6 +55,11 @@ final class LibraryMediaRulesTests: XCTestCase {
         XCTAssertEqual(LibraryMedia.span(header: "bytes=100-", size: 100), .unsatisfiable)
         XCTAssertEqual(LibraryMedia.span(header: "bytes=0-1,5-6", size: 100), .whole)
         XCTAssertEqual(LibraryMedia.span(header: "items=0-1", size: 100), .whole)
+        XCTAssertEqual(LibraryMedia.span(header: "bytes=99-99", size: 100), .part(99...99), "the last byte, as a seek to the end asks")
+        XCTAssertEqual(LibraryMedia.span(header: "bytes=-500", size: 100), .part(0...99), "a tail longer than the file")
+        XCTAssertEqual(LibraryMedia.span(header: "bytes=-0", size: 100), .unsatisfiable)
+        XCTAssertEqual(LibraryMedia.span(header: "bytes=0-", size: 0), .unsatisfiable, "an empty file")
+        XCTAssertEqual(LibraryMedia.span(header: "bytes=5-3", size: 100), .whole, "an impossible range is ignored")
     }
 }
 
@@ -101,6 +113,19 @@ final class LibraryMediaHandlerTests: XCTestCase {
         XCTAssertEqual(task.response?.statusCode, 206)
         XCTAssertEqual(task.response?.value(forHTTPHeaderField: "Content-Range"), "bytes 10-19/255")
         XCTAssertEqual([UInt8](task.body), (10...19).map { UInt8($0) })
+    }
+
+    func testTheFirstProbeAndASeekAnswerLikeAServer() async {
+        // What the media stack asks first (two bytes), then a seek to the tail.
+        let probe = await run(takePath, range: "bytes=0-1")
+        XCTAssertEqual(probe.response?.statusCode, 206)
+        XCTAssertEqual(probe.response?.value(forHTTPHeaderField: "Content-Type"), "audio/mp4")
+        XCTAssertEqual(probe.response?.value(forHTTPHeaderField: "Content-Length"), "2")
+        XCTAssertEqual(probe.response?.value(forHTTPHeaderField: "Content-Range"), "bytes 0-1/255")
+        XCTAssertEqual(probe.body.count, 2)
+        let seek = await run(takePath, range: "bytes=200-")
+        XCTAssertEqual(seek.response?.value(forHTTPHeaderField: "Content-Range"), "bytes 200-254/255")
+        XCTAssertEqual([UInt8](seek.body), (200...254).map { UInt8($0) })
     }
 
     func testOutsideTheLibraryIsNotFound() async {

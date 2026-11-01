@@ -1,5 +1,4 @@
 import Foundation
-import UniformTypeIdentifiers
 import WebKit
 
 /// The rules for `hotmic-media://library/<absolute path>`: how the window's page reaches audio in the
@@ -7,7 +6,13 @@ import WebKit
 public enum LibraryMedia {
     public static let scheme = "hotmic-media"
     static let host = "library"
-    static let audioExtensions: Set<String> = ["m4a", "aac", "mp3", "mp4", "wav", "aif", "aiff", "caf", "flac"]
+    /// What the media stack is told each file is. Spelled out: the system's table gives CAF no type at all,
+    /// and a media element won't play "application/octet-stream".
+    static let audioTypes = ["m4a": "audio/mp4", "mp4": "audio/mp4", "aac": "audio/aac", "mp3": "audio/mpeg", "wav": "audio/wav",
+                             "aif": "audio/aiff", "aiff": "audio/aiff", "caf": "audio/x-caf", "flac": "audio/flac"]
+    static var audioExtensions: Set<String> { Set(audioTypes.keys) }
+
+    static func type(of file: URL) -> String { audioTypes[file.pathExtension.lowercased()] ?? "application/octet-stream" }
 
     /// The file a URL names, or nil unless it is an audio file inside `root` (symlinks resolved first).
     public static func resolve(_ url: URL, root: URL) -> URL? {
@@ -63,8 +68,7 @@ public final class LibraryMediaSchemeHandler: NSObject, WKURLSchemeHandler {
             task.didFinish()
             return
         }
-        let type = UTType(filenameExtension: file.pathExtension)?.preferredMIMEType ?? "application/octet-stream"
-        var headers = ["Accept-Ranges": "bytes", "Content-Type": type]
+        var headers = ["Accept-Ranges": "bytes", "Content-Type": LibraryMedia.type(of: file)]
         let range: ClosedRange<Int64>
         switch LibraryMedia.span(header: task.request.value(forHTTPHeaderField: "Range"), size: size) {
         case .unsatisfiable:
@@ -109,7 +113,7 @@ public final class LibraryMediaSchemeHandler: NSObject, WKURLSchemeHandler {
             }
             DispatchQueue.main.async {
                 MainActor.assumeIsolated {
-                    guard active.remove(id) != nil else { return }
+                    guard self.active.remove(id) != nil else { return }
                     if let failure { task.didFailWithError(failure) } else { task.didFinish() }
                 }
             }
