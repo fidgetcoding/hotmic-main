@@ -90,7 +90,7 @@ struct PhonesView: View {
                     Toggle("Let phones join", isOn: Binding(get: { phones.enabled }, set: { phones.setEnabled($0) }))
                         .toggleStyle(.switch)
                 }
-                Text("Experimental. Phone audio and the join code travel unencrypted over your local network, so only turn this on when you trust the network.")
+                Text("Phone audio is encrypted between the phone and this Mac. Still new: it has only been tested with a simulated phone so far.")
                     .font(.callout).foregroundStyle(.secondary)
                 if !phones.snapshot.requests.isEmpty { requests }
                 if !phones.enabled {
