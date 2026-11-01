@@ -21,3 +21,5 @@ jobs:
       # Tests that use the mic, the network or local files are opt-in through HM_* variables, none set here.
       - name: Test
         run: swift test
+      - name: Test the window's judge code
+        run: node --test Tests/lab/judge.test.mjs

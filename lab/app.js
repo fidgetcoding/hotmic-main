@@ -76,7 +76,13 @@
   const clearLines = (sec) => Object.keys(HM.S.linePicks).forEach((k) => { if (k.startsWith(`${sec.id}:`)) delete HM.S.linePicks[k]; });
   HM.pickPass = (sec, p) => { HM.S.picks[sec.id] = p.id; clearLines(sec); HM.save(); HM.render(); };
   HM.clearPass = (sec) => { delete HM.S.picks[sec.id]; clearLines(sec); HM.save(); HM.render(); };
-  HM.pickLine = (sec, slot, key) => { HM.S.linePicks[`${sec.id}:${slot}`] = key; HM.save(); HM.render(); };
+  HM.pickLine = (sec, slot, key) => {
+    HM.S.linePicks[`${sec.id}:${slot}`] = key; HM.save();
+    // Picking a version of a line says it's a lyric: the judge learns from it.
+    const picked = HM.judge && sec.passes.find((p) => p.lines[slot] && p.lines[slot].key === key);
+    if (picked && picked.real) HM.judge.signal('starred', picked.real.id);
+    HM.render();
+  };
   HM.clearLine = (sec, slot) => { delete HM.S.linePicks[`${sec.id}:${slot}`]; HM.save(); HM.render(); };
 
   // ---------- menus ----------
@@ -138,7 +144,7 @@
     const row = (s) => {
       if (S.side === 'cards') return `<button class="s-card${s.current ? ' on' : ''}"${s.id ? ` data-session="${e(s.id)}"` : ''}><span class="s-top">${icon(s)}<b>${e(s.name)}</b></span>${miniWave(s.seed)}<span class="s-sub">${e(s.day)} · ${e(s.len)} · ${e(s.takes)} takes</span></button>`;
       if (S.side === 'days') return `<button class="s-row compact${s.current ? ' on' : ''}">${icon(s)}<span class="s-main"><span class="s-line"><b>${e(s.name)}</b><span class="s-time">${e(s.time)}</span></span><span class="s-chips"><em>${e(s.key)}</em><em>${e(s.bpm)} BPM</em><em>${e(s.takes)} takes</em></span></span></button>`;
-      return `<button class="s-row${s.current ? ' on' : ''}"${s.id ? ` data-session="${e(s.id)}"` : ''}>${icon(s)}<span class="s-main"><b>${e(s.name)}</b><span>${e(s.day)} · ${e(s.time)} · ${e(s.len)}</span></span></button>`;
+      return `<button class="s-row${s.current ? ' on' : ''}"${s.id ? ` data-session="${e(s.id)}"` : ''}>${icon(s)}<span class="s-main"><b>${e(s.name)}${s.judged ? '<i class="s-judged" title="Talk sorted by the on-device model"></i>' : ''}</b><span>${e(s.day)} · ${e(s.time)} · ${e(s.len)}</span></span></button>`;
     };
     // A session being recorded keeps its row (the app lists the folder only once it exists on disk).
     const unlisted = HM.S.growing && !HM.sessions.some((x) => x.current);

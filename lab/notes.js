@@ -249,6 +249,8 @@
       st.addEventListener('mouseleave', () => row.classList.remove('peek'));
       row.appendChild(st);
     }
+    const talk = HM.judge && sh.pass.real ? HM.judge.rowButton(h, sh.pass.real.id, sh.pass.real.takeID) : null;
+    if (talk) row.appendChild(talk);
     row.addEventListener('mouseenter', () => { S()._hoverKey = `${sec.id}:${slot}`; });
     if (S()._flash === `${sec.id}:${slot}`) { S()._flash = null; row.classList.add('flash'); setTimeout(() => row.classList.remove('flash'), 1100); }
     return row;

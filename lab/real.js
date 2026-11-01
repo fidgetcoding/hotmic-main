@@ -9,8 +9,12 @@
   const fileURL = (p) => (!p ? null : window.HM_HOST ? `hotmic-media://library${p.split('/').map(encodeURIComponent).join('/')}` : `file://${encodeURI(p)}`);
 
   HM.realConvert = (d) => {
+    const seen = {};
     HM.sections = d.slots.map((versions, i) => {
-      const id = `s${i}`;
+      // Named from the line's first version, not its place: picks and edits stay on their line when the judge takes a line above it away.
+      const base = String((versions[0] && versions[0].id) || `s${i}`).replace(/[^\w-]/g, '_');
+      seen[base] = (seen[base] || 0) + 1;
+      const id = seen[base] > 1 ? `${base}_${seen[base]}` : base;
       const passes = versions.map((v, k) => {
         const line = {
           text: v.text, flow: 'on the beat', chords: v.chords || [], sung: v.notes || [], key: `${v.text}|on the beat`,
@@ -19,7 +23,7 @@
         return {
           id: `${id}p${k + 1}`, n: k + 1, at: v.at, beatAt: v.at, dur: Math.max(0.8, v.end - v.start),
           score: { whole: 1, pitch: 1, timing: 1, total: v.keeper ? 1 : 0.5 }, note: '', lines: [line], wording: line.key,
-          real: { takeID: v.takeID, start: v.start, end: v.end, voice: fileURL((d.takes.find((t) => t.id === v.takeID) || {}).voice) },
+          real: { id: v.id, takeID: v.takeID, start: v.start, end: v.end, voice: fileURL((d.takes.find((t) => t.id === v.takeID) || {}).voice) },
         };
       });
       return { id, name: `Line ${i + 1}`, tone: tones[i % 3], slots: 1, passes, keeper: versions.findIndex((v) => v.keeper) };

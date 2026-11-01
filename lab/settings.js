@@ -26,10 +26,12 @@
       <div class="set-sec"><div class="set-h">Accent</div><div class="set-accents">${ACCENTS.map(([id, nm, c]) => `
         <button class="set-acc${ac === id ? ' on' : ''}" data-accent-pick="${id}" title="${nm}"><i style="background:${c}"></i><span>${nm}</span></button>`).join('')}</div></div>
       <div class="set-sec"><div class="set-h">Appearance</div><div class="set-row"><span>Light or dark</span><button class="set-btn" data-theme-flip>${S.look === 'tube-light' ? 'Switch to dark' : 'Switch to light'}</button></div></div>
+      ${window.HM_HOST ? HM.judge.settings(S) : ''}
       <div class="set-foot">More settings land here.</div>`;
     pop.querySelector('.set-x').onclick = close;
     pop.querySelectorAll('[data-style-pick]').forEach((b) => (b.onclick = () => { HM.set({ style: b.dataset.stylePick }); render(); }));
     pop.querySelectorAll('[data-accent-pick]').forEach((b) => (b.onclick = () => { HM.set({ accent: b.dataset.accentPick }); render(); }));
+    if (window.HM_HOST) HM.judge.wireSettings(pop, render);
     pop.querySelector('[data-theme-flip]').onclick = () => { HM.set({ look: HM.S.look === 'tube-light' ? 'tube' : 'tube-light' }); render(); };
   }
   function open() {

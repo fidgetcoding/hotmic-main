@@ -135,6 +135,7 @@
     const s = S();
     // Editing pauses the music, unless you're looping a part on purpose.
     if (s.playing && !(s.mode === 'beat' && s.loop.on)) { s.playing = false; HM.audio.stop(); HM.strip.head(); }
+    s._editsBefore = { ...s.edits };
     s.editing = true; HM.renderNotes();
     const target = (key && host.querySelector(`.row[data-key="${key}"] .lyric`)) || host.querySelector('.row[data-key] .lyric');
     if (!target) return;
@@ -142,7 +143,16 @@
     const r = x != null && document.caretRangeFromPoint ? document.caretRangeFromPoint(x, y) : null;
     if (r && target.contains(r.startContainer)) { const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r); } else caretEnd(target);
   };
-  HM.sheet.stopEditing = () => { S().editing = false; HM.renderNotes(); };
+  HM.sheet.stopEditing = () => {
+    const s = S();
+    // A line whose words you fixed is a lyric: the judge learns from it.
+    if (HM.judge) Object.keys(s.edits).forEach((k) => {
+      if (s.edits[k] === (s._editsBefore || {})[k] || !s.edits[k]) return;
+      const [id, slot] = k.split(':'), sec = HM.sec(id), pass = sec && HM.shown(sec, +slot).pass;
+      if (pass && pass.real) HM.judge.signal('edited', pass.real.id);
+    });
+    s.editing = false; HM.renderNotes();
+  };
 
   function toolbar(n) {
     const ed = S().editing;
@@ -156,6 +166,8 @@
       sec.addEventListener('click', () => { const k = S()._caretKey || (host.querySelector('.row[data-key]') || {}).dataset?.key; if (k) HM.sheet.addBreak(k); });
       bar.querySelector('.np-right').appendChild(sec);
     }
+    const aside = !ed && HM.judge ? HM.judge.bar(h) : null;
+    if (aside) bar.querySelector('.np-left').appendChild(aside);
     bar.querySelector('.np-right').appendChild(btn);
     return bar;
   }
@@ -210,6 +222,8 @@
     // The board is only lyrics, and always typeable (Nate 2026-10-14): an empty session is just a blank page.
     if (!all.length && !singing && !(HM.labTyped || []).length) { finish(); return; }
     host.appendChild(toolbar(all.length));
+    const asideList = HM.judge ? HM.judge.list(h, esc) : null;
+    if (asideList) host.appendChild(asideList);
     if (!all.length && !(HM.labTyped || []).length) { finish(); host.scrollTop = keepScroll; return; }
     const b = breaks();
     let named = 0;

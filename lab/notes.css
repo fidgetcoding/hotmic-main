@@ -51,6 +51,21 @@
 .tag.typed { background: var(--chg); color: var(--ink); }
 .tag.pick { background: var(--fire-soft); border-color: color-mix(in srgb, var(--fire) 35%, transparent); color: var(--fire); cursor: pointer; }
 .tag.count-tag { font-family: var(--mono); letter-spacing: 0; }
+/* The line judge: quiet until you reach for it. */
+.np-aside { flex: none; color: var(--faint); font-size: 12px; text-decoration: underline dotted; text-underline-offset: 3px; }
+.np-aside:hover, .np-aside.on { color: var(--accent); }
+.aside-list { max-width: 860px; margin: 0 auto 14px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; max-height: 240px; overflow: auto; }
+.aside-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 3px 0; color: var(--muted); font-size: 13px; }
+.aside-text { cursor: pointer; min-width: 0; }
+.aside-text:hover { color: var(--ink); }
+.aside-keep, .row-talk { flex: none; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--faint); font: 600 10.5px/1.6 var(--ui); }
+.aside-keep:hover, .row-talk:hover { border-color: var(--accent); color: var(--accent); }
+.row-talk { align-self: flex-start; margin-top: 4px; margin-left: 8px; opacity: 0; transition: opacity 0.12s; }
+.row:hover > .row-talk { opacity: 1; }
+.is-editing .row-talk { display: none; }
+.s-judged { display: inline-block; width: 5px; height: 5px; margin-left: 6px; border-radius: 50%; background: var(--accent); opacity: 0.7; vertical-align: 2px; }
+.set-note { margin-top: 6px; color: var(--faint); font-size: 11px; }
+.set-row em { font-style: normal; color: var(--faint); font-size: 11px; }
 
 /* steppers, pills, tabs */
 .stepper { display: inline-flex; align-items: center; gap: 2px; flex: none; margin-top: 4px; padding: 2px; border-radius: 999px; border: 1px solid var(--line); background: var(--display); box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35); font: 600 11px var(--mono); color: var(--muted); white-space: nowrap; }

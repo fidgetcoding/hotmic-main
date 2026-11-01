@@ -633,6 +633,7 @@ final class AppModel: ObservableObject {
     /// UI updates immediately; finishing files and the last take happens off the main thread.
     private func stopSession() {
         let recorder = self.recorder, pipeline = self.pipeline, room = self.room
+        let folderOfStoppedSession = recordingFolder
         liveWords?.stop(); liveWords = nil
         self.recorder = nil
         self.pipeline = nil
@@ -650,6 +651,7 @@ final class AppModel: ObservableObject {
         overlay.source = nil
         overlay.level = 0
         guard let recorder else { return }
+        let judged = pipeline.flatMap { _ in folderOfStoppedSession }
         if let pipeline { finishingPipelines.append(pipeline) }
         if let room { finishingRooms.append(room) }
         // Finalization is serialized (files close in order) but never waits on an earlier session's lyrics.
@@ -671,6 +673,7 @@ final class AppModel: ObservableObject {
             guard let pipeline else { return }
             await pipeline.waitForLyrics()
             self?.finishingPipelines.removeAll { $0 === pipeline }
+            if let judged { self?.labWindow.judgeSoon(judged) }      // the words are in: the model pass reads them
         }
     }
 

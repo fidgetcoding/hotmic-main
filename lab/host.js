@@ -22,7 +22,7 @@
     HM.sessions = list.map((s) => ({
       id: s.id, name: s.name.replace(/^\d{4}-\d{2}-\d{2} \d{6} /, ''), day: dayLabel(s.date),
       time: new Date(s.date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-      len: fmt(s.length), key: '—', bpm: '—', takes: s.takes, kind: /jam/i.test(s.daw) || !s.daw ? 'solo' : 'beat',
+      len: fmt(s.length), key: '—', bpm: '—', takes: s.takes, judged: !!s.judged, kind: /jam/i.test(s.daw) || !s.daw ? 'solo' : 'beat',
       current: s.id === current, seed: s.takes * 7 + 3,
     }));
   }
@@ -72,10 +72,12 @@
       if (d.id !== current) HM.liveDone = [];
       current = d.id;
       lastLoad = d;
+      if (HM.judge) HM.judge.load(d);
       reconcile(d);
       HM.realConvert(withPending(d));
       const S = HM.S;
       if (S) {
+        if (HM.judge) HM.judge.migrate(S, HM.sections);
         // Recording: the clock comes from the app (HM.host.level); a mid-take reload never moves it.
         if (S.growing) HM.sessionLen = Math.max(HM.sessionLen, Math.ceil(S.elapsed)); else S.elapsed = HM.sessionLen;
         S.t = Math.min(S.t, HM.sessionLen); S.cue = Math.min(S.cue || 0, HM.sessionLen);
@@ -122,6 +124,7 @@
       if (lastLoad) { HM.realConvert(withPending(lastLoad)); HM.renderNotes(); if (HM.strip && HM.strip.draw) HM.strip.draw(); }
       drawLive();
     },
+    judgeState(s) { if (HM.judge) Object.assign(HM.judge.state, s); },
     liveNotice(text) { HM.liveNotice = text || ''; drawLive(); },
     // Live input level while recording: written into the strip's waveform at the current time.
     level(v, at) {

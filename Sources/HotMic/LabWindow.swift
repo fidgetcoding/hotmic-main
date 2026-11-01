@@ -13,10 +13,11 @@ import WebKit
 final class LabWindowController: NSObject, WKScriptMessageHandler, WKNavigationDelegate, NSWindowDelegate {
     private(set) var window: NSWindow?
     private var web: DragWebView?
-    private weak var model: AppModel?
-    private var library: () -> LibraryLocation
-    private var current: URL?
-    private var ready = false
+    weak var model: AppModel?
+    var library: () -> LibraryLocation
+    var current: URL?
+    private(set) var ready = false
+    let judgeRunner = LineJudgeRunner()
     private var settingsPending = false
     private var refreshPending = false
     private var lookObserver: NSObjectProtocol?
@@ -96,9 +97,9 @@ final class LabWindowController: NSObject, WKScriptMessageHandler, WKNavigationD
         if ready { js("HM.openSettings()") } else { settingsPending = true }
     }
 
-    private func js(_ script: String) { web?.evaluateJavaScript(script, completionHandler: nil) }
+    func js(_ script: String) { web?.evaluateJavaScript(script, completionHandler: nil) }
 
-    private func pushAll() {
+    func pushAll() {
         let lib = library()
         let index = LibraryIndex(location: lib)
         Task { [weak self] in
@@ -110,6 +111,7 @@ final class LabWindowController: NSObject, WKScriptMessageHandler, WKNavigationD
             self.js("HM.host.sessions(\(LabSessionExport.json(list)))")
             self.pushMics()
             self.pushRecording()
+            self.pushJudge()
             self.pushSession()
         }
     }
@@ -183,6 +185,7 @@ final class LabWindowController: NSObject, WKScriptMessageHandler, WKNavigationD
     func importFinished(_ name: String, folder: URL, takes: Int) {
         js("HM.host.importing({name: \(LabSessionExport.json(name)), done: true, takes: \(takes)})")
         if model?.armedBy == nil { current = folder }      // never yank the window off a live recording
+        judgeSoon(folder)
         pushAll()
     }
     func importFailed(_ name: String, _ message: String) {
@@ -217,6 +220,7 @@ final class LabWindowController: NSObject, WKScriptMessageHandler, WKNavigationD
     }
 
     private func recordingChanged(_ on: Bool) {
+        if on { judgeRunner.pause() } else { judgeRunner.resume() }   // the model never runs during a recording
         guard ready else { return }
         if on, let folder = model?.currentRecordingFolder { current = folder }
         pushRecording()
@@ -233,11 +237,13 @@ final class LabWindowController: NSObject, WKScriptMessageHandler, WKNavigationD
         let text = body["text"] as? String, at = body["at"] as? Double
         Task { @MainActor in
             if cmd == "typeLines" { self.typeLines(text ?? "", at: at ?? 0); return }
+            if self.handleJudge(cmd, id: id, kind: body["kind"] as? String, verdict: body["verdict"] as? String,
+                                modelOn: body["modelOn"] as? Bool, learnerOn: body["learnerOn"] as? Bool, reset: body["reset"] as? Bool) { return }
             if cmd == "hideRange" || cmd == "unhideRange", let folder = self.current ?? self.model?.currentRecordingFolder {
-                if cmd == "hideRange" { HiddenRanges.hide(HiddenRange(a: (body["a"] as? Double) ?? 0, b: (body["b"] as? Double) ?? 0), in: folder) }
-                else { HiddenRanges.unhideLast(in: folder) }
+                if cmd == "hideRange" { self.hide(HiddenRange(a: (body["a"] as? Double) ?? 0, b: (body["b"] as? Double) ?? 0), in: folder) }
+                else { self.unhideLast(in: folder) }
                 HotMicLog.write("\(cmd) in \(folder.lastPathComponent)")
-                self.pushAll(); return
+                return
             }
             if cmd == "beatRun", let folder = self.model?.currentRecordingFolder ?? self.current {
                 let n = { (k: String) in (body[k] as? Double) ?? 0 }
@@ -280,6 +286,7 @@ final class LabWindowController: NSObject, WKScriptMessageHandler, WKNavigationD
         case "openSession":
             guard let id, id.isEmpty || inLibrary(id) else { return }
             current = id.isEmpty ? nil : URL(fileURLWithPath: id, isDirectory: true)
+            if let current { judgeSoon(current) }
             pushAll()
         case "record":
             guard let model else { return }
