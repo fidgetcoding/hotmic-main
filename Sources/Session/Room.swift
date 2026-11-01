@@ -38,11 +38,13 @@ public final class Room: SessionServerDelegate, @unchecked Sendable {
     private var beatBuffer: [Int16] = []
     private var beatStart: Int64 = 0
 
-    public init(hostName: String, sessionName: String, host: RemoteSinger.Host, isTrusted: @escaping (String) -> Bool) {
+    /// `identity` and `onNetwork` are for tests: a throwaway key, and only this Mac can connect.
+    public init(hostName: String, sessionName: String, host: RemoteSinger.Host, isTrusted: @escaping (String) -> Bool,
+                identity: SessionIdentity = HostIdentity.load(), onNetwork: Bool = true) {
         tap = host.tap
         self.host = host
         self.isTrusted = isTrusted
-        server = SessionServer(hostName: hostName, sessionName: sessionName, identity: HostIdentity.load())
+        server = SessionServer(hostName: hostName, sessionName: sessionName, identity: identity, onNetwork: onNetwork)
     }
 
     public func start() {

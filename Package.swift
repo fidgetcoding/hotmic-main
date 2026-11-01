@@ -47,6 +47,7 @@ let package = Package(
         .testTarget(name: "LibraryTests", dependencies: ["Library", "Detection", "Timeline", "Enrichment", "Capture"], exclude: ["Fixtures"]),
         // Session context (host side): phones' mic streams → aligned to the beat → echo-cancelled → takes.
         .target(name: "Session", dependencies: ["Capture", "Library", "Timeline", .product(name: "SessionKit", package: "SessionKit")]),
+        .testTarget(name: "SessionTests", dependencies: ["Session", "Library", .product(name: "SessionKit", package: "SessionKit")]),
         // Overlay: invisible hover pill + panel (never takes focus).
         .target(name: "Overlay"),
         .testTarget(name: "OverlayTests", dependencies: ["Overlay"]),

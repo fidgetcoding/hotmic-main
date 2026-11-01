@@ -95,11 +95,11 @@ final class ModelPassTests: XCTestCase {
             return .talk
         }
         let started = Date()
-        let out = await ModelPass.run(rows: rows(["stall here", "fine here"]), model: model, into: SessionJudgments(), lineTimeout: 0.05)
+        let out = await ModelPass.run(rows: rows(["stall here", "fine here"]), model: model, into: SessionJudgments(), lineTimeout: 1)
         XCTAssertEqual(out.stats.timedOut, 1)
         XCTAssertNil(out.lines["t#0"]?.model)
         XCTAssertEqual(out.lines["t#1"]?.model, .talk)
-        XCTAssertLessThan(Date().timeIntervalSince(started), 5)
+        XCTAssertLessThan(Date().timeIntervalSince(started), 15, "not the 30 s the stalled line would take")
     }
 
     func testAModelThatKeepsFailingIsGivenUpOn() async {

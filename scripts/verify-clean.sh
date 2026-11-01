@@ -65,7 +65,10 @@ shasum -a 256 "$BIN" | awk '{print "executable sha256: " $1}'
 
 if $WITH_TESTS; then
   step "tests (the ones that need the mic, the network or local files stay skipped)"
-  clean swift test --force-resolved-versions 2>&1 | grep -E " error: |Executed [0-9]+ tests|failed" | tail -5
+  clean swift test --force-resolved-versions > "$WORK/tests.log" 2>&1 || true
+  grep -E "Executed [0-9]+ tests" "$WORK/tests.log" | tail -1
+  if grep -E " error: " "$WORK/tests.log" | grep -v checkouts; then fail "tests failed (log: $WORK/tests.log)"; fi
+  grep -qE "Executed [0-9]+ tests, with .* 0 failures" "$WORK/tests.log" || fail "the tests didn't finish (log: $WORK/tests.log)"
 fi
 
 printf '\nOK: a fresh clone of %s builds a complete, signed (ad hoc) bundle. Not installed, not opened.\n' "$HEAD"

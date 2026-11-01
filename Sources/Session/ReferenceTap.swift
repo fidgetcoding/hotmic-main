@@ -46,7 +46,8 @@ public final class ReferenceTap: @unchecked Sendable {
     public func stereo(from: Int64, count: Int) -> [Float] {
         var out = [Float](repeating: 0, count: count * 2)
         lock.withLock {
-            let lo = max(from, end - Int64(capacity)), hi = min(from + Int64(count), end)
+            // Never below frame 0: a phone singing right at the start asks for what came "before" the session.
+            let lo = max(from, end - Int64(capacity), 0), hi = min(from + Int64(count), end)
             guard lo < hi else { return }
             for f in lo..<hi {
                 let slot = Int(f % Int64(capacity)) * 2, i = Int(f - from) * 2
