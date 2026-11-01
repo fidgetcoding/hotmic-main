@@ -121,7 +121,7 @@ public struct SessionJudgeSummary: Encodable, Equatable, Sendable {
 public enum LineSmoother {
     /// How far one model answer counts, and how likely the next line stays in the same state. Tuned on
     /// the livestream test corpus; your own clicks stay out of it, so a click moves that line and no other.
-    public static let modelEvidence = log(0.7 / 0.3), stay = 0.9
+    public static let modelEvidence = log(0.7 / 0.3), stay = 0.95
 
     public struct State: Equatable, Sendable {
         public var talk: Bool

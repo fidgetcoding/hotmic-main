@@ -273,7 +273,10 @@ Plus one continuous `session__voice.m4a` + `session__mix.m4a` per session (for a
 ```
 Build:   swift build
 Test:    swift test
+Window:  npm ci --prefix Tests/lab --ignore-scripts && node --test Tests/lab/*.test.mjs   # the real page in jsdom, no audio
 App:     scripts/bundle.sh            # → .build/Hot Mic.app (ad-hoc signed)
+Clean:   scripts/verify-clean.sh <empty folder> --with-tests   # fresh clone, empty home, bare PATH, pinned versions; never installs or opens
+Install: scripts/install.sh           # replaces /Applications/Hot Mic.app and opens it
 Spikes:  spikes/capture/build.sh · (cd spikes/aec && uv run bench.py <dir>)
 Release: scripts/release.sh           # T5.3: sign → notarize → staple → dmg
 ```
@@ -311,6 +314,24 @@ struct PaddedTakeSlicer: TakeSlicing {
 ```
 
 Protocol per boundary, value types, `Duration`/sample counts never raw `Double` seconds across boundaries, no work on the audio render thread beyond copying into a lock-free ring buffer. Files under 500 lines.
+
+## Bar stamps, scored
+
+A stamp is now exact between clock ticks: position from a line through the last beat of clocks, tempo from the last two beats. `Tests/TimelineTests/BarStampScoreTests` scores it against known truth on simulated DAW clock streams, and prints a table. Target from Success Criteria: within ±10 ms while the transport runs.
+
+| Stream | Median | Worst | Within ±10 ms |
+|---|---|---|---|
+| Perfect clock, 60 to 174 BPM | 0.0 ms | 0.0 ms | 100% |
+| 1 ms jitter | 0.7 ms | 1.3 ms | 100% |
+| 3 ms jitter | 2.0 ms | 4.0 ms | 100% |
+| 5 ms jitter, 70 BPM | 3.3 ms | 6.5 ms | 100% |
+| Clock on 11.6 ms audio buffers | 5.9 ms | 7.9 ms | 100% |
+| Ramp 90 to 140 BPM | 0.8 ms | 1.4 ms | 100% |
+| Tempo jump 100 to 150 BPM | 0.0 ms | 24 ms | 99.5% |
+| 4-bar loop, locates, clocks while stopped, 3/4, one hour | 0.7 ms | 1.3 ms | 100% |
+| 3 clocks per burst (60 ms late) | 21 ms | 42 ms | 0% |
+
+The last row is a limit, not a pass: no stamp can beat a route that delays the clock itself, though the bar and tempo stay right and `FrameClock.offsetSeconds` can take a fixed delay out. These streams are simulated; no real DAW has been scored yet. `ClockRecording.parse` reads a MIDI log ("seconds status data…") for when one is captured.
 
 ## Testing Strategy
 

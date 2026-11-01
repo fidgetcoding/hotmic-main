@@ -37,11 +37,11 @@ public actor WhisperTranscriber: LyricTranscribing {
         public var logProbThreshold: Float? = -1
         public var compressionThreshold: Float? = 2.4
         /// Take Whisper's loops out of a segment instead of dropping the whole segment.
-        public var loopFix = false
+        public var loopFix = true
         /// Spread collapsed word times out over the piece.
-        public var spreadTimes = false
+        public var spreadTimes = true
         /// Try a failed piece again other ways.
-        public var retries = false
+        public var retries = true
         /// A piece with fewer words than this per second of voiced sound counts as failed.
         public var minWordsPerVoicedSecond = 0.5
         public init() {}

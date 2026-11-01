@@ -47,9 +47,9 @@ func tuningOptions(_ args: [String]) -> WhisperTranscriber.Tuning {
     if let t = option("--logprob", in: args).flatMap(Float.init) { tuning.logProbThreshold = t }
     if args.contains("--no-logprob") { tuning.logProbThreshold = nil }
     if args.contains("--no-compression") { tuning.compressionThreshold = nil }
-    if args.contains("--loopfix") { tuning.loopFix = true }
-    if args.contains("--retries") { tuning.retries = true }
-    if args.contains("--spread") { tuning.spreadTimes = true }
+    if args.contains("--no-loopfix") { tuning.loopFix = false }
+    if args.contains("--no-retries") { tuning.retries = false }
+    if args.contains("--no-spread") { tuning.spreadTimes = false }
     if let m = option("--min-rate", in: args).flatMap(Double.init) { tuning.minWordsPerVoicedSecond = m }
     return tuning
 }
@@ -64,7 +64,7 @@ case "import":
     let audio = URL(fileURLWithPath: args[1]), folder = URL(fileURLWithPath: args[2], isDirectory: true)
     let mix = option("--mix", in: args).map { URL(fileURLWithPath: $0) }
     let lyrics = !args.contains("--no-lyrics")
-    let transcriber = option("--model", in: args).map { WhisperTranscriber(model: $0) } ?? WhisperTranscriber()
+    let transcriber = WhisperTranscriber(model: option("--model", in: args) ?? WhisperTranscriber.defaultModel, tuning: tuningOptions(args))
     let started = Date()
     if lyrics { try await transcriber.prepare() }
     var shown = -1
