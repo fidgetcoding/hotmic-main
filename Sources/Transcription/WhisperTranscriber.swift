@@ -18,6 +18,22 @@ public actor WhisperTranscriber: LyricTranscribing {
         public var temperature: Float = 0
         public var debug = false
         public var timestamps = true
+        /// Long takes are decoded in pieces no longer than this, cut at quiet spots.
+        public var pieceSeconds = 25.0
+        /// How far back from a piece's end the quiet spot may be.
+        public var searchSeconds = 8.0
+        /// Feed the session's earlier lyrics to the decoder as a hint.
+        public var sessionHint = true
+        /// Retries at a higher temperature when a decode fails Whisper's own quality checks.
+        public var fallbacks = 5
+        public var logProbThreshold: Float? = -1
+        public var compressionThreshold: Float? = 2.4
+        /// Take Whisper's loops out of a segment instead of dropping the whole segment.
+        public var loopFix = false
+        /// Try a failed piece again other ways.
+        public var retries = false
+        /// A piece with fewer words than this per second of voiced sound counts as failed.
+        public var minWordsPerVoicedSecond = 0.5
         public init() {}
     }
 
@@ -88,33 +104,75 @@ public actor WhisperTranscriber: LyricTranscribing {
         // Takes are already judged to be sung/whispered ideas: only skip a window when Whisper is
         // very sure nothing's there (default 0.6 drops breathy lines).
         options.noSpeechThreshold = tuning.noSpeechThreshold
+        options.temperatureFallbackCount = tuning.fallbacks
+        options.logProbThreshold = tuning.logProbThreshold
+        options.compressionRatioThreshold = tuning.compressionThreshold
         if !tuning.timestamps { options.withoutTimestamps = true; options.wordTimestamps = false }
         // Prompt = how rappers and singers actually talk (keeps slang, contractions and ad-libs as
         // said instead of "correcting" them), then this session's own recent lyrics.
         if tuning.prompt, let tokenizer = pipe.tokenizer {
-            let session = (hint ?? "").isEmpty ? "" : " " + String(hint!.suffix(200))
+            let session = !tuning.sessionHint || (hint ?? "").isEmpty ? "" : " " + String(hint!.suffix(200))
             options.promptTokens = tokenizer.encode(text: " " + Self.slangRegister + session)
                 .filter { $0 < tokenizer.specialTokens.specialTokenBegin }
         }
-        // Long takes go in ≤ 25 s pieces cut at quiet spots, each decoded on its own: one pass over a
+        // Long takes go in short pieces cut at quiet spots, each decoded on its own: one pass over a
         // 10-minute take skips minutes, collapses word timings and loops.
         var texts: [String] = [], words: [Lyrics.Word] = []
-        for piece in Lyrics.pieces(audio, sampleRate: 16_000) {
-            let offset = Double(piece.lowerBound) / 16_000
-            let results = try await pipe.transcribe(audioArray: Array(audio[piece]), decodeOptions: options)
-            if tuning.debug { print(String(format: "piece %.1f–%.1f s: %d result(s), %d segment(s)", offset, Double(piece.upperBound) / 16_000, results.count, results.flatMap(\.segments).count)) }
-            for segment in results.flatMap(\.segments) {
-                if tuning.debug { print(String(format: "  piece %.1f s  segment %.1f–%.1f  no-speech %.2f  logprob %.2f  \"%@\"",
-                                               offset, segment.start, segment.end, segment.noSpeechProb, segment.avgLogprob, segment.text)) }
-                let text = segment.text
-                    .replacingOccurrences(of: #"<\|[^|]*\|>"#, with: "", options: .regularExpression)  // special tokens
-                    .trimmingCharacters(in: .whitespacesAndNewlines)
-                guard !text.isEmpty, !Lyrics.isLoop(text) else { continue }
-                texts.append(text)
-                words += (segment.words ?? []).map {
-                    Lyrics.Word(text: $0.word.trimmingCharacters(in: .whitespaces), start: offset + Double($0.start), end: offset + Double($0.end))
-                }.filter { !$0.text.isEmpty }
+        for piece in Lyrics.pieces(audio, sampleRate: 16_000, maxSeconds: tuning.pieceSeconds, searchSeconds: tuning.searchSeconds) {
+            let got = try await decode(piece, of: audio, options: options, pipe: pipe)
+            if !got.text.isEmpty { texts.append(got.text) }
+            words += got.words
+        }
+        return Lyrics(text: texts.joined(separator: " "), words: words)
+    }
+
+    /// One piece. When Whisper gives up on it (nothing back, or far too few words for how much sound there is:
+    /// it goes straight to end-of-text on some sung clips, or loops), it gets more tries before it counts as empty.
+    private func decode(_ piece: Range<Int>, of audio: [Float], options: DecodingOptions, pipe: WhisperKit) async throws -> Lyrics {
+        var best = try await attempt(piece, of: audio, options: options, pipe: pipe)
+        guard tuning.retries else { return best }
+        let voiced = Lyrics.voicedSeconds(audio[piece], sampleRate: 16_000)
+        func enough(_ l: Lyrics) -> Bool { voiced < 2 || Double(l.words.count) >= tuning.minWordsPerVoicedSecond * voiced }
+        guard !enough(best) else { return best }
+        // Other ways in: without the hint, a little later in the audio, and sampling instead of the greedy path.
+        var plain = options
+        plain.promptTokens = nil
+        var warm = plain
+        warm.temperature = 0.4
+        let late = (piece.lowerBound + 16_000)..<piece.upperBound
+        for (range, opts) in [(piece, plain), (late, plain), (piece, warm)] where range.count > 16_000 {
+            let again = try await attempt(range, of: audio, options: opts, pipe: pipe)
+            if tuning.debug { print("  retry: \(best.words.count) words before, \(again.words.count) now") }
+            if again.words.count > best.words.count { best = again }
+            if enough(best) { break }
+        }
+        return best
+    }
+
+    private func attempt(_ piece: Range<Int>, of audio: [Float], options: DecodingOptions, pipe: WhisperKit) async throws -> Lyrics {
+        let offset = Double(piece.lowerBound) / 16_000
+        let results = try await pipe.transcribe(audioArray: Array(audio[piece]), decodeOptions: options)
+        if tuning.debug { print(String(format: "piece %.1f–%.1f s: %d result(s), %d segment(s)", offset, Double(piece.upperBound) / 16_000, results.count, results.flatMap(\.segments).count)) }
+        var texts: [String] = [], words: [Lyrics.Word] = []
+        for segment in results.flatMap(\.segments) {
+            if tuning.debug { print(String(format: "  piece %.1f s  segment %.1f–%.1f  no-speech %.2f  logprob %.2f  \"%@\"",
+                                           offset, segment.start, segment.end, segment.noSpeechProb, segment.avgLogprob, segment.text)) }
+            var text = segment.text
+                .replacingOccurrences(of: #"<\|[^|]*\|>"#, with: "", options: .regularExpression)  // special tokens
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            var kept = (segment.words ?? []).map {
+                Lyrics.Word(text: $0.word.trimmingCharacters(in: .whitespaces), start: offset + Double($0.start), end: offset + Double($0.end))
+            }.filter { !$0.text.isEmpty }
+            if tuning.loopFix {
+                let stay = Lyrics.withoutLoops(kept.map(\.text))
+                if stay.count < kept.count {
+                    kept = stay.map { kept[$0] }
+                    text = kept.map(\.text).joined(separator: " ")
+                }
             }
+            guard !text.isEmpty, !Lyrics.isLoop(text) else { continue }
+            texts.append(text)
+            words += kept
         }
         return Lyrics(text: texts.joined(separator: " "), words: words)
     }

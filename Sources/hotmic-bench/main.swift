@@ -3,6 +3,7 @@
 // Usage:
 //   hotmic-bench import <audio> <session folder> [--mix <audio>] [--no-lyrics] [--model <WhisperKit model>]
 //   hotmic-bench export <session folder> <out.json>
+//   hotmic-bench retranscribe <session folder> [--model m] [switches]     (the same takes decoded again; lyrics written to the folder)
 //   hotmic-bench stitch <session folder> <out.m4a> [--voice] [--plan <out.json>]
 //   hotmic-bench transcribe <audio> [--model <m>] [--hint "<earlier lyrics>"] [--no-prompt] [--no-vad] [--no-speech <0…1>]
 //                                  (the app's Whisper on one file; the switches find what drops words)
@@ -29,6 +30,27 @@ func writeJSON<T: Encodable>(_ value: T, to path: String) throws {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     try encoder.encode(value).write(to: URL(fileURLWithPath: path))
+}
+
+func tuningOptions(_ args: [String]) -> WhisperTranscriber.Tuning {
+    var tuning = WhisperTranscriber.Tuning()
+    if args.contains("--no-prompt") { tuning.prompt = false }
+    if args.contains("--no-vad") { tuning.vadChunking = false }
+    if args.contains("--no-hint") { tuning.sessionHint = false }
+    if let t = option("--no-speech", in: args).flatMap(Float.init) { tuning.noSpeechThreshold = t }
+    if let l = option("--language", in: args) { tuning.language = l }
+    tuning.debug = args.contains("--debug")
+    if args.contains("--no-timestamps") { tuning.timestamps = false }
+    if let t = option("--temperature", in: args).flatMap(Float.init) { tuning.temperature = t }
+    if let p = option("--piece", in: args).flatMap(Double.init) { tuning.pieceSeconds = p; tuning.searchSeconds = min(tuning.searchSeconds, p / 3) }
+    if let f = option("--fallbacks", in: args).flatMap(Int.init) { tuning.fallbacks = f }
+    if let t = option("--logprob", in: args).flatMap(Float.init) { tuning.logProbThreshold = t }
+    if args.contains("--no-logprob") { tuning.logProbThreshold = nil }
+    if args.contains("--no-compression") { tuning.compressionThreshold = nil }
+    if args.contains("--loopfix") { tuning.loopFix = true }
+    if args.contains("--retries") { tuning.retries = true }
+    if let m = option("--min-rate", in: args).flatMap(Double.init) { tuning.minWordsPerVoicedSecond = m }
+    return tuning
 }
 
 setvbuf(stdout, nil, _IOLBF, 0)   // progress lines reach a log file as they happen
@@ -78,6 +100,27 @@ case "plan":
     let session = LabSessionExport.session(folder: URL(fileURLWithPath: args[1], isDirectory: true))
     try writeJSON(WholeSong.plan(session.slots), to: args[2])
 
+case "retranscribe":
+    // Decodes a session's takes again from its recording, with the same take boundaries, so transcription
+    // settings can be compared without running detection again. Writes lyrics into the folder's sidecars.
+    guard args.count >= 2 else { fail("usage: hotmic-bench retranscribe <session folder> [--model m] [switches]") }
+    let folder = URL(fileURLWithPath: args[1], isDirectory: true)
+    let transcriber = WhisperTranscriber(model: option("--model", in: args) ?? WhisperTranscriber.defaultModel, tuning: tuningOptions(args))
+    let segments = try FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)
+        .filter { $0.lastPathComponent.hasPrefix("session__voice_") && $0.pathExtension == "m4a" }.sorted { $0.lastPathComponent < $1.lastPathComponent }
+    guard let first = segments.first else { fail("no session__voice files in \(folder.path)") }
+    let rate = try AVAudioFile(forReading: first).processingFormat.sampleRate
+    var hint = ""
+    let started = Date()
+    for take in LabSessionExport.unjudged(folder: folder).takes where take.kind != "beatbox" {
+        let samples = WholeSong.read(take.sessionStartSeconds, take.sessionStartSeconds + take.durationSeconds, segments: segments, segmentSeconds: 300, channels: 1, rate: rate)[0]
+        let lyrics = try await transcriber.transcribe(samples, sampleRate: rate, hint: hint)
+        hint += " " + lyrics.text
+        try LyricSheet.attach(lyrics, toTake: take.id, in: folder)
+        print("\(take.id): \(Int(take.durationSeconds)) s, \(lyrics.words.count) words")
+    }
+    print(String(format: "retranscribed in %.0f s", Date().timeIntervalSince(started)))
+
 case "transcribe":
     guard args.count >= 2 else { fail("usage: hotmic-bench transcribe <audio> [--hint \"…\"]") }
     let file = try AVAudioFile(forReading: URL(fileURLWithPath: args[1]))
@@ -85,14 +128,7 @@ case "transcribe":
           let data = buf.floatChannelData else { fail("can't read \(args[1])") }
     try file.read(into: buf)
     let samples = Array(UnsafeBufferPointer(start: data[0], count: Int(buf.frameLength)))
-    var tuning = WhisperTranscriber.Tuning()
-    if args.contains("--no-prompt") { tuning.prompt = false }
-    if args.contains("--no-vad") { tuning.vadChunking = false }
-    if let t = option("--no-speech", in: args).flatMap(Float.init) { tuning.noSpeechThreshold = t }
-    if let l = option("--language", in: args) { tuning.language = l }
-    tuning.debug = args.contains("--debug")
-    if args.contains("--no-timestamps") { tuning.timestamps = false }
-    if let t = option("--temperature", in: args).flatMap(Float.init) { tuning.temperature = t }
+    let tuning = tuningOptions(args)
     let lyrics = try await WhisperTranscriber(model: option("--model", in: args) ?? WhisperTranscriber.defaultModel, tuning: tuning).transcribe(samples, sampleRate: file.processingFormat.sampleRate, hint: option("--hint", in: args))
     print("\(lyrics.words.count) words: \(lyrics.text)")
 

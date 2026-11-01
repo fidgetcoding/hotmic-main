@@ -137,7 +137,7 @@ public enum WholeSong {
     }
 
     /// Session seconds `a…b` as one array per channel, across segment boundaries.
-    static func read(_ a: Double, _ b: Double, segments: [URL], segmentSeconds: Double, channels: Int, rate: Double) -> [[Float]] {
+    public static func read(_ a: Double, _ b: Double, segments: [URL], segmentSeconds: Double, channels: Int, rate: Double) -> [[Float]] {
         var out = [[Float]](repeating: [], count: channels)
         var t = max(0, a)
         while t < b {

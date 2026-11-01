@@ -5,7 +5,7 @@
 set -e
 cd "$(dirname "$0")/.."
 CONFIG="${1:-release}"
-swift build -c "$CONFIG" --product HotMic   # only the app (other products pull TTSKit, which fails to compile)
+swift build -c "$CONFIG" --product HotMic --force-resolved-versions   # only the app (other products pull TTSKit, which fails to compile); only the pinned versions
 APP=".build/Hot Mic.app"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
