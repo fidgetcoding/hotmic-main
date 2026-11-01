@@ -65,7 +65,7 @@ final class AppModel: ObservableObject {
     /// Always present so DAWs can select "Hot Mic Sync" as a MIDI clock output any time.
     private let sync: SyncPort? = try? SyncPort()
     /// One shared model; loads in the background at launch (first run downloads it once).
-    private let transcriber = WhisperTranscriber()
+    private let transcriber = WhisperTranscriber(downloadBase: WhisperTranscriber.modelFolder())
     private lazy var watcher = DAWWatcher(
         source: apps, catalog: DAWCatalog.standard.adding(bundleIDs: extraDAWs), scheduler: MainQueueScheduler(),
         onArm: { [weak self] daw in self?.startSession(for: daw) },

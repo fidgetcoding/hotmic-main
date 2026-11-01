@@ -9,6 +9,14 @@ import WhisperKit
 public actor WhisperTranscriber: LyricTranscribing {
     public static let defaultModel = "large-v3-v20240930_turbo"
 
+    /// Where the app keeps the model. WhisperKit's own default is ~/Documents/huggingface, which on a clean Mac means
+    /// a permission prompt about Documents for a cache nobody should see. A copy already there is used as it is.
+    public static func modelFolder(model: String = defaultModel, home: URL = FileManager.default.homeDirectoryForCurrentUser) -> URL {
+        let old = home.appendingPathComponent("Documents/huggingface", isDirectory: true)
+        if FileManager.default.fileExists(atPath: old.appendingPathComponent("models/argmaxinc/whisperkit-coreml/openai_whisper-\(model)").path) { return old }
+        return home.appendingPathComponent("Library/Application Support/Hot Mic/Models", isDirectory: true)
+    }
+
     /// Decoding switches (the bench flips these to find what drops a take's words).
     public struct Tuning: Sendable {
         public var prompt = true
@@ -30,6 +38,8 @@ public actor WhisperTranscriber: LyricTranscribing {
         public var compressionThreshold: Float? = 2.4
         /// Take Whisper's loops out of a segment instead of dropping the whole segment.
         public var loopFix = false
+        /// Spread collapsed word times out over the piece.
+        public var spreadTimes = false
         /// Try a failed piece again other ways.
         public var retries = false
         /// A piece with fewer words than this per second of voiced sound counts as failed.
@@ -173,6 +183,9 @@ public actor WhisperTranscriber: LyricTranscribing {
             guard !text.isEmpty, !Lyrics.isLoop(text) else { continue }
             texts.append(text)
             words += kept
+        }
+        if tuning.spreadTimes {
+            words = Lyrics.spreadCollapsed(words, from: offset, to: Double(piece.upperBound) / 16_000)
         }
         return Lyrics(text: texts.joined(separator: " "), words: words)
     }

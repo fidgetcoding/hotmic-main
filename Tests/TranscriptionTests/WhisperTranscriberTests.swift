@@ -10,6 +10,15 @@ final class WhisperTranscriberTests: XCTestCase {
         XCTAssertEqual(Double(try WhisperTranscriber.resample(x, from: 48_000, to: 16_000).count), 16_000, accuracy: 64)
     }
 
+    func testTheModelGoesInApplicationSupportUnlessACopyIsAlreadyInDocuments() throws {
+        let home = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: home) }
+        XCTAssertEqual(WhisperTranscriber.modelFolder(home: home).path, home.appendingPathComponent("Library/Application Support/Hot Mic/Models").path, "a clean Mac")
+        let existing = home.appendingPathComponent("Documents/huggingface/models/argmaxinc/whisperkit-coreml/openai_whisper-\(WhisperTranscriber.defaultModel)")
+        try FileManager.default.createDirectory(at: existing, withIntermediateDirectories: true)
+        XCTAssertEqual(WhisperTranscriber.modelFolder(home: home).path, home.appendingPathComponent("Documents/huggingface").path, "no second 1.5 GB download")
+    }
+
     func testTranscribesSpokenWords() async throws {
         try XCTSkipUnless(ProcessInfo.processInfo.environment["HM_WHISPER"] == "1", "set HM_WHISPER=1 (downloads a model)")
         let aiff = FileManager.default.temporaryDirectory.appendingPathComponent("hm-say-\(UUID()).aiff")

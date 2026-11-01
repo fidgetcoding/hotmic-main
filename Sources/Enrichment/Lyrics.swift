@@ -61,6 +61,43 @@ extension Lyrics {
         return keep
     }
 
+    /// Whisper's word times collapse on sung audio: dozens of words at one instant, then a word lasting
+    /// six seconds. Runs like that are spread out between the times that can be believed, by word length,
+    /// so a line lands near where it was sung. Word order and text never change. `from…to`: the stretch these
+    /// words were decoded from.
+    public static func spreadCollapsed(_ words: [Word], from: Double, to: Double) -> [Word] {
+        guard words.count > 1, to > from else { return words }
+        let plausible = 0.05...1.2                         // how long a sung word can be
+        var out = words
+        // Words whose own length is believable and that keep moving forward anchor the rest.
+        var anchors: [Int] = []
+        var last = from
+        for (i, w) in words.enumerated() where plausible.contains(w.end - w.start) && w.start >= last && w.end <= to + 0.5 {
+            anchors.append(i)
+            last = w.end
+        }
+        func fill(_ range: Range<Int>, _ a: Double, _ b: Double) {
+            guard !range.isEmpty else { return }
+            let weights = range.map { Double(max(2, words[$0].text.count)) }
+            let total = weights.reduce(0, +)
+            // Sung words rarely run over a second each on average: past that, the gap is a pause, not slow singing.
+            let span = min(b - a, total / 5)
+            var t = a
+            for (k, i) in range.enumerated() {
+                let d = span * weights[k] / total
+                out[i].start = t; out[i].end = t + d
+                t += d
+            }
+        }
+        var previous = -1, previousEnd = from
+        for anchor in anchors + [words.count] {
+            let nextStart = anchor < words.count ? words[anchor].start : to
+            fill((previous + 1)..<anchor, previousEnd, max(previousEnd, nextStart))
+            if anchor < words.count { previous = anchor; previousEnd = words[anchor].end }
+        }
+        return out
+    }
+
     /// Seconds of audio with a voice's level in it (Whisper handing back nothing for this much sound is a failed decode).
     public static func voicedSeconds(_ x: ArraySlice<Float>, sampleRate rate: Double) -> Double {
         let hop = max(1, Int(0.05 * rate))

@@ -17,9 +17,9 @@ jobs:
         with:
           persist-credentials: false
       - name: Build
-        run: swift build
+        run: swift build --force-resolved-versions
       # Tests that use the mic, the network or local files are opt-in through HM_* variables, none set here.
       - name: Test
-        run: swift test
+        run: swift test --force-resolved-versions
       - name: Test the window's page code
         run: npm ci --prefix Tests/lab --ignore-scripts && node --test Tests/lab/*.test.mjs

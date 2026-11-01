@@ -49,6 +49,7 @@ func tuningOptions(_ args: [String]) -> WhisperTranscriber.Tuning {
     if args.contains("--no-compression") { tuning.compressionThreshold = nil }
     if args.contains("--loopfix") { tuning.loopFix = true }
     if args.contains("--retries") { tuning.retries = true }
+    if args.contains("--spread") { tuning.spreadTimes = true }
     if let m = option("--min-rate", in: args).flatMap(Double.init) { tuning.minWordsPerVoicedSecond = m }
     return tuning
 }
