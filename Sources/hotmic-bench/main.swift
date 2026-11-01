@@ -6,6 +6,11 @@
 //   hotmic-bench stitch <session folder> <out.m4a> [--voice] [--plan <out.json>]
 //   hotmic-bench transcribe <audio> [--model <m>] [--hint "<earlier lyrics>"] [--no-prompt] [--no-vad] [--no-speech <0…1>]
 //                                  (the app's Whisper on one file; the switches find what drops words)
+//   hotmic-bench plan <session folder> <out.json>                          (the whole-song plan, no audio written)
+//   hotmic-bench judge <session folder>                                    (the model pass; answers go in the folder)
+//   hotmic-bench verdicts <session folder> <out.json> [--no-model] [--no-learner]    (every line's verdict and who decided)
+//   hotmic-bench teach <line-judge.json> <folder>=<truth.jsonl> … [--budget <n>]      (a learner from simulated corrections)
+//   hotmic-bench replay <folder>=<truth.jsonl> … [--budget <n per session>]  (simulated corrections teach the learner; see JudgeReplay)
 import AVFoundation
 import Foundation
 import Library
@@ -68,6 +73,11 @@ case "stitch":
     let seconds = clips.reduce(0) { $0 + $1.end - $1.start }
     print(String(format: "wrote %@ · %d clips · %d lines · %.1f s", args[2], clips.count, clips.reduce(0) { $0 + $1.lines.count }, seconds))
 
+case "plan":
+    guard args.count >= 3 else { fail("usage: hotmic-bench plan <session folder> <out.json>") }
+    let session = LabSessionExport.session(folder: URL(fileURLWithPath: args[1], isDirectory: true))
+    try writeJSON(WholeSong.plan(session.slots), to: args[2])
+
 case "transcribe":
     guard args.count >= 2 else { fail("usage: hotmic-bench transcribe <audio> [--hint \"…\"]") }
     let file = try AVAudioFile(forReading: URL(fileURLWithPath: args[1]))
@@ -85,6 +95,41 @@ case "transcribe":
     if let t = option("--temperature", in: args).flatMap(Float.init) { tuning.temperature = t }
     let lyrics = try await WhisperTranscriber(model: option("--model", in: args) ?? WhisperTranscriber.defaultModel, tuning: tuning).transcribe(samples, sampleRate: file.processingFormat.sampleRate, hint: option("--hint", in: args))
     print("\(lyrics.words.count) words: \(lyrics.text)")
+
+case "judge":
+    guard args.count >= 2 else { fail("usage: hotmic-bench judge <session folder>") }
+    let folder = URL(fileURLWithPath: args[1], isDirectory: true)
+    let stored = await SessionJudge.pass(folder: folder, model: FoundationLineModel())
+    print("\(stored.engine ?? "no model") · \(stored.stats.lines) lines · \(stored.stats.answered) answered · \(stored.stats.refused) refused · \(stored.stats.timedOut) timed out · \(stored.stats.failed) failed · \(Int(stored.stats.seconds)) s")
+
+case "verdicts":
+    guard args.count >= 3 else { fail("usage: hotmic-bench verdicts <session folder> <out.json> [--no-model] [--no-learner]") }
+    let folder = URL(fileURLWithPath: args[1], isDirectory: true)
+    let rows = SessionJudge.rows(folder: folder)
+    let profile = LineJudgeProfile.read(LineJudgeProfile.url(forSession: folder))
+    let decisions = LineJudge.decide(rows, stored: SessionJudgments.read(folder), learner: args.contains("--no-learner") ? nil : profile.learner,
+                                     useModel: !args.contains("--no-model"), audio: LineAudioCache.read(folder))
+    try writeJSON(rows.map { JudgeReplay.Row(id: $0.id, verdict: decisions[$0.id]?.verdict.rawValue ?? "writing", source: decisions[$0.id]?.source.rawValue ?? "rules") }, to: args[2])
+    print("wrote \(args[2]) · \(rows.count) lines")
+
+case "teach":
+    guard args.count >= 3 else { fail("usage: hotmic-bench teach <line-judge.json> <folder>=<truth.jsonl> … [--budget <n per session>]") }
+    let sessions = args.dropFirst(2).filter { $0.contains("=") }.map { pair -> (URL, URL) in
+        let p = pair.split(separator: "=", maxSplits: 1).map(String.init)
+        return (URL(fileURLWithPath: p[0], isDirectory: true), URL(fileURLWithPath: p[1]))
+    }
+    var profile = LineJudgeProfile()
+    for s in try JudgeReplay.load(sessions) { JudgeReplay.teach(&profile.learner, from: s, budget: option("--budget", in: args).flatMap(Int.init) ?? 30) }
+    profile.write(to: URL(fileURLWithPath: args[1]))
+    print("taught \(profile.learner.corrections) corrections, \(profile.learner.weights.count) weights")
+
+case "replay":
+    let sessions = args.dropFirst().filter { $0.contains("=") }.map { pair -> (URL, URL) in
+        let p = pair.split(separator: "=", maxSplits: 1).map(String.init)
+        return (URL(fileURLWithPath: p[0], isDirectory: true), URL(fileURLWithPath: p[1]))
+    }
+    let report = try JudgeReplay.run(sessions: sessions, budget: option("--budget", in: args).flatMap(Int.init) ?? 30)
+    try writeJSON(report, to: option("--out", in: args) ?? "/dev/stdout")
 
 default:
     fail("unknown command \(command)")

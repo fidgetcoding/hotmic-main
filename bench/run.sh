@@ -7,6 +7,8 @@
 #   split = Demucs vocal stem as the mic, full stream as the mix (Beat mode: the beat comes from the tap)
 #   clean = split with the labeled playback muted (a real session cancels DAW playback through the tap)
 #   live-* = the same inputs through the live session path in the app, in real time (scripts/bundle.sh first)
+#   judge <cond> = the line judge over a run already made: rules vs on-device model, scored against the labels
+#     (needs bench/local/work/<id>/windows.tsv + labels; answers land beside the run's takes, nothing else changes)
 # Nothing here plays audio or touches audio devices, except the live-* conditions, which open the app.
 set -euo pipefail
 id=$1; which=${2:-both}
@@ -88,8 +90,22 @@ run() {  # <cond>: raw | split | clean | live-raw | live-split | live-clean
     --whole $out/whole-song.txt --plan $out/plan.json --out $out/score.json "${extra[@]}" | tee $out/score.md
 }
 
+judge() {  # <cond>: scores the rules, then the model pass, on a finished run. Files only; no audio device.
+  local c=$1 out=$R/$1
+  $BENCH export $out/session $out/session.json
+  python3 -I $root/lines.py --session $out/session.json --folder $out/session --windows $W/windows.tsv --labels $L/labels/$id.json --out $out/lines.jsonl
+  for mode in rules model; do
+    local flags=(); [[ $mode == rules ]] && flags=(--no-model --no-learner) || { flags=(--no-learner); $BENCH judge $out/session; }
+    $BENCH verdicts $out/session $out/verdicts-$mode.json "${flags[@]}"
+    $BENCH plan $out/session $out/plan-$mode.json
+    python3 -I $root/score.py --name "$id $c $mode" --session $out/session.json --folder $out/session --ref $L/ref/$id.txt --labels $L/labels/$id.json \
+      --plan $out/plan-$mode.json --verdicts $out/verdicts-$mode.json --truth $out/lines.jsonl --out $out/score-$mode.json | tee $out/score-$mode.md
+  done
+}
+
 case $which in
   prep) echo "prepped $W" ;;
+  judge) judge ${3:-split} ;;
   both) run raw; run split ;;
   *) run $which ;;
 esac

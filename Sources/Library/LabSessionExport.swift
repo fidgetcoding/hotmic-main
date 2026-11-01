@@ -36,6 +36,8 @@ public struct LabSession: Encodable, Sendable {
     public var beatRuns: [BeatRun] = []
     /// Stretches you deleted (hidden, audio kept).
     public var hidden: [HiddenRange] = []
+    /// What the line judge did to this session; nil when it did nothing.
+    public var judge: SessionJudgeSummary?
 }
 
 /// One row in the window's Sessions list.
@@ -46,11 +48,13 @@ public struct LabSessionItem: Encodable, Sendable {
     public let daw: String
     public let takes: Int
     public let length: Double
+    /// A model judged this session's lines (the row's small mark).
+    public var judged = false
 }
 
 public enum LabSessionExport {
-    /// Reads a session folder (take sidecars + your keeper picks) into a `LabSession`.
-    public static func session(folder: URL) -> LabSession {
+    /// A session's lines before the line judge: take sidecars, live lines, your picks and deletions.
+    public static func unjudged(folder: URL) -> (takes: [TakeRecord], slots: [[LabSession.Version]]) {
         let fm = FileManager.default
         let files = (try? fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? []
         let takes = files
@@ -67,7 +71,15 @@ public enum LabSessionExport {
         let protected = Set(((try? String(contentsOf: wordsFile, encoding: .utf8)) ?? "").split(whereSeparator: \.isNewline)
             .map { $0.trimmingCharacters(in: .whitespaces).lowercased() }.filter { !$0.isEmpty && !$0.hasPrefix("#") })
         let hidden = HiddenRanges.read(folder)
-        let slots = HiddenRanges.filter(sungNotes(takes, wordless(takes, into: LyricArranger.arrange(takes: takes, keepers: NotebookStore(folder: folder).keepers(), live: liveRaw, protected: protected))), hidden)
+        return (takes, HiddenRanges.filter(sungNotes(takes, wordless(takes, into: LyricArranger.arrange(takes: takes, keepers: NotebookStore(folder: folder).keepers(), live: liveRaw, protected: protected))), hidden))
+    }
+
+    /// Reads a session folder (take sidecars + your keeper picks) into a `LabSession`.
+    public static func session(folder: URL) -> LabSession {
+        let (takes, allSlots) = unjudged(folder: folder)
+        let hidden = HiddenRanges.read(folder)
+        let judged = judge(allSlots, takes: takes, folder: folder)
+        let slots = judged.slots
         let livePart = slots.filter { $0.contains { $0.takeID.isEmpty || $0.takeID == "typed" } }
 
         let exTakes = takes.map { t in
@@ -82,12 +94,27 @@ public enum LabSessionExport {
         out.env = waveform(folder: folder)
         out.beatRuns = BeatRuns.read(folder)
         out.hidden = hidden
+        out.judge = judged.summary
         let names = (try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? []
         out.sessionAudio = names.filter { $0.hasPrefix("session__voice_") && $0.hasSuffix(".m4a") }.sorted()
             .map { folder.appendingPathComponent($0).path }
         out.sessionMix = names.filter { $0.hasPrefix("session__mix_") && $0.hasSuffix(".m4a") }.sorted()
             .map { folder.appendingPathComponent($0).path }
         return out
+    }
+
+    /// The notepad after the line judge: what it holds comes from `line-judgments.json` and the learner in
+    /// `line-judge.json`. With neither, the slots pass through unchanged.
+    static func judge(_ slots: [[LabSession.Version]], takes: [TakeRecord], folder: URL) -> (slots: [[LabSession.Version]], summary: SessionJudgeSummary?) {
+        let stored = SessionJudgments.read(folder)
+        let profile = LineJudgeProfile.read(LineJudgeProfile.url(forSession: folder))
+        guard !stored.lines.isEmpty || !stored.corrections.isEmpty || (profile.learnerOn && profile.learner.corrections > 0) else { return (slots, nil) }
+        let rows = LineJudge.rows(slots: slots, takes: takes)
+        let decisions = LineJudge.decide(rows, stored: stored, learner: profile.learnerOn ? profile.learner : nil, useModel: profile.modelOn, audio: LineAudioCache.read(folder))
+        let applied = LineJudge.apply(slots, decisions: decisions, stored: stored)
+        let model = profile.modelOn ? stored.engine : nil
+        guard model != nil || !applied.aside.isEmpty else { return (slots, nil) }
+        return (applied.slots, SessionJudgeSummary(model: model, aside: applied.aside))
     }
 
     static let noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
@@ -357,8 +384,10 @@ public enum LabSessionExport {
     public static func list(_ index: LibraryIndex) -> [LabSessionItem] {
         let iso = ISO8601DateFormatter()
         return index.sessions().map { s in
-            LabSessionItem(id: s.id, name: s.name, date: iso.string(from: s.date), daw: s.daw, takes: s.takes.count,
-                           length: s.takes.map { $0.sessionStartSeconds + $0.durationSeconds }.max() ?? 0)
+            var item = LabSessionItem(id: s.id, name: s.name, date: iso.string(from: s.date), daw: s.daw, takes: s.takes.count,
+                                      length: s.takes.map { $0.sessionStartSeconds + $0.durationSeconds }.max() ?? 0)
+            item.judged = SessionJudgments.read(s.folder).engine != nil
+            return item
         }
     }
 

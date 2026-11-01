@@ -3,15 +3,19 @@
 
   score.py --session <session.json> --folder <session folder> --ref <release lyrics.txt>
            [--labels <labels.json>] [--whole <whole-song transcript.txt>] [--plan <plan.json>]
-           [--out <score.json>]
+           [--verdicts <verdicts.json> --truth <lines.jsonl>] [--out <score.json>]
 
 session.json = `hotmic-bench export`. Take kinds come from the take sidecars in the session folder.
 labels.json = [{"start": s, "end": s, "label": "talk|writing|playback|beat|other"}] in stream seconds.
+verdicts.json = `hotmic-bench verdicts`, truth = bench/lines.py: scores the line judge (talk precision and recall,
+writing kept) over lines not marked unsure. With --plan and --labels: how much of the stitched song is talk.
 Prints a markdown scorecard; --out writes the numbers as JSON.
 """
 import argparse, json, os, re, sys
 
-SPELLED = [(r"\bb\W*l\W*u\W*(?:double\W*r|r\W*r)\W*e\W*d\b", "blurred")]
+# Spelled-out words in a reference, as [["regex", "word"], …], kept beside the rest of the local corpus.
+_spelled = os.path.join(os.path.dirname(os.path.abspath(__file__)), "local", "spelled.json")
+SPELLED = json.load(open(_spelled)) if os.path.exists(_spelled) else []
 NUMBERS = {"0": "zero", "1": "one", "2": "two", "3": "three", "4": "four", "5": "five", "6": "six",
            "7": "seven", "8": "eight", "9": "nine", "10": "ten"}
 
@@ -83,6 +87,7 @@ def main():
     ap.add_argument("--session", required=True); ap.add_argument("--folder", required=True)
     ap.add_argument("--ref", required=True); ap.add_argument("--labels"); ap.add_argument("--whole")
     ap.add_argument("--plan"); ap.add_argument("--out"); ap.add_argument("--name", default="run")
+    ap.add_argument("--verdicts"); ap.add_argument("--truth")
     ap.add_argument("--ceiling", help="whisper transcript of the release's own vocals: the best any whisper-based run can do")
     a = ap.parse_args()
 
@@ -179,6 +184,34 @@ def main():
             clips = json.load(open(a.plan))
             score["whole_song"].update({"clips": len(clips), "seconds": round(sum(c["end"] - c["start"] for c in clips), 1)})
 
+    if a.plan and a.labels:
+        labels = json.load(open(a.labels))
+        clips = json.load(open(a.plan))
+        total = sum(max(0, c["end"] - c["start"]) for c in clips)
+        def part(label):
+            return sum(max(0, min(c["end"], l["end"]) - max(c["start"], l["start"])) for c in clips for l in labels if l["label"] == label)
+        score.setdefault("whole_song", {}).update({"clips": len(clips), "seconds": round(total, 1),
+            "talk_pct": round(100 * part("talk") / max(1e-6, total), 1), "writing_pct": round(100 * part("writing") / max(1e-6, total), 1),
+            "playback_pct": round(100 * part("playback") / max(1e-6, total), 1)})
+
+    if a.verdicts and a.truth:
+        truth = [json.loads(l) for l in open(a.truth)]
+        said = {v["id"]: v for v in json.load(open(a.verdicts))}
+        lines = [t for t in truth if not t["unsure"] and t["id"] in said]
+        def judged(t, verdict): return said[t["id"]]["verdict"] == verdict
+        talk = [t for t in lines if t["truth"] == "talk"]
+        writing = [t for t in lines if t["truth"] == "writing"]
+        playback = [t for t in lines if t["truth"] == "playback"]
+        called_talk = [t for t in lines if judged(t, "talk")]
+        score["judge"] = {"lines": len(lines), "talk_lines": len(talk), "writing_lines": len(writing), "playback_lines": len(playback),
+            "talk_called": len(called_talk), "talk_true": sum(t["truth"] == "talk" for t in called_talk),
+            "writing_called_talk": sum(t["truth"] == "writing" for t in called_talk),
+            "talk_precision": round(sum(t["truth"] == "talk" for t in called_talk) / max(1, len(called_talk)), 3),
+            "talk_recall": round(sum(judged(t, "talk") for t in talk) / max(1, len(talk)), 3),
+            "writing_kept": round(sum(judged(t, "writing") for t in writing) / max(1, len(writing)), 3),
+            "playback_called": sum(judged(t, "playback") for t in playback),
+            "by_source": {s: sum(1 for t in lines if said[t["id"]]["source"] == s) for s in ("rules", "model", "learner", "you")}}
+
     if a.ceiling:
         hyp = norm(open(a.ceiling).read())
         score["ceiling"] = {"wer_vs_release": round(wer(norm(" ".join(ref_lines)), hyp), 3),
@@ -198,6 +231,8 @@ def main():
         print(f"| song {k} | {v} |")
     for k, v in s.get("ceiling", {}).items():
         print(f"| ceiling {k} | {v} |")
+    for k, v in s.get("judge", {}).items():
+        print(f"| judge {k} | {v} |")
 
 if __name__ == "__main__":
     main()

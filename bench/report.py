@@ -2,7 +2,7 @@
 """One local page per video: every condition's scorecard side by side, the released lines next to what
 Hot Mic shows for them, and the stitched whole song to play. Lyrics stay local (bench/local is never committed).
 
-  report.py --id <video id> [--title "Blurred"]   → bench/local/report/<id>/index.html
+  report.py --id <video id> [--title "Song name"]   → bench/local/report/<id>/index.html
 Open: bench/local/report/<id>/index.html in a browser
 """
 import argparse, html, json, os, shutil, sys
