@@ -34,13 +34,23 @@ public final class SessionBrowser: @unchecked Sendable {
     public func stop() { browser?.cancel(); browser = nil }
 }
 
+/// Where a phone keeps the long-term keys of hosts it has joined, by host name. Public keys, so no secret.
+public protocol HostKeyStore: AnyObject, Sendable {
+    func key(forHost name: String) -> Data?
+    func remember(_ key: Data, forHost name: String)
+}
+
 /// The phone's side of a session: connects, waits for approval, streams the mic, resends what a
 /// dropped connection missed, and plays nothing itself (the app owns audio).
 /// Public methods are thread-safe; callbacks arrive on the main queue.
 public final class SessionClient: @unchecked Sendable {
     public enum State: Equatable, Sendable {
-        case idle, connecting, waitingForApproval, joined(Welcome), reconnecting, denied(String), unreachable
+        /// `code`: the host sees the same six digits.
+        case idle, connecting, waitingForApproval(code: String), joined(Welcome), reconnecting, denied(String), unreachable
     }
+
+    /// Remembered host keys: a Nearby host that answers with another key is refused. nil = don't remember.
+    public var hostKeys: HostKeyStore?
 
     public var onState: ((State) -> Void)?
     public var onStatus: ((Status) -> Void)?
@@ -63,9 +73,14 @@ public final class SessionClient: @unchecked Sendable {
     private var historyFrames = 0
     private let historySeconds: Double = 300
     private var retry: DispatchWorkItem?
+    private let identity: SessionIdentity
+    private var mode = JoinMode.nearby
+    private var psk = SecureLink.noPSK
+    private var hostName = ""
 
-    public init(name: String, device: String, sampleRate: Double, headphones: Bool) {
-        hello = Hello(name: NameRules.clean(name), device: device, token: nil, sampleRate: sampleRate, headphones: headphones)
+    public init(name: String, identity: SessionIdentity, sampleRate: Double, headphones: Bool) {
+        self.identity = identity
+        hello = Hello(name: NameRules.clean(name), device: identity.device, sampleRate: sampleRate, headphones: headphones)
     }
 
     /// From a QR code or invite link: tries Bonjour first, then each address.
@@ -75,11 +90,14 @@ public final class SessionClient: @unchecked Sendable {
         for address in invite.addresses {
             endpoints.append(.hostPort(host: NWEndpoint.Host(address), port: NWEndpoint.Port(rawValue: invite.port)!))
         }
-        start(endpoints, token: invite.token)
+        start(endpoints, hostName: invite.hostName, mode: .invite, psk: SecureLink.psk(forToken: invite.token))
     }
 
     /// Tapped in the Nearby list: the host approves (or remembers this phone).
-    public func join(_ host: NearbyHost) { start([host.endpoint], token: nil) }
+    public func join(_ host: NearbyHost) { start([host.endpoint], hostName: host.name, mode: .nearby, psk: SecureLink.noPSK) }
+
+    /// Nearby join to a known endpoint. For tests: a simulated phone has no Bonjour to browse.
+    public func joinForTesting(endpoint: NWEndpoint, hostName: String) { start([endpoint], hostName: hostName, mode: .nearby, psk: SecureLink.noPSK) }
 
     public func leave() {
         queue.async { [self] in
@@ -118,13 +136,13 @@ public final class SessionClient: @unchecked Sendable {
 
     // MARK: - connection
 
-    private func start(_ endpoints: [NWEndpoint], token: String?) {
+    private func start(_ endpoints: [NWEndpoint], hostName: String, mode: JoinMode, psk: Data) {
         queue.async { [self] in
             retry?.cancel()
             peer?.close()
             leaving = false
             joined = false
-            hello.token = token
+            self.hostName = hostName; self.mode = mode; self.psk = psk
             candidates = endpoints
             candidateIndex = 0
             state = .connecting
@@ -135,10 +153,20 @@ public final class SessionClient: @unchecked Sendable {
     private func connectNext() {
         guard !leaving, !candidates.isEmpty else { return }
         let endpoint = candidates[candidateIndex % candidates.count]
-        let peer = Peer(connection: NWConnection(to: endpoint, using: Peer.parameters()), queue: queue)
+        let parameters = Peer.parameters()
+        parameters.includePeerToPeer = true      // phone ↔ Mac even without a shared Wi-Fi router (AWDL)
+        let peer = Peer(connection: NWConnection(to: endpoint, using: parameters), queue: queue,
+                        link: SecureLink(initiator: identity, mode: mode, psk: psk))
         self.peer = peer
         peer.onReady = { [weak self, weak peer] in
             guard let self, let peer else { return }
+            // Nearby has nothing secret behind it: a host we know must answer with the key we know.
+            if self.mode == .nearby, let known = self.hostKeys?.key(forHost: self.hostName), known != peer.link.remoteKey {
+                self.leaving = true
+                self.state = .denied("This isn't the \(self.hostName) you joined before. Ask them to show you their QR code.")
+                peer.connection.cancel()
+                return
+            }
             peer.send(.hello(self.hello))
         }
         peer.onMessage = { [weak self] in self?.handle($0) }
@@ -167,8 +195,9 @@ public final class SessionClient: @unchecked Sendable {
     private func handle(_ message: Message) {
         switch message {
         case .waiting:
-            state = .waitingForApproval
+            state = .waitingForApproval(code: peer?.link.code ?? "")
         case let .welcome(welcome):
+            if let key = peer?.link.remoteKey { hostKeys?.remember(key, forHost: hostName) }
             joined = true
             state = .joined(welcome)
             resend(from: welcome.nextFrame)

@@ -1,14 +1,15 @@
 import Foundation
 import Network
 
-/// One framed connection. Every callback arrives on `queue`.
+/// One encrypted, framed connection. Every callback arrives on `queue`.
 public final class Peer: @unchecked Sendable {
     public let connection: NWConnection
     public let queue: DispatchQueue
+    public let link: SecureLink
     public var onMessage: ((Message) -> Void)?
     /// Called once, when the connection ends for any reason.
     public var onClose: ((NWError?) -> Void)?
-    /// Called once the connection is up (client side).
+    /// Called once the encrypted link is up. The other side's key and the code are on `link` by then.
     public var onReady: (() -> Void)?
     private var decoder = FrameDecoder()
     private var closed = false
@@ -16,12 +17,13 @@ public final class Peer: @unchecked Sendable {
     /// the link is backed up, so a slow phone never builds up seconds of lag.
     private var pendingBytes = 0
 
-    public init(connection: NWConnection, queue: DispatchQueue) {
+    public init(connection: NWConnection, queue: DispatchQueue, link: SecureLink) {
         self.connection = connection
         self.queue = queue
+        self.link = link
     }
 
-    /// Parameters both sides use: TCP, no Nagle delay (control messages are tiny), keepalive.
+    /// TCP, no Nagle delay (control messages are tiny), keepalive. The encryption is SecureLink, above this.
     public static func parameters() -> NWParameters {
         let tcp = NWProtocolTCP.Options()
         tcp.noDelay = true
@@ -30,16 +32,16 @@ public final class Peer: @unchecked Sendable {
         tcp.keepaliveInterval = 2
         tcp.keepaliveCount = 3
         tcp.connectionTimeout = 5
-        let params = NWParameters(tls: nil, tcp: tcp)
-        params.includePeerToPeer = true      // phone ↔ Mac even without a shared Wi-Fi router (AWDL)
-        return params
+        return NWParameters(tls: nil, tcp: tcp)
     }
 
     public func start() {
         connection.stateUpdateHandler = { [weak self] state in
             guard let self else { return }
             switch state {
-            case .ready: self.onReady?(); self.onReady = nil
+            case .ready:
+                guard self.link.role == .initiator else { return }
+                do { self.write(try self.link.start()) } catch { self.connection.cancel() }
             case let .failed(error): self.finish(error)
             case let .waiting(error): self.finish(error)   // no route: let the owner retry
             case .cancelled: self.finish(nil)
@@ -56,7 +58,11 @@ public final class Peer: @unchecked Sendable {
     public func send(_ message: Message, droppable: Bool = false) {
         guard !closed else { return }
         if droppable && isBackedUp { return }
-        let data = message.encoded()
+        guard let data = try? link.seal(message.encoded()) else { return }     // not up yet: nothing is ever sent in the clear
+        write(data)
+    }
+
+    private func write(_ data: Data) {
         pendingBytes += data.count
         connection.send(content: data, completion: .contentProcessed { [weak self] error in
             guard let self else { return }
@@ -68,7 +74,8 @@ public final class Peer: @unchecked Sendable {
     /// Sends `bye` and closes after it's out.
     public func close() {
         guard !closed else { return }
-        connection.send(content: Message.bye.encoded(), completion: .contentProcessed { [weak self] _ in
+        guard let bye = try? link.seal(Message.bye.encoded()) else { connection.cancel(); return }
+        connection.send(content: bye, completion: .contentProcessed { [weak self] _ in
             self?.connection.cancel()
         })
         queue.asyncAfter(deadline: .now() + 1) { [weak self] in self?.connection.cancel() }
@@ -79,12 +86,18 @@ public final class Peer: @unchecked Sendable {
             guard let self, !self.closed else { return }
             if let data, !data.isEmpty {
                 do {
-                    for message in try self.decoder.push(data) {
-                        if case .bye = message { self.connection.cancel(); return }
-                        self.onMessage?(message)
+                    let wasReady = self.link.isReady
+                    let (reply, records) = try self.link.receive(data)
+                    if !reply.isEmpty { self.write(reply) }
+                    if !wasReady, self.link.isReady { self.onReady?(); self.onReady = nil }
+                    for record in records {
+                        for message in try self.decoder.push(record) {
+                            if case .bye = message { self.connection.cancel(); return }
+                            self.onMessage?(message)
+                        }
                     }
                 } catch {
-                    self.connection.cancel()          // garbage or oversized: drop the peer
+                    self.connection.cancel()          // garbage, forged or oversized: drop the peer
                     return
                 }
             }

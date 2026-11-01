@@ -32,6 +32,8 @@ final class SessionModel {
     var showScanner = false
     /// Opened from a link or the Camera app before the singer had a name: joins once they add one.
     var pendingInvite: JoinInvite?
+    /// Nearby: six digits the host should see too.
+    var approvalCode = ""
     /// A link or QR code waiting for the singer's yes: joining starts the mic.
     var inviteToConfirm: JoinInvite?
 
@@ -132,8 +134,9 @@ final class SessionModel {
                 return
             }
             headphonesConnected = AudioEngine.headphonesConnected
-            let client = SessionClient(name: NameRules.clean(name), device: Identity.device,
+            let client = SessionClient(name: NameRules.clean(name), identity: Identity.session,
                                        sampleRate: rate, headphones: beatOnPhone)
+            client.hostKeys = SavedHostKeys()
             client.onState = { [weak self] state in MainActor.assumeIsolated { self?.handle(state) } }
             client.onStatus = { [weak self] status in MainActor.assumeIsolated { self?.status = status } }
             client.onTake = { [weak self] take in MainActor.assumeIsolated { self?.takes.insert(take, at: 0) } }
@@ -154,7 +157,8 @@ final class SessionModel {
             break
         case .connecting:
             if phase != .joined { phase = .connecting }
-        case .waitingForApproval:
+        case let .waitingForApproval(code):
+            approvalCode = code
             phase = .waiting
         case let .joined(welcome):
             self.welcome = welcome

@@ -19,6 +19,11 @@ struct WaitingView: View {
                 Text("They'll see your name, \(model.name), on the Mac.")
                     .foregroundStyle(Color.inkSoft)
                     .multilineTextAlignment(.center)
+                if !model.approvalCode.isEmpty {
+                    Text(model.approvalCode).font(.largeTitle.monospacedDigit().bold()).foregroundStyle(Color.ink)
+                    Text("Ask them to check the Mac shows this code. If it doesn't, cancel: someone may be listening in.")
+                        .font(.footnote).foregroundStyle(Color.inkSoft).multilineTextAlignment(.center)
+                }
             }
             Spacer()
             Button("Cancel") { model.leave() }
@@ -61,7 +66,7 @@ struct JoinConfirmSheet: View {
             Text("Join \(invite.hostName)'s session?")
                 .font(.title2.weight(.bold))
                 .foregroundStyle(Color.ink)
-            Text("Your microphone turns on and streams to \(place) on this network, unencrypted. Only join if you know this Mac and you're on a network you trust.")
+            Text("Your microphone turns on and streams to \(place), encrypted. Only join if you know this Mac.")
                 .foregroundStyle(Color.inkSoft)
             Button("Join") { model.confirmInvite() }
                 .buttonStyle(BigButtonStyle())

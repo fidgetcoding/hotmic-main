@@ -3,7 +3,7 @@ import PackageDescription
 
 /// Session: phones (and other Macs) join a Hot Mic session and sing takes into it.
 /// Shared by the Mac app (host) and the iPhone app (contributor), so it stays platform-neutral:
-/// Foundation, Network, Accelerate only.
+/// Foundation, Network, CryptoKit, Accelerate only.
 let package = Package(
     name: "SessionKit",
     platforms: [.macOS("14.2"), .iOS("17.0")],

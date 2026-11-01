@@ -1,11 +1,14 @@
 import Foundation
 import Network
 
-/// Someone asking to join. Nearby joins without a token wait for the host to allow them.
+/// Someone asking to join. Nearby joins wait for the host to allow them.
 public struct JoinRequest: Identifiable, Equatable, Sendable {
     public var id: String { device }
     public var name: String
     public var device: String
+    /// The same six digits show on the phone. If they differ, someone is in the middle: don't let them in.
+    public var code: String
+    public init(name: String, device: String, code: String) { self.name = name; self.device = device; self.code = code }
 }
 
 /// One joined singer, as the host sees them. Callbacks and properties are used on the server queue.
@@ -56,6 +59,8 @@ public final class SessionServer: @unchecked Sendable {
     public let sessionName: String
     /// Carried by the QR code: joining with it needs no approval. New for every session.
     public let token = JoinInvite.newToken()
+    /// This Mac's long-term key: a phone remembers it, so nothing else can pose as this host later.
+    public let identity: SessionIdentity
     public weak var delegate: SessionServerDelegate?
     /// Called (on the server queue) with the port once listening, or an error message.
     public var onListening: ((UInt16?, String?) -> Void)?
@@ -65,16 +70,27 @@ public final class SessionServer: @unchecked Sendable {
     private var pending: [ObjectIdentifier: Peer] = [:]
     private var pingTimer: DispatchSourceTimer?
 
-    public init(hostName: String, sessionName: String) {
+    /// False (tests): no Bonjour, and only this Mac can connect.
+    private let onNetwork: Bool
+
+    public init(hostName: String, sessionName: String, identity: SessionIdentity = SessionIdentity(), onNetwork: Bool = true) {
         self.hostName = NameRules.clean(hostName, max: 40).nonEmpty ?? "Hot Mic"
         self.sessionName = NameRules.clean(sessionName, max: 60)
+        self.identity = identity
+        self.onNetwork = onNetwork
     }
 
     public func start() {
         queue.async { [self] in
             do {
-                let listener = try NWListener(using: Peer.parameters())
-                listener.service = NWListener.Service(name: hostName, type: Wire.serviceType)
+                let parameters = Peer.parameters()
+                if onNetwork {
+                    parameters.includePeerToPeer = true      // phone ↔ Mac even without a shared Wi-Fi router (AWDL)
+                } else {
+                    parameters.requiredInterfaceType = .loopback
+                }
+                let listener = try NWListener(using: parameters)
+                if onNetwork { listener.service = NWListener.Service(name: hostName, type: Wire.serviceType) }
                 listener.stateUpdateHandler = { [weak self] state in
                     guard let self else { return }
                     switch state {
@@ -137,7 +153,7 @@ public final class SessionServer: @unchecked Sendable {
     // MARK: - connections
 
     private func accept(_ connection: NWConnection) {
-        let peer = Peer(connection: connection, queue: queue)
+        let peer = Peer(connection: connection, queue: queue, link: SecureLink(responder: identity, token: token))
         let key = ObjectIdentifier(peer)
         guard pending.count < 16 else { connection.cancel(); return }
         pending[key] = peer
@@ -170,12 +186,14 @@ public final class SessionServer: @unchecked Sendable {
     }
 
     private func admit(_ hello: Hello, peer: Peer, waiting: (JoinRequest?) -> Void) {
-        guard hello.sampleRate >= 8_000, hello.sampleRate <= 192_000, !hello.device.isEmpty, hello.device.count <= 64,
-              hello.device.allSatisfy({ $0.isASCII && ($0.isLetter || $0.isNumber || $0 == "-") }) else {
+        // The device is whoever holds the key the handshake proved, not what the message says.
+        guard hello.sampleRate >= 8_000, hello.sampleRate <= 192_000, let key = peer.link.remoteKey,
+              hello.device == SessionIdentity.device(forPublicKey: key) else {
             peer.send(.denied(Denied(reason: "This version of Hot Mic can't join."))); peer.close(); return
         }
-        let request = JoinRequest(name: NameRules.clean(hello.name).nonEmpty ?? "Guest", device: hello.device)
-        let welcomeNow = tokensMatch(hello.token, token) || delegate?.server(self, isTrusted: hello.device) == true
+        let request = JoinRequest(name: NameRules.clean(hello.name).nonEmpty ?? "Guest", device: hello.device, code: peer.link.code ?? "")
+        // Getting this far in invite mode proves the phone holds the token: the handshake needs it.
+        let welcomeNow = peer.link.mode == .invite || delegate?.server(self, isTrusted: hello.device) == true
         if welcomeNow { welcome(hello, peer: peer); return }
         guard let delegate else { peer.send(.denied(Denied(reason: "Not accepting guests."))); peer.close(); return }
         peer.send(.waiting)

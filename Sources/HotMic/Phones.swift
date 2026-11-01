@@ -142,6 +142,8 @@ struct PhonesView: View {
                 HStack {
                     Image(systemName: "iphone.radiowaves.left.and.right").foregroundStyle(.orange)
                     Text("\(request.name) wants to join").font(.headline)
+                    Text("Code \(request.code)").font(.body.monospacedDigit()).foregroundStyle(.secondary)
+                        .help("The phone shows the same six digits. If it doesn't, someone is in the middle: don't let them in.")
                     Spacer()
                     Button("Not now") { phones.deny(request) }
                     Button("Let in") { phones.allow(request, always: false) }

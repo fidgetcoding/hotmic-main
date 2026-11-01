@@ -2,8 +2,9 @@ import Foundation
 
 /// The Session wire format. Every message is one frame: `[type: UInt8][length: UInt32 BE][payload]`.
 /// Control messages carry JSON; audio carries a small binary header plus 16-bit PCM.
+/// On the network every frame travels inside SecureLink: nothing is ever sent in the clear.
 public enum Wire {
-    public static let version = 1
+    public static let version = 2
     /// Bonjour service type the host advertises and phones browse for.
     public static let serviceType = "_hotmic._tcp"
     /// Anything bigger is a broken or hostile peer: the connection is dropped.
@@ -20,15 +21,14 @@ public enum Wire {
 public struct Hello: Codable, Equatable, Sendable {
     public var version = Wire.version
     public var name: String
-    /// Stable per install: lets the host resume the same singer after a dropped connection.
+    /// `SessionIdentity.device`: stable per install, and the host checks it against the key the handshake
+    /// proved. Lets the host resume the same singer after a dropped connection.
     public var device: String
-    /// From a QR code or invite link: joins without the host having to approve.
-    public var token: String?
     public var sampleRate: Double
     /// True when the phone plays the beat itself (headphones / booth), false when it hears the room.
     public var headphones: Bool
-    public init(name: String, device: String, token: String?, sampleRate: Double, headphones: Bool) {
-        self.name = name; self.device = device; self.token = token; self.sampleRate = sampleRate; self.headphones = headphones
+    public init(name: String, device: String, sampleRate: Double, headphones: Bool) {
+        self.name = name; self.device = device; self.sampleRate = sampleRate; self.headphones = headphones
     }
 }
 

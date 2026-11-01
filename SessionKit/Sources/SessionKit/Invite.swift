@@ -1,6 +1,7 @@
 import Foundation
 
-/// What a QR code (or invite link) carries: where the host is and a token that skips approval.
+/// What a QR code (or invite link) carries: where the host is, and a token that skips approval. The token
+/// is the link's shared secret (SecureLink): it never goes over the network, so keep the code itself private.
 /// `hotmic://join?name=Mike&service=Mike%27s%20Mac&addr=192.168.1.20,10.0.0.4&port=51234&token=…`
 public struct JoinInvite: Equatable, Sendable {
     public var hostName: String
@@ -67,16 +68,6 @@ public struct JoinInvite: Equatable, Sendable {
         default: return false
         }
     }
-}
-
-/// Constant-time comparison so a token can't be guessed byte by byte.
-public func tokensMatch(_ a: String?, _ b: String) -> Bool {
-    guard let a else { return false }
-    let x = Array(a.utf8), y = Array(b.utf8)
-    guard x.count == y.count else { return false }
-    var diff: UInt8 = 0
-    for i in x.indices { diff |= x[i] ^ y[i] }
-    return diff == 0
 }
 
 /// Names come from other people's phones: they end up in file names and on screen.

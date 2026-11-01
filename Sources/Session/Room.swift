@@ -42,7 +42,7 @@ public final class Room: SessionServerDelegate, @unchecked Sendable {
         tap = host.tap
         self.host = host
         self.isTrusted = isTrusted
-        server = SessionServer(hostName: hostName, sessionName: sessionName)
+        server = SessionServer(hostName: hostName, sessionName: sessionName, identity: HostIdentity.load())
     }
 
     public func start() {
@@ -199,5 +199,21 @@ public final class Room: SessionServerDelegate, @unchecked Sendable {
         let snapshot = Snapshot(invite: invite, singers: singers.sorted { $0.name < $1.name },
                                 requests: requests, problem: problem)
         DispatchQueue.main.async { onChange(snapshot) }
+    }
+}
+
+/// This Mac's long-term session key, kept between sessions so a phone can tell it's the same Mac.
+/// A file only this user can read, not the Keychain: a build that isn't signed with a stable identity would
+/// ask for the Keychain password on every launch.
+public enum HostIdentity {
+    public static let defaultURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        .appendingPathComponent("Hot Mic/session-host.key")
+
+    public static func load(from url: URL = defaultURL) -> SessionIdentity {
+        if let data = try? Data(contentsOf: url), let saved = SessionIdentity(rawRepresentation: data) { return saved }
+        let fresh = SessionIdentity()
+        try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        FileManager.default.createFile(atPath: url.path, contents: fresh.rawRepresentation, attributes: [.posixPermissions: 0o600])
+        return fresh
     }
 }
