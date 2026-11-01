@@ -36,6 +36,8 @@ public struct Notebook: Equatable, Sendable {
 
     /// Anchor threshold: share of words (and word pairs) two lines must have in common.
     static let matchThreshold = 0.35
+    /// Most lines in a row that can be rewrites of the lines they replace.
+    static let maxRewriteGap = 4
     /// Bars apart that still count as "the same place in the song".
     static let sameBar = 1.0
 
@@ -127,10 +129,15 @@ public struct Notebook: Equatable, Sendable {
             var gapSlots = Array(slots[(prev.slot + 1)..<anchor.slot])
             var leftover: [SungLine] = []
             var k = 0
+            // Without bars, a rewrite is a small gap next to a line that clearly matches. Pairing any size of gap
+            // made a whole take of unrelated lines (talk, a new verse) "rewrites" of whatever came before, and the
+            // newest of them hid the real line (livestream test corpus: 0 of 21 released lines shown; 10 with this).
+            let nearMatch = (prev.line >= 0 || anchor.line < n) && gapLines.count <= maxRewriteGap && gapSlots.count <= maxRewriteGap
+            let pairable = nearMatch || gapLines.contains { $0.bar != nil }
             for line in gapLines {
                 // Same place in the song (in order) = a rewrite of that line.
-                while k < gapSlots.count, !samePlace(line, gapSlots[k]) { k += 1 }
-                if k < gapSlots.count { gapSlots[k].append(line); k += 1 } else { leftover.append(line) }
+                while pairable, k < gapSlots.count, !samePlace(line, gapSlots[k]) { k += 1 }
+                if pairable, k < gapSlots.count { gapSlots[k].append(line); k += 1 } else { leftover.append(line) }
             }
             result += gapSlots
             result += leftover.map { [$0] }
