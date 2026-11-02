@@ -345,10 +345,10 @@
       "input": {
         "live": [
           [
-            "Hey yo my name is Nate",
+            "Hey yo my name is June",
             1.69,
             3.43,
-            "ay yo, my name is Nate,"
+            "ay yo, my name is June,"
           ],
           [
             "and I'm willing to say that it's about to be a good",
@@ -382,7 +382,7 @@
           "label": "Leave the cuts where the live recognizer made them (lone “day” joins the line before)",
           "sheet": [
             [
-              "ay yo, my name is Nate"
+              "ay yo, my name is June"
             ],
             [
               "and i'm willing to say, that its about to be a good day"
@@ -400,7 +400,7 @@
           "label": "Re-cut at Whisper's commas (a comma ends the line once it has 4 words or more), commas kept",
           "sheet": [
             [
-              "ay yo, my name is Nate"
+              "ay yo, my name is June"
             ],
             [
               "and i'm willing to say"
@@ -672,17 +672,17 @@
       "input": {
         "live": [
           [
-            "Damn brother",
+            "Damn neighbor",
             1.93,
             2.49
           ],
           [
-            "everybody got a mother and another lover but I got a little something for my other",
+            "everybody got a garden and another fence but I got a little something for my fence",
             3.39,
             7.99
           ],
           [
-            "lover",
+            "fence",
             8.19,
             8.49
           ]
@@ -694,10 +694,10 @@
           "label": "The pickup is its own line",
           "sheet": [
             [
-              "damn brother"
+              "damn neighbor"
             ],
             [
-              "everybody got a mother and another lover but I got a little something for my other lover"
+              "everybody got a garden and another fence but I got a little something for my fence fence"
             ]
           ]
         },
@@ -706,7 +706,7 @@
           "label": "The pickup joins the line after it",
           "sheet": [
             [
-              "damn brother everybody got a mother and another lover but I got a little something for my other lover"
+              "damn neighbor everybody got a garden and another fence but I got a little something for my fence fence"
             ]
           ]
         }
@@ -768,7 +768,7 @@
             1.3
           ],
           [
-            "my name is Nate",
+            "my name is June",
             2.0,
             3.2
           ]
@@ -780,7 +780,7 @@
           "label": "Joins the line after, with a comma",
           "sheet": [
             [
-              "yo, my name is Nate"
+              "yo, my name is June"
             ]
           ]
         },
@@ -792,7 +792,7 @@
               "yo"
             ],
             [
-              "my name is Nate"
+              "my name is June"
             ]
           ]
         }
@@ -806,7 +806,7 @@
       "input": {
         "live": [
           [
-            "That boy",
+            "That one",
             35.09,
             35.39
           ],
@@ -816,7 +816,7 @@
             36.63
           ],
           [
-            "Do you know I'm that guy yeah",
+            "Do you know I'm that one yeah",
             38.09,
             40.53
           ]
@@ -825,13 +825,13 @@
       "options": [
         {
           "key": "a",
-          "label": "Joins the line before, with a comma: “That boy, yeah”",
+          "label": "Joins the line before, with a comma: “That one, yeah”",
           "sheet": [
             [
-              "that boy, yeah"
+              "that one, yeah"
             ],
             [
-              "do you know I'm that guy, yeah"
+              "do you know I'm that one, yeah"
             ]
           ]
         },
@@ -840,10 +840,10 @@
           "label": "Joins the line after",
           "sheet": [
             [
-              "that boy"
+              "that one"
             ],
             [
-              "yeah, Do you know I'm that guy, yeah"
+              "yeah, Do you know I'm that one, yeah"
             ]
           ]
         },
@@ -852,10 +852,10 @@
           "label": "Dropped",
           "sheet": [
             [
-              "that boy"
+              "that one"
             ],
             [
-              "do you know I'm that guy, yeah"
+              "do you know I'm that one, yeah"
             ]
           ]
         }
@@ -869,7 +869,7 @@
       "input": {
         "live": [
           [
-            "Try killing all these lines on these killer tracks",
+            "Try pulling all these threads on these paper maps",
             11.67,
             13.83
           ],
@@ -879,7 +879,7 @@
             14.8
           ],
           [
-            "and every time I be spitting raps they listen to me",
+            "and every time I be trading lines they sing with me",
             15.7,
             19.2
           ]
@@ -891,10 +891,10 @@
           "label": "Joins the line before, with a comma",
           "sheet": [
             [
-              "try killing all these lines on these killer tracks, yeah"
+              "try pulling all these threads on these paper maps, yeah"
             ],
             [
-              "and every time I be spitting raps they listen to me"
+              "and every time I be trading lines they sing with me"
             ]
           ]
         },
@@ -903,10 +903,10 @@
           "label": "Joins the line after",
           "sheet": [
             [
-              "try killing all these lines on these killer tracks"
+              "try pulling all these threads on these paper maps"
             ],
             [
-              "yeah, and every time I be spitting raps they listen to me"
+              "yeah, and every time I be trading lines they sing with me"
             ]
           ]
         },
@@ -915,13 +915,13 @@
           "label": "Its own line",
           "sheet": [
             [
-              "try killing all these lines on these killer tracks"
+              "try pulling all these threads on these paper maps"
             ],
             [
               "yeah"
             ],
             [
-              "and every time I be spitting raps they listen to me"
+              "and every time I be trading lines they sing with me"
             ]
           ]
         },
@@ -930,10 +930,10 @@
           "label": "Dropped",
           "sheet": [
             [
-              "try killing all these lines on these killer tracks"
+              "try pulling all these threads on these paper maps"
             ],
             [
-              "and every time I be spitting raps they listen to me"
+              "and every time I be trading lines they sing with me"
             ]
           ]
         }
@@ -1008,7 +1008,7 @@
             32.79
           ],
           [
-            "That boy",
+            "That one",
             35.09,
             35.39
           ]
@@ -1026,7 +1026,7 @@
               "cause I'm cause I'm cause I'm"
             ],
             [
-              "that boy"
+              "that one"
             ]
           ]
         },
@@ -1041,7 +1041,7 @@
               "cause I'm"
             ],
             [
-              "that boy"
+              "that one"
             ]
           ]
         },
@@ -1053,7 +1053,7 @@
               "and she gotta know, Shazam"
             ],
             [
-              "that boy"
+              "that one"
             ]
           ]
         }
@@ -1389,12 +1389,12 @@
       "input": {
         "live": [
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             23.7,
             26.9
           ],
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             29.9,
             32.6
           ]
@@ -1406,10 +1406,10 @@
           "label": "Two lines",
           "sheet": [
             [
-              "they listening to me and say what what"
+              "they singing with me and say what what"
             ],
             [
-              "they listening to me and say what what"
+              "they singing with me and say what what"
             ]
           ]
         },
@@ -1418,7 +1418,7 @@
           "label": "One line marked ×2",
           "sheet": [
             [
-              "they listening to me and say what what ×2"
+              "they singing with me and say what what ×2"
             ]
           ]
         },
@@ -1427,8 +1427,8 @@
           "label": "One line, 2 versions",
           "sheet": [
             [
-              "they listening to me and say what what",
-              "they listening to me and say what what"
+              "they singing with me and say what what",
+              "they singing with me and say what what"
             ]
           ]
         }
@@ -1442,28 +1442,28 @@
       "input": {
         "live": [
           [
-            "and every time I'll be spitting wraps they listen to me and",
+            "and every time I'll be trading lyrics they sing with me and",
             14.97,
             20.07,
-            "and every time i be spitting raps they listen to me and saying what what"
+            "and every time i be trading lines they sing with me and saying what what"
           ],
           [
-            "What but they listen to me and say what",
+            "What but they sing with me and say what",
             23.73,
             26.93,
-            "what they listening to me and say what what"
+            "what they singing with me and say what what"
           ],
           [
-            "But they listen to me and say why what",
+            "But they sing with me and say why what",
             29.87,
             32.57,
-            "They listen to me and say what what"
+            "They sing with me and say what what"
           ],
           [
-            "What are they still listening to me say what",
+            "What are they still singing with me say what",
             35.53,
             38.43,
-            "and they still listen to me and say what what"
+            "and they still sing with me and say what what"
           ],
           [
             "Yeah",
@@ -1479,16 +1479,16 @@
           "label": "Four lines, written out",
           "sheet": [
             [
-              "and every time i be spitting raps they listen to me and saying what what"
+              "and every time i be trading lines they sing with me and saying what what"
             ],
             [
-              "what they listening to me and say what what"
+              "what they singing with me and say what what"
             ],
             [
-              "they listen to me and say what what"
+              "they sing with me and say what what"
             ],
             [
-              "and they still listen to me and say what what, Yeah"
+              "and they still sing with me and say what what, Yeah"
             ]
           ]
         },
@@ -1497,12 +1497,12 @@
           "label": "First line, then one hook line with 3 versions",
           "sheet": [
             [
-              "and every time i be spitting raps they listen to me and saying what what"
+              "and every time i be trading lines they sing with me and saying what what"
             ],
             [
-              "what they listening to me and say what what",
-              "they listen to me and say what what",
-              "and they still listen to me and say what what, Yeah"
+              "what they singing with me and say what what",
+              "they sing with me and say what what",
+              "and they still sing with me and say what what, Yeah"
             ]
           ]
         },
@@ -1511,10 +1511,10 @@
           "label": "First line, then the hook once marked ×3",
           "sheet": [
             [
-              "and every time i be spitting raps they listen to me and saying what what"
+              "and every time i be trading lines they sing with me and saying what what"
             ],
             [
-              "they listening to me and say what what ×3"
+              "they singing with me and say what what ×3"
             ]
           ]
         }
@@ -1854,7 +1854,7 @@
       "input": {
         "live": [
           [
-            "Do you know I'm that guy yeah",
+            "Do you know I'm that one yeah",
             38.09,
             40.53
           ],
@@ -1871,7 +1871,7 @@
           "label": "Two lines",
           "sheet": [
             [
-              "do you know I'm that guy, yeah"
+              "do you know I'm that one, yeah"
             ],
             [
               "and everybody fly, yeah"
@@ -1883,7 +1883,7 @@
           "label": "One line, 2 versions",
           "sheet": [
             [
-              "do you know I'm that guy, yeah",
+              "do you know I'm that one, yeah",
               "and everybody fly, yeah"
             ]
           ]
@@ -1898,7 +1898,7 @@
       "input": {
         "live": [
           [
-            "that boy",
+            "that one",
             10.0,
             10.4
           ],
@@ -1908,7 +1908,7 @@
             13.0
           ],
           [
-            "that guy",
+            "that one",
             15.0,
             15.4
           ]
@@ -1920,23 +1920,23 @@
           "label": "Three lines: a version needs at least 2 matching words",
           "sheet": [
             [
-              "that boy"
+              "that one"
             ],
             [
               "run it back"
             ],
             [
-              "that guy"
+              "that one"
             ]
           ]
         },
         {
           "key": "b",
-          "label": "“that guy” is a version of “that boy”",
+          "label": "“that one” is a version of “that one”",
           "sheet": [
             [
-              "that boy",
-              "that guy"
+              "that one",
+              "that one"
             ],
             [
               "run it back"
@@ -1953,7 +1953,7 @@
       "input": {
         "live": [
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             23.7,
             26.9
           ],
@@ -1963,7 +1963,7 @@
             29.0
           ],
           [
-            "they listening to me and say what what yeah",
+            "they singing with me and say what what yeah",
             30.0,
             33.0
           ]
@@ -1975,13 +1975,13 @@
           "label": "A repeat: yeah / uh / ay on the ends are ignored when comparing",
           "sheet": [
             [
-              "they listening to me and say what what"
+              "they singing with me and say what what"
             ],
             [
               "run it back"
             ],
             [
-              "they listening to me and say what what, yeah"
+              "they singing with me and say what what, yeah"
             ]
           ]
         },
@@ -1990,8 +1990,8 @@
           "label": "A version (the words differ)",
           "sheet": [
             [
-              "they listening to me and say what what",
-              "they listening to me and say what what, yeah"
+              "they singing with me and say what what",
+              "they singing with me and say what what, yeah"
             ],
             [
               "run it back"
@@ -2471,27 +2471,27 @@
       "input": {
         "live": [
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             10.0,
             13.0
           ],
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             14.0,
             17.0
           ],
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             18.0,
             21.0
           ],
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             22.0,
             25.0
           ],
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             26.0,
             29.0
           ]
@@ -2503,19 +2503,19 @@
           "label": "Five lines",
           "sheet": [
             [
-              "they listening to me and say what what"
+              "they singing with me and say what what"
             ],
             [
-              "they listening to me and say what what"
+              "they singing with me and say what what"
             ],
             [
-              "they listening to me and say what what"
+              "they singing with me and say what what"
             ],
             [
-              "they listening to me and say what what"
+              "they singing with me and say what what"
             ],
             [
-              "they listening to me and say what what"
+              "they singing with me and say what what"
             ]
           ]
         },
@@ -2524,7 +2524,7 @@
           "label": "One line marked ×5",
           "sheet": [
             [
-              "they listening to me and say what what ×5"
+              "they singing with me and say what what ×5"
             ]
           ]
         },
@@ -2533,11 +2533,11 @@
           "label": "One line, 5 versions",
           "sheet": [
             [
-              "they listening to me and say what what",
-              "they listening to me and say what what",
-              "they listening to me and say what what",
-              "they listening to me and say what what",
-              "they listening to me and say what what"
+              "they singing with me and say what what",
+              "they singing with me and say what what",
+              "they singing with me and say what what",
+              "they singing with me and say what what",
+              "they singing with me and say what what"
             ]
           ]
         }
@@ -3085,7 +3085,7 @@
             32.79
           ],
           [
-            "That boy",
+            "That one",
             35.09,
             35.39
           ],
@@ -3095,7 +3095,7 @@
             36.63
           ],
           [
-            "Do you know I'm that guy yeah",
+            "Do you know I'm that one yeah",
             38.09,
             40.53
           ],
@@ -3121,7 +3121,7 @@
             "at": 0.0,
             "dur": 55.2,
             "kind": "playing",
-            "text": "damn brother, everybody got a mother and another lover, but i got a little something for my other lover, you call another brother, summer mother, i got another for the lover, summer, i'm in the suburbs and i got a boat, she gotta blow, yeah she gotta blow, cause i'm that fella, and she gotta know, cause i'm that,"
+            "text": "damn neighbor, everybody got a garden and another fence, but i got a little something for my fence fence, you call another neighbor, summer garden, i got another for the fence, summer, i'm in the valley and i got a boat, she gotta row, yeah she gotta row, cause i'm that one, and she gotta know, cause i'm that,"
           }
         ]
       },
@@ -3134,10 +3134,10 @@
               "cause I'm cause I'm cause I'm"
             ],
             [
-              "that boy, yeah"
+              "that one, yeah"
             ],
             [
-              "do you know I'm that guy, yeah"
+              "do you know I'm that one, yeah"
             ],
             [
               "and everybody fly, yeah, Yeah"
@@ -3288,10 +3288,10 @@
             "hey yo my name is name",
             1.69,
             3.43,
-            "ay yo, my name is Nate,"
+            "ay yo, my name is June,"
           ],
           [
-            "twenty six thousand on the dash",
+            "ninety one thousand on the dash",
             5.0,
             7.0,
             "26000 on the dash"
@@ -3301,10 +3301,10 @@
       "options": [
         {
           "key": "a",
-          "label": "Whisper's spelling: Nate, 26000",
+          "label": "Whisper's spelling: June, 26000",
           "sheet": [
             [
-              "ay yo, my name is Nate"
+              "ay yo, my name is June"
             ],
             [
               "26000 on the dash"
@@ -3316,10 +3316,10 @@
           "label": "Numbers written out as words",
           "sheet": [
             [
-              "ay yo, my name is Nate"
+              "ay yo, my name is June"
             ],
             [
-              "twenty six thousand on the dash"
+              "ninety one thousand on the dash"
             ]
           ]
         },
@@ -3331,7 +3331,7 @@
               "hey yo, my name is name"
             ],
             [
-              "twenty six thousand on the dash"
+              "ninety one thousand on the dash"
             ]
           ]
         }
@@ -3425,16 +3425,16 @@
       "input": {
         "live": [
           [
-            "but they listen to me and say why what",
+            "but they sing with me and say why what",
             29.87,
             32.57,
-            "They listen to me and say what what"
+            "They sing with me and say what what"
           ],
           [
-            "what are they still listening to me say what",
+            "what are they still singing with me say what",
             35.53,
             38.43,
-            "and they still listen to me and say what what"
+            "and they still sing with me and say what what"
           ],
           [
             "run it back",
@@ -3449,10 +3449,10 @@
           "label": "As Whisper writes them",
           "sheet": [
             [
-              "they listen to me and say what what"
+              "they sing with me and say what what"
             ],
             [
-              "and they still listen to me and say what what"
+              "and they still sing with me and say what what"
             ],
             [
               "run it back"
@@ -3464,10 +3464,10 @@
           "label": "Every line starts with a capital",
           "sheet": [
             [
-              "they listen to me and say what what"
+              "they sing with me and say what what"
             ],
             [
-              "and they still listen to me and say what what"
+              "and they still sing with me and say what what"
             ],
             [
               "run it back"
@@ -3479,10 +3479,10 @@
           "label": "All lowercase except I and names",
           "sheet": [
             [
-              "they listen to me and say what what"
+              "they sing with me and say what what"
             ],
             [
-              "and they still listen to me and say what what"
+              "and they still sing with me and say what what"
             ],
             [
               "run it back"
@@ -4081,12 +4081,12 @@
             13.5
           ],
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             15.0,
             18.0
           ],
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             19.0,
             22.0
           ],
@@ -4111,12 +4111,12 @@
             35.0
           ],
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             37.0,
             40.0
           ],
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             41.0,
             44.0
           ]
@@ -4140,10 +4140,10 @@
               "i keep driving till the morning comes"
             ],
             [
-              "they listening to me and say what what"
+              "they singing with me and say what what"
             ],
             [
-              "they listening to me and say what what"
+              "they singing with me and say what what"
             ],
             [
               "radio static in a borrowed car"
@@ -4158,10 +4158,10 @@
               "and a name I never said out loud"
             ],
             [
-              "they listening to me and say what what"
+              "they singing with me and say what what"
             ],
             [
-              "they listening to me and say what what"
+              "they singing with me and say what what"
             ]
           ]
         },
@@ -4182,7 +4182,7 @@
               "i keep driving till the morning comes"
             ],
             [
-              "they listening to me and say what what ×2"
+              "they singing with me and say what what ×2"
             ],
             [
               "radio static in a borrowed car"
@@ -4197,7 +4197,7 @@
               "and a name I never said out loud"
             ],
             [
-              "they listening to me and say what what ×2"
+              "they singing with me and say what what ×2"
             ]
           ]
         },
@@ -4218,10 +4218,10 @@
               "i keep driving till the morning comes"
             ],
             [
-              "they listening to me and say what what",
-              "they listening to me and say what what",
-              "they listening to me and say what what",
-              "they listening to me and say what what"
+              "they singing with me and say what what",
+              "they singing with me and say what what",
+              "they singing with me and say what what",
+              "they singing with me and say what what"
             ],
             [
               "radio static in a borrowed car"
@@ -4252,7 +4252,7 @@
             "at": 0.0,
             "dur": 12.0,
             "kind": "playing",
-            "text": "yeah, yeah, yeah, you already know, this is Nate, with the flow, i'm just testing, how it goes,",
+            "text": "yeah, yeah, yeah, you already know, this is June, with the flow, i'm just testing, how it goes,",
             "words": [
               [
                 "yeah,",
@@ -4295,7 +4295,7 @@
                 3.5
               ],
               [
-                "Nate,",
+                "June,",
                 3.5,
                 3.9
               ],
@@ -4357,7 +4357,7 @@
               "yeah, yeah, yeah, you already know"
             ],
             [
-              "this is Nate, with the flow"
+              "this is June, with the flow"
             ],
             [
               "i'm just testing, how it goes"
@@ -4381,7 +4381,7 @@
               "you already know"
             ],
             [
-              "this is Nate"
+              "this is June"
             ],
             [
               "with the flow"
@@ -4402,7 +4402,7 @@
               "yeah, yeah, yeah, you already know"
             ],
             [
-              "this is Nate"
+              "this is June"
             ],
             [
               "with the flow"
@@ -4425,27 +4425,27 @@
       "input": {
         "live": [
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             10,
             13.0
           ],
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             14,
             17.0
           ],
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             18,
             21.0
           ],
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             22,
             25.0
           ],
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             26,
             29.0
           ]
@@ -4457,7 +4457,7 @@
           "label": "Once, marked ×5: you meant it five times",
           "sheet": [
             [
-              "they listening to me and say what what ×5"
+              "they singing with me and say what what ×5"
             ]
           ]
         },
@@ -4466,7 +4466,7 @@
           "label": "Once, no marker: you were drilling the delivery",
           "sheet": [
             [
-              "they listening to me and say what what"
+              "they singing with me and say what what"
             ]
           ]
         },
@@ -4475,19 +4475,19 @@
           "label": "Five lines, written out",
           "sheet": [
             [
-              "they listening to me and say what what"
+              "they singing with me and say what what"
             ],
             [
-              "they listening to me and say what what"
+              "they singing with me and say what what"
             ],
             [
-              "they listening to me and say what what"
+              "they singing with me and say what what"
             ],
             [
-              "they listening to me and say what what"
+              "they singing with me and say what what"
             ],
             [
-              "they listening to me and say what what"
+              "they singing with me and say what what"
             ]
           ]
         }
@@ -4581,27 +4581,27 @@
       "input": {
         "live": [
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             10,
             13.0
           ],
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             14,
             17.0
           ],
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             21,
             24.0
           ],
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             25,
             28.0
           ],
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             33,
             36.0
           ]
@@ -4613,7 +4613,7 @@
           "label": "Still one line ×5",
           "sheet": [
             [
-              "they listening to me and say what what ×5"
+              "they singing with me and say what what ×5"
             ]
           ]
         },
@@ -4622,7 +4622,7 @@
           "label": "Once, no marker (the stops say you were drilling)",
           "sheet": [
             [
-              "they listening to me and say what what"
+              "they singing with me and say what what"
             ]
           ]
         },
@@ -4631,13 +4631,13 @@
           "label": "A long stop starts a new count: ×2 / ×2 / once",
           "sheet": [
             [
-              "they listening to me and say what what ×2"
+              "they singing with me and say what what ×2"
             ],
             [
-              "they listening to me and say what what ×2"
+              "they singing with me and say what what ×2"
             ],
             [
-              "they listening to me and say what what"
+              "they singing with me and say what what"
             ]
           ]
         }
@@ -4651,22 +4651,22 @@
       "input": {
         "live": [
           [
-            "they listening to",
+            "they singing with",
             10,
             11
           ],
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             13,
             16.0
           ],
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             17,
             20.0
           ],
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             21,
             24.0
           ]
@@ -4678,7 +4678,7 @@
           "label": "Cut-off dropped, hook ×3",
           "sheet": [
             [
-              "they listening to me and say what what ×3"
+              "they singing with me and say what what ×3"
             ]
           ]
         },
@@ -4687,10 +4687,10 @@
           "label": "Cut-off kept as its own line, hook ×3",
           "sheet": [
             [
-              "they listening to"
+              "they singing with"
             ],
             [
-              "they listening to me and say what what ×3"
+              "they singing with me and say what what ×3"
             ]
           ]
         },
@@ -4699,8 +4699,8 @@
           "label": "Cut-off kept as a version of the hook",
           "sheet": [
             [
-              "they listening to",
-              "they listening to me and say what what ×3"
+              "they singing with",
+              "they singing with me and say what what ×3"
             ]
           ]
         }
@@ -4714,27 +4714,27 @@
       "input": {
         "live": [
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             10,
             13.0
           ],
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             14,
             17.0
           ],
           [
-            "they listening to me and say what now",
+            "they singing with me and say what now",
             18,
             21
           ],
           [
-            "they listening to me and say what now",
+            "they singing with me and say what now",
             22,
             25
           ],
           [
-            "they listening to me and say what now",
+            "they singing with me and say what now",
             26,
             29
           ]
@@ -4746,10 +4746,10 @@
           "label": "Two lines: “…what what ×2” then “…what now ×3”",
           "sheet": [
             [
-              "they listening to me and say what what ×2"
+              "they singing with me and say what what ×2"
             ],
             [
-              "they listening to me and say what now ×3"
+              "they singing with me and say what now ×3"
             ]
           ]
         },
@@ -4758,19 +4758,19 @@
           "label": "Five lines written out",
           "sheet": [
             [
-              "they listening to me and say what what"
+              "they singing with me and say what what"
             ],
             [
-              "they listening to me and say what what"
+              "they singing with me and say what what"
             ],
             [
-              "they listening to me and say what now"
+              "they singing with me and say what now"
             ],
             [
-              "they listening to me and say what now"
+              "they singing with me and say what now"
             ],
             [
-              "they listening to me and say what now"
+              "they singing with me and say what now"
             ]
           ]
         },
@@ -4779,8 +4779,8 @@
           "label": "One line, 2 versions (what what → what now), the newest shows",
           "sheet": [
             [
-              "they listening to me and say what what",
-              "they listening to me and say what now"
+              "they singing with me and say what what",
+              "they singing with me and say what now"
             ]
           ]
         }
@@ -4901,7 +4901,7 @@
       "input": {
         "live": [
           [
-            "they listening to me and say what what",
+            "they singing with me and say what what",
             23.7,
             26.7
           ],
@@ -4911,7 +4911,7 @@
             29.0
           ],
           [
-            "they listening to me and say what what yeah",
+            "they singing with me and say what what yeah",
             30.0,
             33.0
           ]
@@ -4923,13 +4923,13 @@
           "label": "The hook comes back as a repeat; the yeah is ignored when comparing",
           "sheet": [
             [
-              "they listening to me and say what what"
+              "they singing with me and say what what"
             ],
             [
               "run it back"
             ],
             [
-              "they listening to me and say what what, yeah"
+              "they singing with me and say what what, yeah"
             ]
           ]
         },
@@ -4938,8 +4938,8 @@
           "label": "The hook with yeah is a version of the hook",
           "sheet": [
             [
-              "they listening to me and say what what",
-              "they listening to me and say what what, yeah"
+              "they singing with me and say what what",
+              "they singing with me and say what what, yeah"
             ],
             [
               "run it back"
