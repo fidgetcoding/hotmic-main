@@ -42,10 +42,14 @@ public struct FoundationLineModel: LineModel {
 
     /// Its answer, or nil for a refusal in words ("I can't help with that") or anything else.
     static func parse(_ reply: String) -> LineVerdict? {
-        let u = reply.uppercased()
-        if u.contains("LYRIC") { return .writing }
-        if u.contains("TALK") { return .talk }
-        return nil
+        let answer = reply.trimmingCharacters(in: .whitespacesAndNewlines)
+            .trimmingCharacters(in: CharacterSet(charactersIn: ".!"))
+            .uppercased()
+        switch answer {
+        case "LYRIC": return .writing
+        case "TALK": return .talk
+        default: return nil
+        }
     }
 
     public var isAvailable: Bool {

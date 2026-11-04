@@ -4,7 +4,13 @@ import Foundation
 /// NSLog from this app doesn't reach the unified log, so problems in a real session are read here.
 public enum HotMicLog {
     private static let queue = DispatchQueue(label: "io.bluegum.hotmic.log", qos: .utility)
-    public static let url = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Logs/Hot Mic/hotmic.log")
+    /// Offline checks can redirect diagnostics without writing into the user's live app log.
+    public static let url: URL = {
+        if let path = ProcessInfo.processInfo.environment["HM_LOG_DIRECTORY"], !path.isEmpty {
+            return URL(fileURLWithPath: path, isDirectory: true).appendingPathComponent("hotmic.log")
+        }
+        return FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Logs/Hot Mic/hotmic.log")
+    }()
 
     public static func write(_ line: String) {
         let text = "\(ISO8601DateFormatter().string(from: Date())) \(line)\n"

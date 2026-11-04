@@ -117,13 +117,38 @@ public struct LineJudgeProfile: Codable, Equatable, Sendable {
         folder.deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent(fileName)
     }
 
+    /// Display-only fallback; it is never used as the starting point of a mutation.
     public static func read(_ url: URL) -> LineJudgeProfile {
-        guard let data = try? Data(contentsOf: url) else { return LineJudgeProfile() }
-        return (try? JSONDecoder().decode(LineJudgeProfile.self, from: data)) ?? LineJudgeProfile()
+        (try? readChecked(url)) ?? LineJudgeProfile()
     }
 
-    public func write(to url: URL) {
-        let enc = JSONEncoder(); enc.outputFormatting = [.sortedKeys]
-        if let data = try? enc.encode(self) { try? data.write(to: url, options: .atomic) }
+    public static func readChecked(_ url: URL) throws -> LineJudgeProfile {
+        try PersistenceFile.read(url, default: LineJudgeProfile())
+    }
+
+    /// Compatibility wrapper: on failure, logs and returns persisted state, never the unsaved update.
+    @discardableResult
+    public static func update(at url: URL, _ change: (inout LineJudgeProfile) -> Void) -> LineJudgeProfile {
+        do { return try updateChecked(at: url, change) } catch { return read(url) }
+    }
+
+    @discardableResult
+    public static func updateChecked(at url: URL, _ change: (inout LineJudgeProfile) -> Void) throws -> LineJudgeProfile {
+        JudgePersistence.lock.lock(); defer { JudgePersistence.lock.unlock() }
+        var profile = try readChecked(url)
+        change(&profile)
+        try profile.writeChecked(to: url)
+        return profile
+    }
+
+    @discardableResult
+    public func write(to url: URL) -> Bool {
+        do { try writeChecked(to: url); return true } catch { return false }
+    }
+
+    public func writeChecked(to url: URL) throws {
+        JudgePersistence.lock.lock(); defer { JudgePersistence.lock.unlock() }
+        _ = try Self.readChecked(url)
+        try PersistenceFile.write(self, to: url)
     }
 }

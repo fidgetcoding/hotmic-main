@@ -439,7 +439,10 @@ final class AppModel: ObservableObject {
             let lineTranscriber: WhisperTranscriber? = self.transcriber
             var recent: [String] = []                       // the hint: what you've sung so far
             live.onLine = { text, at, end, audio, cut in
-                LiveLines.append(LiveLine(text: text, at: at, end: end, cut: cut ? true : nil), to: folder)
+                guard LiveLines.append(LiveLine(text: text, at: at, end: end, cut: cut ? true : nil), to: folder) else {
+                    lab.liveNotice("Couldn't save this lyric line. Check the library folder.")
+                    return
+                }
                 lab.lineDone(text, at: at, end: end)
                 lab.refreshSoon()
                 // Whisper on just this line's audio: corrected in place a moment later.
@@ -452,9 +455,12 @@ final class AppModel: ObservableObject {
                     let levelled = Loudness().normalize(audio, channels: 1, sampleRate: rate)
                     guard let lyrics = try? await lineTranscriber.transcribe(levelled, sampleRate: rate, hint: hint) else { return }
                     let fixed = lyrics.text.trimmingCharacters(in: .whitespacesAndNewlines)
-                    HotMicLog.write(String(format: "line fix %.1f s", at))
                     guard !fixed.isEmpty, !LiveLines.isJunk(fixed) else { return }
-                    LiveLines.fix(at: at, text: fixed, in: folder)
+                    guard LiveLines.fix(at: at, text: fixed, in: folder) else {
+                        await MainActor.run { lab.liveNotice("Couldn't save the lyric correction. Check the library folder.") }
+                        return
+                    }
+                    HotMicLog.write(String(format: "line fix %.1f s", at))
                     await MainActor.run { lab.refreshSoon() }
                 }
             }

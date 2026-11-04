@@ -20,6 +20,7 @@ final class LabWindowController: NSObject, WKScriptMessageHandler, WKNavigationD
     let judgeRunner = LineJudgeRunner()
     private var settingsPending = false
     private var refreshPending = false
+    private var refreshID = UUID()
     private var lookObserver: NSObjectProtocol?
     private var bag = Set<AnyCancellable>()
 
@@ -100,11 +101,13 @@ final class LabWindowController: NSObject, WKScriptMessageHandler, WKNavigationD
     func js(_ script: String) { web?.evaluateJavaScript(script, completionHandler: nil) }
 
     func pushAll() {
+        let request = UUID()
+        refreshID = request
         let lib = library()
         let index = LibraryIndex(location: lib)
         Task { [weak self] in
             let list = await Task.detached(priority: .userInitiated) { LabSessionExport.list(index) }.value
-            guard let self else { return }
+            guard let self, self.refreshID == request, self.library().root == lib.root else { return }
             if let c = self.current, !FileManager.default.fileExists(atPath: c.path) { self.current = nil }
             // Nothing picked and not recording: the empty session ("Ready when you are").
             if self.current == nil { self.current = self.model?.currentRecordingFolder }
@@ -118,9 +121,11 @@ final class LabWindowController: NSObject, WKScriptMessageHandler, WKNavigationD
 
     private func pushSession() {
         guard let folder = current else { js("HM.host.load({id:'',name:'New session',folder:'',length:0,takes:[],slots:[]})"); return }
+        let request = refreshID
         Task { [weak self] in
             let json = await Task.detached(priority: .userInitiated) { LabSessionExport.json(LabSessionExport.session(folder: folder)) }.value
-            self?.js("HM.host.load(\(json))")
+            guard let self, self.refreshID == request, self.current == folder else { return }
+            self.js("HM.host.load(\(json))")
         }
     }
 
@@ -261,7 +266,11 @@ final class LabWindowController: NSObject, WKScriptMessageHandler, WKNavigationD
     private func typeLines(_ text: String, at: Double) {
         guard let folder = current ?? model?.currentRecordingFolder ?? model?.newWrittenSession() else { return }
         current = folder
-        LiveLines.type(text, at: at, to: folder)
+        guard LiveLines.type(text, at: at, to: folder) else {
+            liveNotice("Couldn't save those lines. Your text is still in the notepad input.")
+            js("HM.host.typeFailed(\(LabSessionExport.json(text)))")
+            return
+        }
         HotMicLog.write(String(format: "typed %d line(s) at %.1f s", text.split(whereSeparator: \.isNewline).count, at))
         pushAll()
     }
@@ -322,7 +331,7 @@ final class LabWindowController: NSObject, WKScriptMessageHandler, WKNavigationD
             if let id, let dev = AudioObjectID(id) { AudioInputs.setDefault(dev) }
             pushMics()
         case "dragRegion":
-            if let bar { web?.dragBar = NSRect(x: bar[0], y: bar[1], width: bar[2], height: bar[3]) }
+            if let bar, bar.count == 4 { web?.dragBar = NSRect(x: bar[0], y: bar[1], width: bar[2], height: bar[3]) }
             web?.noDrag = (noDrag ?? []).compactMap { $0.count == 4 ? NSRect(x: $0[0], y: $0[1], width: $0[2], height: $0[3]) : nil }
             if let lights, lights.count == 4 { lightsSlot = NSRect(x: lights[0], y: lights[1], width: lights[2], height: lights[3]); placeTrafficLights() }
         default: break

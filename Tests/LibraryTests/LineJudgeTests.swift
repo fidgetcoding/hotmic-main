@@ -35,6 +35,13 @@ final class FoundationLineModelTests: XCTestCase {
         XCTAssertNil(FoundationLineModel.parse("I'm sorry, I can't help with that."), "a refusal in words is no answer")
     }
 
+    func testRefusalsAndAmbiguousRepliesAreNotVerdicts() {
+        for reply in ["I cannot classify this as LYRIC or TALK.", "I cannot discuss these lyrics.", "TALKATIVE", "LYRIC TALK", "This is not a LYRIC"] {
+            XCTAssertNil(FoundationLineModel.parse(reply), reply)
+        }
+        XCTAssertEqual(FoundationLineModel.parse("  lyric\n"), .writing)
+    }
+
     func testPromptMarksTheLine() {
         let p = FoundationLineModel.prompt(before: ["a"], line: "b", after: ["c"])
         XCTAssertTrue(p.contains("  a\n>> b\n  c\n"))
@@ -100,6 +107,38 @@ final class ModelPassTests: XCTestCase {
         XCTAssertNil(out.lines["t#0"]?.model)
         XCTAssertEqual(out.lines["t#1"]?.model, .talk)
         XCTAssertLessThan(Date().timeIntervalSince(started), 15, "not the 30 s the stalled line would take")
+    }
+
+    func testCancellationStopsTheActiveRequestPromptly() async {
+        let started = expectation(description: "model started")
+        let cancelled = expectation(description: "model cancelled")
+        let model = StubModel { _ in
+            started.fulfill()
+            do { try await Task.sleep(nanoseconds: 10_000_000_000) }
+            catch { cancelled.fulfill(); throw error }
+            return .talk
+        }
+        let r = rows(["first line", "second line"])
+        let task = Task { await ModelPass.run(rows: r, model: model, into: SessionJudgments(), lineTimeout: 2) }
+        await fulfillment(of: [started], timeout: 1)
+        let stop = Date()
+        task.cancel()
+        let result = await task.value
+        XCTAssertLessThan(Date().timeIntervalSince(stop), 0.5)
+        await fulfillment(of: [cancelled], timeout: 1)
+        XCTAssertTrue(result.lines.isEmpty)
+        XCTAssertEqual(result.stats.timedOut, 0, "a user cancellation is not a model failure")
+    }
+
+    func testPassBudgetBoundsTheActiveLine() async {
+        let model = StubModel { _ in
+            try await Task.sleep(nanoseconds: 10_000_000_000)
+            return .talk
+        }
+        let start = Date()
+        let out = await ModelPass.run(rows: rows(["one line"]), model: model, into: SessionJudgments(), lineTimeout: 2, passTimeout: 0.05)
+        XCTAssertLessThan(Date().timeIntervalSince(start), 0.5)
+        XCTAssertEqual(out.stats.timedOut, 1)
     }
 
     func testAModelThatKeepsFailingIsGivenUpOn() async {
@@ -241,6 +280,42 @@ final class SessionFolderJudgeTests: XCTestCase {
         XCTAssertEqual(stored.corrections[rows[0].id], .talk)
         XCTAssertEqual(SessionJudgments.read(folder).stats.lines, rows.count)
         XCTAssertEqual(try Data(contentsOf: folder.appendingPathComponent("t1.json")), before)
+    }
+
+    func testCheckpointKeepsCorrectionsMadeDuringThePass() async throws {
+        let lines = (0..<60).map { LiveLine(text: "unique lyric number \($0) carries the melody", at: 20 + Double($0) * 4, end: 22 + Double($0) * 4) }
+        try JSONEncoder().encode(lines).write(to: folder.appendingPathComponent(LiveLines.fileName))
+        let rows = SessionJudge.rows(folder: folder)
+        XCTAssertGreaterThan(rows.count, 50)
+        let folder = self.folder!
+        let corrected = rows[0].id
+        let calls = Recorder()
+        let model = StubModel { text in
+            calls.add(text)
+            if calls.lines.count == 2 {
+                SessionJudge.learn(.verdict(.talk), lineID: corrected, folder: folder)
+            }
+            if calls.lines.count == 51 {
+                XCTAssertEqual(SessionJudgments.read(folder).corrections[corrected], .talk, "checkpoint must retain the click")
+            }
+            return .writing
+        }
+        let out = await SessionJudge.pass(folder: folder, model: model)
+        XCTAssertEqual(out.corrections[corrected], .talk)
+        XCTAssertEqual(SessionJudgments.read(folder).corrections[corrected], .talk)
+    }
+
+    func testConcurrentCorrectionsKeepEveryLearningSignal() {
+        let id = SessionJudge.rows(folder: folder)[0].id
+        let folder = self.folder!
+        let group = DispatchGroup()
+        for _ in 0..<2 {
+            DispatchQueue.global().async(group: group) {
+                for _ in 0..<6 { SessionJudge.learn(.starred, lineID: id, folder: folder) }
+            }
+        }
+        group.wait()
+        XCTAssertEqual(LineJudgeProfile.read(LineJudgeProfile.url(forSession: folder)).learner.corrections, 12)
     }
 
     func testStarsTeachButDoNotPin() throws {

@@ -61,7 +61,7 @@ enum BenchLive {
         var recent: [String] = []
         // Same as a session's onLine (HotMicApp.startSession): keep the line, then Whisper just its audio.
         live.onLine = { text, at, end, audio, cut in
-            LiveLines.append(LiveLine(text: text, at: at, end: end, cut: cut ? true : nil), to: folder)
+            guard LiveLines.append(LiveLine(text: text, at: at, end: end, cut: cut ? true : nil), to: folder) else { return }
             HotMicLog.write(String(format: "bench-live: line %.1f–%.1f \"%@\"", at, end, text))
             guard let lineTranscriber, audio.count > Int(rate * 0.3) else { return }
             let hint = recent.suffix(4).joined(separator: " ")
@@ -72,9 +72,9 @@ enum BenchLive {
                 let levelled = Loudness().normalize(audio, channels: 1, sampleRate: rate)
                 guard let lyrics = try? await lineTranscriber.transcribe(levelled, sampleRate: rate, hint: hint) else { return }
                 let fixed = lyrics.text.trimmingCharacters(in: .whitespacesAndNewlines)
-                HotMicLog.write(String(format: "bench-live: line fix %.1f s: \"%@\" → \"%@\"", at, text, fixed))
                 guard !fixed.isEmpty, !LiveLines.isJunk(fixed) else { return }
-                LiveLines.fix(at: at, text: fixed, in: folder)
+                guard LiveLines.fix(at: at, text: fixed, in: folder) else { return }
+                HotMicLog.write(String(format: "bench-live: line fix %.1f s: \"%@\" → \"%@\"", at, text, fixed))
             }
         }
         live.onNotice = { n in if let n { HotMicLog.write("bench-live: notice \(n)") } }

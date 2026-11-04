@@ -126,6 +126,13 @@ Private repo: 121 commits on the main line and 128 in all, with 29 on September 
 - **Fixed:** all four. Takes now close at 5 minutes. One song went from 0 of 21 released lines shown to 8. Whisper's line times went from a median 14 s off to 2.4 s on a tuning song.
 - **Wanted next:** me, singing into this build.
 
+### Round 10: local reliability maintenance (November 4)
+- **Fixed:** judge checkpoints overwriting new corrections; concurrent learner/profile and live-line updates losing changes; model cancellation and timeout cleanup; refusals misread as verdicts; routine refreshes restarting Beat playback; stale session loads replacing the current selection; malformed drag rectangles crashing the bridge.
+- **Optimized:** pasting a verse writes the live-lines file once. A 300-line paste measured 915 ms before and 6.7 ms after in local debug runs; this is a single-machine check, not a general app-speed benchmark.
+- **Tested:** the debug app compiled; 100 selected offline Swift tests and 42 mocked window tests passed. Six new Swift regression tests and the new window regression failed against the original implementation. Existing lyric scenarios: 50 answered cases passed, 18 remained open, 10 were page-only.
+- **Persistence follow-up:** a hub review found that fallback reads could overwrite corrupt JSON and that failed writes could still report learned corrections. Four fixture tests reproduced seven failed assertions. Checked mutations now preserve damaged/unreadable files, report read/encode/write failures, stop failed judge checkpoints and final saves, and restore failed pasted text to the input. The affected run passed 83 Swift and 43 mocked window tests; a final focused run passed all 17 persistence fixtures, including permission-denied reads. The previous fixes remain in place.
+- **Limits:** no app launch, real audio device, recording, playback or real model invocation. Existing compiler concurrency warnings remain. Hardware behavior and classification accuracy were not re-measured.
+
 ## 5. Feature family tree
 
 ```

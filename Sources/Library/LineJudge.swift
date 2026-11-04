@@ -65,6 +65,12 @@ public protocol LineModel: Sendable {
     func judge(before: [String], line: String, after: [String]) async throws -> LineVerdict?
 }
 
+/// Serializes judge/profile read-modify-write transactions within the app. Recursive because a
+/// learning transaction also writes its profile and session judgments.
+enum JudgePersistence {
+    static let lock = NSRecursiveLock()
+}
+
 /// The judged lines of one session (`line-judgments.json` beside the takes). The raw logs (take sidecars,
 /// live-lines.json) are never touched, so the pass can be re-run or thrown away at any time.
 public struct SessionJudgments: Codable, Equatable, Sendable {
@@ -88,15 +94,36 @@ public struct SessionJudgments: Codable, Equatable, Sendable {
 
     public static let fileName = "line-judgments.json"
 
+    /// Display-only fallback; checked reads distinguish absent files from damaged data.
     public static func read(_ folder: URL) -> SessionJudgments {
-        guard let data = try? Data(contentsOf: folder.appendingPathComponent(fileName)) else { return SessionJudgments() }
-        return (try? JSONDecoder().decode(SessionJudgments.self, from: data)) ?? SessionJudgments()
+        (try? readChecked(folder)) ?? SessionJudgments()
     }
 
-    public func write(to folder: URL) {
-        let enc = JSONEncoder(); enc.outputFormatting = [.prettyPrinted, .sortedKeys]
-        if let data = try? enc.encode(self) { try? data.write(to: folder.appendingPathComponent(Self.fileName), options: .atomic) }
+    public static func readChecked(_ folder: URL) throws -> SessionJudgments {
+        try PersistenceFile.read(folder.appendingPathComponent(fileName), default: SessionJudgments())
     }
+
+    @discardableResult
+    public func write(to folder: URL) -> Bool {
+        do { try writeChecked(to: folder); return true } catch { return false }
+    }
+
+    public func writeChecked(to folder: URL) throws {
+        JudgePersistence.lock.lock(); defer { JudgePersistence.lock.unlock() }
+        _ = try Self.readChecked(folder) // direct writes must also preserve an unreadable existing file
+        try PersistenceFile.write(self, to: folder.appendingPathComponent(Self.fileName), pretty: true)
+    }
+
+    /// Model checkpoints own model answers; the latest readable user corrections always win.
+    @discardableResult
+    func saveModelProgress(to folder: URL) throws -> SessionJudgments {
+        JudgePersistence.lock.lock(); defer { JudgePersistence.lock.unlock() }
+        var merged = self
+        merged.corrections.merge(try Self.readChecked(folder).corrections) { _, latest in latest }
+        try merged.writeChecked(to: folder)
+        return merged
+    }
+
 }
 
 /// A line the judge took out of the notepad: still there, one click brings it back.

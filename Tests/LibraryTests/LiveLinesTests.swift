@@ -65,3 +65,39 @@ final class VersionTests: XCTestCase {
         XCTAssertEqual(out.map(\.count), [3, 2, 1])
     }
 }
+
+final class LiveLineConcurrencyTests: XCTestCase {
+    func testLargePastePreservesEveryLineAndExistingCorrections() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        LiveLines.append(LiveLine(text: "old words", at: 1, end: 2, fixed: "kept correction"), to: folder)
+        let text = (0..<300).map { "Line \($0) — café under the moon" }
+        let start = ProcessInfo.processInfo.systemUptime
+        LiveLines.type(text.joined(separator: "\n\n"), at: 10, to: folder)
+        print("PASTE_BENCH_300_MS=\((ProcessInfo.processInfo.systemUptime - start) * 1000)")
+        let saved = LiveLines.read(folder)
+        XCTAssertEqual(saved.first?.fixed, "kept correction")
+        XCTAssertEqual(saved.dropFirst().map(\.text), text)
+        XCTAssertTrue(saved.dropFirst().allSatisfy { $0.typed == true })
+        XCTAssertEqual(saved.last!.at, 12.99, accuracy: 0.0001)
+    }
+
+    func testConcurrentAppendsKeepEveryLine() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let group = DispatchGroup()
+        for worker in 0..<2 {
+            DispatchQueue.global().async(group: group) {
+                for i in 0..<40 {
+                    LiveLines.append(LiveLine(text: "worker \(worker) line \(i)", at: Double(worker * 40 + i), end: 100), to: folder)
+                }
+            }
+        }
+        group.wait()
+        let lines = LiveLines.read(folder)
+        XCTAssertEqual(lines.count, 80)
+        XCTAssertEqual(Set(lines.map(\.text)).count, 80)
+    }
+}

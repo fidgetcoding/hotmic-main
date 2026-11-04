@@ -87,11 +87,19 @@
       mapSessions();
       if (S) HM.render();
     },
+    // The native save failed: keep the submitted words and anything typed while it was saving.
+    typeFailed(text) {
+      const S = HM.S; if (!S) return;
+      S._typeDraft = [text, S._typeDraft].filter(Boolean).join('\n');
+      HM.renderNotes();
+    },
     sessions(items) { list = items || []; mapSessions(); if (HM.S) HM.render(); },
     recording(on) {
-      HM._lastLevelAt = undefined;
       const S = HM.S; if (!S) return;
-      S.growing = !!on; if (on) { S.fresh = false; S.elapsed = Math.max(0, S.elapsed); }
+      on = !!on;
+      if (S.growing === on) return; // snapshots arrive on every refresh; only transitions start/stop the beat
+      HM._lastLevelAt = undefined;
+      S.growing = on; if (on) { S.fresh = false; S.elapsed = Math.max(0, S.elapsed); }
       // Beat mode: Record plays the beat (from the loop or your marker), Stop stops it.
       if (S.mode === 'beat' && HM.beat && HM.beat.buffer) {
         if (on) {

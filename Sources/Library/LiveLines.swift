@@ -1,3 +1,4 @@
+import Capture
 import Enrichment
 import Foundation
 
@@ -26,34 +27,57 @@ public struct LiveLine: Codable, Equatable, Sendable {
 
 public enum LiveLines {
     public static let fileName = "live-lines.json"
+    private static let lock = NSLock()
 
+    /// Display-only fallback. Mutations always use readChecked so damaged data is never replaced.
     public static func read(_ folder: URL) -> [LiveLine] {
-        guard let data = try? Data(contentsOf: folder.appendingPathComponent(fileName)) else { return [] }
-        return (try? JSONDecoder().decode([LiveLine].self, from: data)) ?? []
+        (try? readChecked(folder)) ?? []
     }
 
-    public static func append(_ line: LiveLine, to folder: URL) {
-        var all = read(folder)
-        all.append(line)
-        let enc = JSONEncoder(); enc.outputFormatting = [.prettyPrinted]
-        if let data = try? enc.encode(all) { try? data.write(to: folder.appendingPathComponent(fileName), options: .atomic) }
+    public static func readChecked(_ folder: URL) throws -> [LiveLine] {
+        try PersistenceFile.read(folder.appendingPathComponent(fileName), default: [LiveLine]())
     }
 
-    /// Lines you typed or pasted: one per non-empty line of `text`, placed from `at` on, in order.
-    public static func type(_ text: String, at: Double, to folder: URL) {
+    private static func update(in folder: URL, _ change: (inout [LiveLine]) -> Bool) -> Bool {
+        lock.lock(); defer { lock.unlock() }
+        do {
+            var all = try readChecked(folder)
+            guard change(&all) else { return false } // no line matched, so nothing was saved
+            try PersistenceFile.write(all, to: folder.appendingPathComponent(fileName), pretty: true)
+            return true
+        } catch { return false } // PersistenceFile already logged the failure
+    }
+
+    /// False reports a failed save. Read/encode failures leave existing data untouched; writes are atomic.
+    @discardableResult
+    public static func append(_ line: LiveLine, to folder: URL) -> Bool {
+        update(in: folder) { $0.append(line); return true }
+    }
+
+    /// Lines you typed or pasted: one per non-empty line, in one atomic write. Empty input is a no-op.
+    @discardableResult
+    public static func type(_ text: String, at: Double, to folder: URL) -> Bool {
         let rows = text.split(whereSeparator: \.isNewline).map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
-        for (i, row) in rows.enumerated() {
-            append(LiveLine(text: row, at: at + Double(i) * 0.01, end: at + Double(i) * 0.01 + 0.005, typed: true), to: folder)
+        guard !rows.isEmpty else { return true }
+        return update(in: folder) { all in
+            all.append(contentsOf: rows.enumerated().map { i, row in
+                LiveLine(text: row, at: at + Double(i) * 0.01, end: at + Double(i) * 0.01 + 0.005, typed: true)
+            })
+            return true
         }
     }
 
-    /// Records Whisper's version of the line that starts at `at`.
-    public static func fix(at: Double, text: String, in folder: URL) {
-        var all = read(folder)
-        guard let i = all.firstIndex(where: { abs($0.at - at) < 0.01 }) else { return }
-        all[i].fixed = text
-        let enc = JSONEncoder(); enc.outputFormatting = [.prettyPrinted]
-        if let data = try? enc.encode(all) { try? data.write(to: folder.appendingPathComponent(fileName), options: .atomic) }
+    /// Records Whisper's version. False if the line is missing or its file could not be saved.
+    @discardableResult
+    public static func fix(at: Double, text: String, in folder: URL) -> Bool {
+        update(in: folder) { all in
+            guard let i = all.firstIndex(where: { abs($0.at - at) < 0.01 }) else {
+                HotMicLog.write("persistence update skipped for live-lines.json: no matching line")
+                return false
+            }
+            all[i].fixed = text
+            return true
+        }
     }
 
     /// What Whisper writes when it hears no words: "*sad music*", "[Music]", "(applause)", "♪".

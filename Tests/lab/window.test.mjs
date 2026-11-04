@@ -356,3 +356,46 @@ test('recording never creates an audio context by itself in Freestyle', () => {
   w.HM.host.recording(true);
   assert.equal(w.log.sources.length, 0);
 });
+
+
+test('repeated recording snapshots do not restart the beat or duplicate its run', () => {
+  const w = loaded();
+  try {
+    w.HM.S.mode = 'beat';
+    w.HM.beat = { buffer: { duration: 30 }, name: 'test beat' };
+    w.HM.S.loop = { on: true, a: 2, b: 8 };
+    let starts = 0, stops = 0;
+    w.HM.audio.start = () => { starts++; };
+    w.HM.audio.stop = () => { stops++; };
+    w.HM.host.recording(true);
+    w.HM.S.t = 6;
+    w.HM.host.recording(true);
+    assert.equal(starts, 1);
+    assert.equal(w.posted('beatRun').length, 1);
+    assert.equal(w.HM.S.t, 6);
+    w.HM.host.recording(false);
+    assert.ok(stops >= 1);
+    const stopped = stops;
+    // A routine stopped-state refresh must not interrupt playback started by the user.
+    w.HM.S.playing = true;
+    w.HM.host.recording(false);
+    assert.equal(stops, stopped);
+    assert.equal(w.HM.S.playing, true);
+    w.HM.host.recording(true);
+    assert.equal(starts, 2);
+  } finally { w.close(); }
+});
+
+
+test('a failed paste save restores the words and keeps newer typing', () => {
+  const w = loaded();
+  try {
+    const text = 'Café on the moon\n<script>keep as text</script>';
+    w.HM.S._typeDraft = 'the next line';
+    w.HM.host.typeFailed(text);
+    assert.equal(w.HM.S._typeDraft, text + '\nthe next line');
+    assert.equal(w.document.querySelector('.type-line').textContent, text + '\nthe next line');
+    assert.equal(w.document.querySelector('.type-line script'), null);
+    assert.equal(w.posted('typeLines').length, 0, 'no automatic retry or claim that these words saved');
+  } finally { w.close(); }
+});

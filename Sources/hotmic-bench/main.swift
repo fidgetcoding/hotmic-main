@@ -136,7 +136,7 @@ case "transcribe":
 case "judge":
     guard args.count >= 2 else { fail("usage: hotmic-bench judge <session folder>") }
     let folder = URL(fileURLWithPath: args[1], isDirectory: true)
-    let stored = await SessionJudge.pass(folder: folder, model: FoundationLineModel())
+    let stored = try await SessionJudge.passChecked(folder: folder, model: FoundationLineModel())
     print("\(stored.engine ?? "no model") · \(stored.stats.lines) lines · \(stored.stats.answered) answered · \(stored.stats.refused) refused · \(stored.stats.timedOut) timed out · \(stored.stats.failed) failed · \(Int(stored.stats.seconds)) s")
 
 case "verdicts":
@@ -157,7 +157,7 @@ case "teach":
     }
     var profile = LineJudgeProfile()
     for s in try JudgeReplay.load(sessions) { JudgeReplay.teach(&profile.learner, from: s, budget: option("--budget", in: args).flatMap(Int.init) ?? 30) }
-    profile.write(to: URL(fileURLWithPath: args[1]))
+    try profile.writeChecked(to: URL(fileURLWithPath: args[1]))
     print("taught \(profile.learner.corrections) corrections, \(profile.learner.weights.count) weights")
 
 case "replay":

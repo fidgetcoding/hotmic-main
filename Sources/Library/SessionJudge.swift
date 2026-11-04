@@ -9,12 +9,18 @@ public enum SessionJudge {
         return LineJudge.rows(slots: notepad.slots, takes: notepad.takes)
     }
 
-    /// Runs the model over what isn't judged yet and saves the answers beside the takes. Safe to run again
-    /// any time: the raw logs are untouched, your corrections are kept. Never throws; a model that can't
-    /// answer leaves the rules in charge.
+    /// Compatibility wrapper: on persistence failure returns disk state, not unsaved model answers.
     @discardableResult
     public static func pass(folder: URL, model: LineModel) async -> SessionJudgments {
-        let rows = rows(folder: folder)
+        do { return try await passChecked(folder: folder, model: model) }
+        catch { return SessionJudgments.read(folder) }
+    }
+
+    /// Model failures fall back to rules; storage failures throw and leave damaged files untouched.
+    @discardableResult
+    public static func passChecked(folder: URL, model: LineModel) async throws -> SessionJudgments {
+        var stored = try SessionJudgments.readChecked(folder)
+        let rows = try rowsChecked(folder: folder)
         var audio = LineAudioCache.read(folder)
         let missing = rows.filter { audio[$0.id] == nil && $0.duration >= 0.5 }
         if !missing.isEmpty {
@@ -23,13 +29,8 @@ public enum SessionJudge {
             audio.merge(LineAudio.measure(missing, segments: names.map { folder.appendingPathComponent($0) }, segmentSeconds: 300)) { a, _ in a }
             LineAudioCache.write(audio, to: folder)
         }
-        var stored = SessionJudgments.read(folder)
-        let before = stored
-        stored = await ModelPass.run(rows: rows, model: model, into: stored) { $0.write(to: folder) }
-        // Your corrections made while the pass ran stay yours.
-        stored.corrections = SessionJudgments.read(folder).corrections.merging(before.corrections) { new, _ in new }
-        stored.write(to: folder)
-        return stored
+        stored = try await ModelPass.run(rows: rows, model: model, into: stored) { try $0.saveModelProgress(to: folder) }
+        return try stored.saveModelProgress(to: folder)
     }
 
     /// How a signal from you counts.
@@ -42,7 +43,7 @@ public enum SessionJudge {
         case deleted, restored
     }
 
-    /// Records your signal on one line and teaches the learner. Returns the profile it saved.
+    /// Compatibility wrappers return persisted state after failure; use learnChecked to handle errors.
     @discardableResult
     public static func learn(_ signal: Signal, lineID id: String, folder: URL, profileURL: URL? = nil) -> LineJudgeProfile {
         learn([(signal, id)], folder: folder, profileURL: profileURL)
@@ -50,10 +51,24 @@ public enum SessionJudge {
 
     @discardableResult
     public static func learn(_ signals: [(Signal, String)], folder: URL, profileURL: URL? = nil) -> LineJudgeProfile {
+        do { return try learnChecked(signals, folder: folder, profileURL: profileURL) }
+        catch { return LineJudgeProfile.read(profileURL ?? LineJudgeProfile.url(forSession: folder)) }
+    }
+
+    @discardableResult
+    public static func learnChecked(_ signal: Signal, lineID id: String, folder: URL, profileURL: URL? = nil) throws -> LineJudgeProfile {
+        try learnChecked([(signal, id)], folder: folder, profileURL: profileURL)
+    }
+
+    /// Each file is atomic, not a multi-file transaction: if profile saving fails after a pin is saved,
+    /// the pin remains and this throws. Callers must not report the learner update as saved.
+    @discardableResult
+    public static func learnChecked(_ signals: [(Signal, String)], folder: URL, profileURL: URL? = nil) throws -> LineJudgeProfile {
+        JudgePersistence.lock.lock(); defer { JudgePersistence.lock.unlock() }
         let url = profileURL ?? LineJudgeProfile.url(forSession: folder)
-        var profile = LineJudgeProfile.read(url)
-        var stored = SessionJudgments.read(folder)
-        let rows = rows(folder: folder)
+        var profile = try LineJudgeProfile.readChecked(url)
+        var stored = try SessionJudgments.readChecked(folder)
+        let rows = try rowsChecked(folder: folder)
         let audio = LineAudioCache.read(folder)
         let input = LineJudge.learningInput(rows, stored: stored, useModel: profile.modelOn, audio: audio)
         let index = Dictionary(rows.enumerated().map { ($1.id, $0) }, uniquingKeysWith: { a, _ in a })
@@ -76,10 +91,20 @@ public enum SessionJudge {
             }
             profile.learner.correct(line.x, talk: talk, lean: line.lean, was: decisions[id], weight: weight, neighbours: neighbours)
         }
-        if pinned { stored.write(to: folder) }
-        profile.write(to: url)
+        if pinned { try stored.writeChecked(to: folder) }
+        try profile.writeChecked(to: url)
         HotMicLog.write("line judge: \(signals.count) signal(s) in \(folder.lastPathComponent), \(profile.learner.corrections) correction(s) in all")
         return profile
+    }
+
+    /// Preflight live lines before using the display exporter, which otherwise substitutes empty data.
+    private static func rowsChecked(folder: URL) throws -> [SungRow] {
+        _ = try LiveLines.readChecked(folder)
+        return rows(folder: folder)
+    }
+
+    public static func linesChecked(in range: HiddenRange, folder: URL) throws -> [String] {
+        try rowsChecked(folder: folder).filter { range.covers($0.at, $0.at + $0.duration) }.map(\.id)
     }
 
     /// Lines sung inside a stretch (what a delete or an undo touches).
