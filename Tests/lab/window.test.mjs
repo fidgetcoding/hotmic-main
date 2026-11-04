@@ -399,3 +399,21 @@ test('a failed paste save restores the words and keeps newer typing', () => {
     assert.equal(w.posted('typeLines').length, 0, 'no automatic retry or claim that these words saved');
   } finally { w.close(); }
 });
+
+
+test('settings use an in-window fallback for the hidden native gear and anchor to a visible gear', () => {
+  const w = openWindow();
+  try {
+    w.HM.openSettings();
+    const pop = w.document.querySelector('.settings-pop');
+    assert.equal(pop.hidden, false);
+    assert.equal(pop.style.top, '64px');
+    assert.equal(pop.style.right, '24px');
+    w.HM.closeSettings();
+    w.document.querySelector('#settingsBtn').getBoundingClientRect = () => ({ width: 30, height: 28, bottom: 42, right: 900 });
+    w.HM.openSettings();
+    assert.equal(pop.hidden, false);
+    assert.equal(pop.style.top, '50px');
+    assert.equal(pop.style.right, `${Math.max(12, w.window.innerWidth - 900)}px`);
+  } finally { w.close(); }
+});

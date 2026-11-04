@@ -127,6 +127,8 @@ Private repo: 121 commits on the main line and 128 in all, with 29 on September 
 - **Wanted next:** me, singing into this build.
 
 ### Round 10: local reliability maintenance (November 4)
+
+- **Native UI smoke:** an isolated WebKit run found Settings opening off-screen because app mode hides its anchor button. A zero-size anchor now uses the in-window fallback. The new regression failed before the fix; 44 mocked window tests and the native viewport/bridge/render checks passed afterward. The full app, audio devices and actual models were not started.
 - **Fixed:** judge checkpoints overwriting new corrections; concurrent learner/profile and live-line updates losing changes; model cancellation and timeout cleanup; refusals misread as verdicts; routine refreshes restarting Beat playback; stale session loads replacing the current selection; malformed drag rectangles crashing the bridge.
 - **Optimized:** pasting a verse writes the live-lines file once. A 300-line paste measured 915 ms before and 6.7 ms after in local debug runs; this is a single-machine check, not a general app-speed benchmark.
 - **Tested:** the debug app compiled; 100 selected offline Swift tests and 42 mocked window tests passed. Six new Swift regression tests and the new window regression failed against the original implementation. Existing lyric scenarios: 50 answered cases passed, 18 remained open, 10 were page-only.

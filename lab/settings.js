@@ -37,8 +37,9 @@
   function open() {
     if (!pop) { pop = document.createElement('div'); pop.className = 'settings-pop'; pop.setAttribute('role', 'dialog'); document.body.appendChild(pop); }
     render(); pop.hidden = false;
-    const g = document.getElementById('settingsBtn');
-    if (g) { const r = g.getBoundingClientRect(); pop.style.top = `${r.bottom + 8}px`; pop.style.right = `${Math.max(12, window.innerWidth - r.right)}px`; }
+    const g = document.getElementById('settingsBtn'), r = g && g.getBoundingClientRect();
+    // App mode hides the gear; its zero bounds would put the dialog outside the window.
+    if (r && r.width > 0 && r.height > 0) { pop.style.top = `${r.bottom + 8}px`; pop.style.right = `${Math.max(12, window.innerWidth - r.right)}px`; }
     else { pop.style.top = '64px'; pop.style.right = '24px'; }
   }
   function close() { if (pop) pop.hidden = true; }
