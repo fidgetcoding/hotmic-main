@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-Please report privately through this repository's Security tab ("Report a vulnerability"). Do not open a public issue. Include what you found, how to reproduce it, and the version or commit.
+Please report privately through this repository's Security tab ("Report a vulnerability"), or email **nate@lorecraft.io**. Do not open a public issue. Include what you found, how to reproduce it, and the version or commit.
 
 ## Known limitations
 
