@@ -301,6 +301,8 @@ public final class RemoteSinger: @unchecked Sendable {
         public var singing: Bool
         public var level: Float
         public var lastTake: String?
+        /// Exclusive phone-frame boundary received and processed on the singer queue.
+        public var receivedFrames: Int64
     }
 
     public var snapshot: Snapshot {
@@ -317,7 +319,7 @@ public final class RemoteSinger: @unchecked Sendable {
             let shown = level
             level *= 0.5
             return Snapshot(device: device, name: name, headphones: headphones, sync: sync, delayMs: aligner.roomDelayMs,
-                            takes: takes, singing: singing, level: shown, lastTake: lastTakeTitle)
+                            takes: takes, singing: singing, level: shown, lastTake: lastTakeTitle, receivedFrames: received)
         }
     }
 

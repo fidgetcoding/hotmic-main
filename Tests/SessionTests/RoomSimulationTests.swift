@@ -9,7 +9,8 @@ import XCTest
 /// made-up melody, and the DAW's audio is silence written straight into the reference tap.
 final class RoomSimulationTests: XCTestCase {
     private var folder: URL!
-    private let rate = 48_000.0
+    // 16 kHz keeps this transport-to-export integration fixture inexpensive in debug CI.
+    private let rate = 16_000.0
 
     override func setUpWithError() throws {
         folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
@@ -47,7 +48,9 @@ final class RoomSimulationTests: XCTestCase {
         let listening = XCTestExpectation(description: "invite"); listening.assertForOverFulfill = false
         let invite = InviteBox()
         let joinedOnHost = XCTestExpectation(description: "on the host's list"); joinedOnHost.assertForOverFulfill = false
+        let delivered = XCTestExpectation(description: "all phone frames received"); delivered.assertForOverFulfill = false
         room.onChange = { snapshot in
+            if snapshot.singers.contains(where: { $0.receivedFrames == Int64(10 * rate) }) { delivered.fulfill() }
             if let i = snapshot.invite { invite.set(i); listening.fulfill() }
             if snapshot.singers.contains(where: { $0.name == "Sim Phone" }) { joinedOnHost.fulfill() }
         }
@@ -63,9 +66,9 @@ final class RoomSimulationTests: XCTestCase {
         phone.join(join)
         await fulfillment(of: [joined, joinedOnHost], timeout: 10)
 
-        // 20 s of session, faster than real time: the DAW's silence into the tap, the phone's melody over the link,
+        // 10 s of session, faster than real time: the DAW's silence into the tap, the phone's melody over the link,
         // told which session frame it was hearing (headphones mode).
-        let singing = melody(seconds: 20)
+        let singing = melody(seconds: 10)
         let chunk = Int(rate / 10)
         let silence = [Float](repeating: 0, count: chunk * 2)
         for k in 0..<(singing.count / chunk) {
@@ -73,10 +76,12 @@ final class RoomSimulationTests: XCTestCase {
             silence.withUnsafeBufferPointer { tap.append($0, frames: chunk, at: at) }
             let piece = Array(singing[(k * chunk)..<((k + 1) * chunk)])
             phone.send(AudioPacket(firstFrame: UInt64(at), captureSeconds: Double(at) / rate, heardFrame: at, sampleRate: rate, samples: PCM16.encode(piece)))
-            try await Task.sleep(nanoseconds: 2_000_000)
+            // Deliberately enqueue faster than the receiver processes.
         }
+        // Sending only enqueues transport work. Wait for the receiver's frame boundary
+        // before disconnecting; Stop then flushes the detector and exports its final take.
+        await fulfillment(of: [delivered], timeout: 30)
         phone.leave()
-        try await Task.sleep(nanoseconds: 500_000_000)
         room.stop()
         await fulfillment(of: [tookOne], timeout: 30)
 

@@ -205,3 +205,7 @@ These are harsh tests: stream audio, not a close mic, and one song's six "caught
 
 - Public: this repo, starting at `93c94a1`. `docs/SPEC.md`, `SECURITY.md`, `Sources/Library/LineJudge.swift`, `LineLearner.swift`, `ModelPass.swift`, `bench/`.
 - Private, kept by me: the private development repo log. Session captures dated September 27 to October 28, 2026. A call recording, October 8. Benchmark reports, kept local and never published.
+
+### Release CI follow-up (November 5)
+
+The synthetic phone-to-take test disconnected after a fixed sleep while its accelerated stream was still processing. An unpaced stream reproduced the four CI failures. Singer snapshots now expose the received frame boundary; the test waits for complete delivery before Stop flushes the take. A 10-second, 16 kHz fixture preserves the full melody and encrypted loopback/export path without unnecessary debug processing. All three focused tests passed; no real audio devices or models were used.
