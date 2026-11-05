@@ -10,6 +10,8 @@ Two weeks later I came back with a clear brief, found the design in a browser la
 
 On October 28 I graded it on a livestream test corpus, and the scores were humbling: the live path caught 0 of 21 lines. Nothing in Hot Mic learned anything at that point. On November 1 it went public with a clean history, and a judge pass with a small on-device learner went in. It took talk recall from 0.03 to 0.91 on that corpus.
 
+On November 4 and 5 I went after the boring stuff that loses work: saves that failed quietly, updates that stepped on each other, a Settings panel that opened off screen. None of it touched a mic. Then the release went into this repo, and CI passed 327 Swift tests and 44 window tests.
+
 ## 2. Origin, in my words
 
 The pitch (private note, September 27):
@@ -47,7 +49,7 @@ Why, two weeks in (call, October 8):
 | Oct 12 | 557-byte bug found and fixed | `6791a50` |
 | Oct 12 | One version, everything on. License tab gone | `e87e1f8` |
 | Oct 12 | Lyric rules rebuilt, line-level Whisper, repeats vs versions | `c83efce`, `5a409ca` |
-| Oct 12 to 13 | Scenario harness and QA page. Auto-listen built and removed | `1359189`, `9a24b30`, `3baabcd` |
+| Oct 12 to 13 | Scenario tests and QA page. Auto-listen built and removed | `1359189`, `9a24b30`, `3baabcd` |
 | Oct 13 | Live tests: clipped words, hums, rap read as "playing", chord rows | `edbb842`, `5398523`, `77d7728`, `50a806a` |
 | Oct 14 | Notes-style notepad, retake alignment, takes as chunks, brand shipped | `fe9db09`, `1ecb962`, `a1baa2b`, `1a74163` |
 | Oct 23 | Idea: log raw, format after Stop. Not built yet | Private note |
@@ -55,7 +57,13 @@ Why, two weeks in (call, October 8):
 | Nov 1 | Clean public tree, MIT, security fixes | `93c94a1` |
 | Nov 1 | Judge pass after Stop, per-user learner, window controls | `aa475ce`, `8d3aa64` |
 | Nov 1 | Encrypted phone link, exact bar stamps, window tests, clean-clone proof | `f1c8951`, `7c4740e`, `b5d9f9a`, `cc81bf2` |
+| Nov 1 | Host crash when a phone sings first, fixed. The whole room tested with a simulated phone | `b99e022` |
+| Nov 1 | Clean-Mac path: the Whisper model moves out of Documents, install waits for the app to quit | `f070be5` |
 | Nov 1 | Long sessions keep everything, stray rewrites stopped, Whisper repairs | `e4a22cc`, `a241eb5`, `b4c72bd` |
+| Nov 2 | README, one-pager, build history, banner. The scenario fixture swaps real session words for invented lines | `6704e71`, `75776d7` |
+| Nov 4 | Reliability pass: failed saves stop overwriting, judge and window updates stop losing changes | `a8c8a66` |
+| Nov 4 | Settings stays inside the window | `b959c88` |
+| Nov 5 | First CI run fails 4 checks in the phone test. The fix waits for every frame. CI passes | `5bf41bc` |
 
 Private repo: 121 commits on the main line and 128 in all, with 29 on September 27, 49 on October 12 and 28 on October 14.
 
@@ -86,7 +94,7 @@ Private repo: 121 commits on the main line and 128 in all, with 29 on September 
 - **Fixed:** the auto-start flag (`6791a50`), then "what you see is what you keep", where live lines commit on a pause and never clear (`c83efce`), and line-level Whisper (`5a409ca`). Self-tests got built so this class of bug shows up without me.
 - **Wanted next:** stop patching by feel.
 
-### Round 5: the QA harness (October 12 to 13)
+### Round 5: the QA rig (October 12 to 13)
 - **Built:** 63 scenarios, then 78, each with candidate sheets on a page I answer. "This test has to have all variables and hella edge cases."
 - **Tested:** I answered 43 of 63. Every pick became a test.
 - **Broke:** the rules I wanted conflicted in Freestyle, and round 3 went unanswered. "We might need to rethink how it happens tomorrow."
@@ -126,14 +134,27 @@ Private repo: 121 commits on the main line and 128 in all, with 29 on September 
 - **Fixed:** all four. Takes now close at 5 minutes. One song went from 0 of 21 released lines shown to 8. Whisper's line times went from a median 14 s off to 2.4 s on a tuning song.
 - **Wanted next:** me, singing into this build.
 
-### Round 10: local reliability maintenance (November 4)
+### Round 10: stop losing work (November 4)
+- **Built:** nothing new to sing into. This round was about not losing what's already there. Pasting a verse now writes the live-lines file once instead of once per line.
+- **Tested:** all of it offline. Nothing in this round opened the app, a real audio device or a real model. The debug app compiled, and 100 selected offline Swift tests and 42 window tests passed. Six new Swift tests and one new window test each failed on the old code before the fix. The lyric scenarios: 50 answered cases pass, 18 are still open, 10 are page only. A 300-line paste took 915 ms before and 5 to 7 ms after, in debug builds on one Mac.
+- **Broke:**
+  - A judge checkpoint could write over corrections I'd just made.
+  - Learner, profile and live-line updates running at the same time could lose changes.
+  - A cancelled or timed-out model pass didn't clean up after itself, and a refusal could be read as a verdict.
+  - A routine refresh restarted Beat playback.
+  - An old session that finished loading late could replace the one I'd just picked.
+  - A malformed drag rectangle crashed the bridge between the window and the app.
+  - A second review found two worse ones: a fallback read could write defaults over a damaged file, and a failed write could still report a correction as learned. Four fixture tests reproduced that with seven failed checks.
+  - A native WebKit run of the window showed Settings opening off screen, because app mode hides the gear it hangs from.
+- **Fixed:** all of it (`a8c8a66`, `b959c88`). Damaged and unreadable files stay where they are. Failed reads, encodes and writes get reported. A judge checkpoint or final save that fails stops there, and a paste that didn't save goes back in the box. Settings falls back to opening inside the window. After the fixes, 83 Swift and 43 window tests passed, then 17 of 17 save tests including permission-denied reads, then 44 window tests and 11 native WebKit checks.
+- **Wanted next:** get it into this repo cleanly. Also still on the list: the compiler's concurrency warnings, and measuring all of this on real hardware.
 
-- **Native UI smoke:** an isolated WebKit run found Settings opening off-screen because app mode hides its anchor button. A zero-size anchor now uses the in-window fallback. The new regression failed before the fix; 44 mocked window tests and the native viewport/bridge/render checks passed afterward. The full app, audio devices and actual models were not started.
-- **Fixed:** judge checkpoints overwriting new corrections; concurrent learner/profile and live-line updates losing changes; model cancellation and timeout cleanup; refusals misread as verdicts; routine refreshes restarting Beat playback; stale session loads replacing the current selection; malformed drag rectangles crashing the bridge.
-- **Optimized:** pasting a verse writes the live-lines file once. A 300-line paste measured 915 ms before and 6.7 ms after in local debug runs; this is a single-machine check, not a general app-speed benchmark.
-- **Tested:** the debug app compiled; 100 selected offline Swift tests and 42 mocked window tests passed. Six new Swift regression tests and the new window regression failed against the original implementation. Existing lyric scenarios: 50 answered cases passed, 18 remained open, 10 were page-only.
-- **Persistence follow-up:** a hub review found that fallback reads could overwrite corrupt JSON and that failed writes could still report learned corrections. Four fixture tests reproduced seven failed assertions. Checked mutations now preserve damaged/unreadable files, report read/encode/write failures, stop failed judge checkpoints and final saves, and restore failed pasted text to the input. The affected run passed 83 Swift and 43 mocked window tests; a final focused run passed all 17 persistence fixtures, including permission-denied reads. The previous fixes remain in place.
-- **Limits:** no app launch, real audio device, recording, playback or real model invocation. Existing compiler concurrency warnings remain. Hardware behavior and classification accuracy were not re-measured.
+### Round 11: the release (November 5)
+- **Built:** the release commit, `5bf41bc`, pushed as a normal commit on the clean history.
+- **Tested:** CI on every push. See section 6.
+- **Broke:** the first CI run on `b959c88` failed 4 checks, all in one test: a simulated phone joins with the QR code, sings, and should end up as a take on disk. The test hung up after a fixed half second while its sped-up stream was still being processed, so no take landed. A stream with no pacing reproduced all four failures locally.
+- **Fixed:** the singer's snapshot now shows how many frames arrived, and the test waits for every one of them before Stop. The fixture is 10 seconds at 16 kHz and still carries the whole melody. No timeout went up, no check got skipped, and nothing about detection or the link changed (`5bf41bc`). Three focused tests passed locally, then CI passed: 327 Swift tests (7 skipped, 0 failures) and 44 window tests. The phone-to-take test took 3.984 s.
+- **Wanted next:** same as round 9. Me, singing into this build.
 
 ## 5. Feature family tree
 
@@ -143,12 +164,13 @@ Voice Memos pain
    ├─ speakers → echo canceller → DAW monitoring detection
    ├─ DAW clock → bar stamps → MIDI per line and per 4 bars
    ├─ Whisper → lyric sheet → Song Notebook → versions, stars
-   │  └─ live lines → per-line Whisper → LyricArranger → QA harness (78 scenarios)
+   │  └─ live lines → per-line Whisper → LyricArranger → QA scenarios (78)
    │     └─ benchmark → turbo fix, 0 to 56 words → judge after Stop → learner
+   │        └─ corrections worth keeping → saves that refuse to write over a damaged file
    ├─ jam mode → tempo, chords, Basic Pitch → chord shapes
    └─ Beat mode → beat runs → looped playback in sync
    hub → design lab → the real window → notes-style notepad → typing
-   "rapper away from the computer" → phone join (paused)
+   "rapper away from the computer" → phone join (paused) → encrypted link → simulated phone to a take
    "log raw, format after Stop" (Oct 23) → the judge runs after Stop
 ```
 
@@ -170,6 +192,12 @@ Voice Memos pain
 | Oct 28 | Talk judged as talk | 0% in every condition | Private note |
 | Nov 1 | Rules vs model vs model + learner | Talk recall 0.03, 0.88, 0.91. Writing kept 0.93, 0.89, 0.91 | `docs/SPEC.md` |
 | Nov 2 | Unit tests and window tests | 303 run, 7 skipped, 0 failures; 41 window tests pass | This repo |
+| Nov 4 | Selected offline Swift tests and window tests | 100 Swift and 42 window pass. 7 new regression tests fail on the old code first | Private note |
+| Nov 4 | Save safety | 4 fixture tests, 7 failed checks before. After: 83 Swift and 43 window pass, then 17 of 17 save tests | Private note |
+| Nov 4 | Native WebKit window check | Settings off screen before. After: 44 window tests and 11 native checks pass | Private note |
+| Nov 4 | 300-line paste, debug build, one Mac | 915 ms before, 5 to 7 ms after | Private note |
+| Nov 5 | CI on `b959c88` | 327 run, 7 skipped, 4 failures, all in the phone-to-take test | CI run 41970152825 |
+| Nov 5 | CI on `5bf41bc` | 327 run, 7 skipped, 0 failures; 44 window tests pass | CI run 41972009240 |
 
 These are harsh tests: stream audio, not a close mic, and one song's six "caught" lines came from playback, not writing. There is no scored benchmark of my own sessions.
 
@@ -190,7 +218,7 @@ These are harsh tests: stream audio, not a close mic, and one song's six "caught
 1. **"All at once", then test it for real.** Build the whole idea, then let live use tear it apart.
 2. **Labs before the app.** One browser page, flip through variants, pick, then port.
 3. **Debug with self-tests and the system's own logs.** The 557-byte bug fell once the logs got read.
-4. **Turn judgment into a harness.** Every answer on the QA page becomes a test, so rules stop drifting.
+4. **Turn judgment into tests.** Every answer on the QA page becomes a test, so rules stop drifting.
 5. **Grade it somewhere harsh.** A public bench full of bad news beats a private feeling that it's fine.
 
 ## 9. What's next
@@ -203,9 +231,5 @@ These are harsh tests: stream audio, not a close mic, and one song's six "caught
 
 ## 10. Sources
 
-- Public: this repo, starting at `93c94a1`. `docs/SPEC.md`, `SECURITY.md`, `Sources/Library/LineJudge.swift`, `LineLearner.swift`, `ModelPass.swift`, `bench/`.
-- Private, kept by me: the private development repo log. Session captures dated September 27 to October 28, 2026. A call recording, October 8. Benchmark reports, kept local and never published.
-
-### Release CI follow-up (November 5)
-
-The synthetic phone-to-take test disconnected after a fixed sleep while its accelerated stream was still processing. An unpaced stream reproduced the four CI failures. Singer snapshots now expose the received frame boundary; the test waits for complete delivery before Stop flushes the take. A 10-second, 16 kHz fixture preserves the full melody and encrypted loopback/export path without unnecessary debug processing. All three focused tests passed; no real audio devices or models were used.
+- Public: this repo, starting at `93c94a1`. `docs/SPEC.md`, `SECURITY.md`, `Sources/Library/LineJudge.swift`, `LineLearner.swift`, `ModelPass.swift`, `Sources/Library/PersistenceFile.swift`, `bench/`. CI runs 41970152825 and 41972009240 (November 5).
+- Private, kept by me: the private development repo log. Session captures dated September 27 to October 28, 2026. A call recording, October 8. Benchmark reports, kept local and never published. Maintenance and release reports with their test logs, November 4 and 5, 2026.
